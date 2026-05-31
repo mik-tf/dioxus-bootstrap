@@ -85,6 +85,7 @@ pub mod spinner;
 pub mod table;
 pub mod tabs;
 pub mod theme;
+pub mod theme_vars;
 pub mod toast;
 pub mod tooltip;
 pub mod types;
@@ -119,6 +120,7 @@ pub mod prelude {
     pub use crate::table::*;
     pub use crate::tabs::*;
     pub use crate::theme::*;
+    pub use crate::theme_vars::*;
     pub use crate::toast::*;
     pub use crate::tooltip::*;
     pub use crate::types::*;
