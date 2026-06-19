@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Publish to crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Verify tag matches crate version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          crate="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "dioxus-bootstrap-css") | .version')"
+          if [ "$tag" != "$crate" ]; then
+            echo "Tag $tag does not match crate version $crate"
+            exit 1
+          fi
+
+      - name: Check crates.io for existing version
+        id: published
+        run: |
+          ver="${GITHUB_REF_NAME#v}"
+          if curl -s -H "User-Agent: dioxus-bootstrap-css-release" "https://crates.io/api/v1/crates/dioxus-bootstrap-css" | jq -e --arg v "$ver" 'any(.versions[]; .num == $v)' >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to crates.io
+        if: steps.published.outputs.exists == 'false'
+        run: cargo publish -p dioxus-bootstrap-css --token "${{ secrets.CARGO_REGISTRY_TOKEN }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
