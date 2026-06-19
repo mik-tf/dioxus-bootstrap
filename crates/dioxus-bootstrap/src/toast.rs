@@ -81,7 +81,7 @@ pub struct ToastProps {
 pub fn Toast(props: ToastProps) -> Element {
     let is_shown = *props.show.read();
     let mut show_signal = props.show;
-    let on_dismiss = props.on_dismiss.clone();
+    let on_dismiss = props.on_dismiss;
 
     if !is_shown {
         return rsx! {};
