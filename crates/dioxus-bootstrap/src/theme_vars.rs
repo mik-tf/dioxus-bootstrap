@@ -1,6 +1,17 @@
 use dioxus::prelude::*;
 
 /// Runtime Bootstrap CSS variable theme overrides.
+///
+/// All fields default to "no override", so construct with struct-update syntax
+/// to stay forward compatible as new fields are added:
+///
+/// ```rust,no_run
+/// # use dioxus_bootstrap_css::prelude::*;
+/// let theme = BootstrapTheme {
+///     colors: ThemeColors { primary: Some("#165317".into()), ..Default::default() },
+///     ..Default::default()
+/// };
+/// ```
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct BootstrapTheme {
     pub colors: ThemeColors,
@@ -53,6 +64,11 @@ pub struct SemanticColorScale {
 }
 
 impl SemanticColorScale {
+    /// Create a color slot from a base color (a hex string like `#0d6efd`, or
+    /// any CSS color / `var(...)` reference).
+    ///
+    /// Use the `with_*` methods to override derived tokens. Prefer them over a
+    /// struct literal so new fields can be added without breaking your code.
     pub fn new(base: impl Into<String>) -> Self {
         Self {
             base: base.into(),
@@ -61,6 +77,30 @@ impl SemanticColorScale {
             bg_subtle: None,
             border_subtle: None,
         }
+    }
+
+    /// Set the `--bs-{color}-rgb` triplet explicitly (otherwise derived from a hex base).
+    pub fn with_rgb(mut self, rgb: (u8, u8, u8)) -> Self {
+        self.rgb = Some(rgb);
+        self
+    }
+
+    /// Set `--bs-{color}-text-emphasis` explicitly.
+    pub fn with_text_emphasis(mut self, color: impl Into<String>) -> Self {
+        self.text_emphasis = Some(color.into());
+        self
+    }
+
+    /// Set `--bs-{color}-bg-subtle` explicitly.
+    pub fn with_bg_subtle(mut self, color: impl Into<String>) -> Self {
+        self.bg_subtle = Some(color.into());
+        self
+    }
+
+    /// Set `--bs-{color}-border-subtle` explicitly.
+    pub fn with_border_subtle(mut self, color: impl Into<String>) -> Self {
+        self.border_subtle = Some(color.into());
+        self
     }
 }
 
@@ -370,5 +410,18 @@ mod tests {
         assert!(css.contains("  --bs-primary-border-subtle: #ddeeff;"));
         assert!(!css.contains("--bs-primary-rgb"));
         assert!(!css.contains("--bs-primary-bg-subtle"));
+    }
+
+    #[test]
+    fn builder_sets_optional_tokens() {
+        let scale = SemanticColorScale::new("#0d6efd")
+            .with_rgb((13, 110, 253))
+            .with_text_emphasis("#084298")
+            .with_bg_subtle("#cfe2ff")
+            .with_border_subtle("#9ec5fe");
+        assert_eq!(scale.rgb, Some((13, 110, 253)));
+        assert_eq!(scale.text_emphasis.as_deref(), Some("#084298"));
+        assert_eq!(scale.bg_subtle.as_deref(), Some("#cfe2ff"));
+        assert_eq!(scale.border_subtle.as_deref(), Some("#9ec5fe"));
     }
 }
