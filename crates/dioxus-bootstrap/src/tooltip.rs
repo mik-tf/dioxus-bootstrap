@@ -22,6 +22,9 @@ pub enum TooltipPlacement {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent — no JavaScript needed
 /// rsx! {
 ///     Tooltip { text: "Save your work", placement: TooltipPlacement::Top,
@@ -31,6 +34,7 @@ pub enum TooltipPlacement {
 ///         Icon { name: "info-circle" }
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props

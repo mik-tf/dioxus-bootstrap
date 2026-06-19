@@ -19,6 +19,9 @@ use crate::types::Color;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent
 /// let show = use_signal(|| true);
 /// rsx! {
@@ -28,6 +31,7 @@ use crate::types::Color;
 ///         }
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Headerless Mode
@@ -36,11 +40,16 @@ use crate::types::Color;
 /// a side-aligned close button (Bootstrap 5.3 `d-flex` pattern):
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
+/// # let signal = use_signal(|| true);
 /// rsx! {
 ///     Toast { show: signal, show_close: true, color: Color::Primary,
 ///         "Body-only toast with close button."
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props
@@ -156,13 +165,19 @@ pub fn Toast(props: ToastProps) -> Element {
 
 /// Container for positioning toasts on screen.
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
+/// # let signal1 = use_signal(|| true);
+/// # let signal2 = use_signal(|| true);
 /// rsx! {
 ///     ToastContainer { position: ToastPosition::TopEnd,
 ///         Toast { show: signal1, title: "Success", "Saved!" }
 ///         Toast { show: signal2, title: "Error", color: Color::Danger, "Failed." }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ToastContainerProps {

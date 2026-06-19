@@ -14,8 +14,11 @@ use dioxus::prelude::*;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent
-/// let show = use_signal(|| false);
+/// let mut show = use_signal(|| false);
 /// rsx! {
 ///     Button { onclick: move |_| show.set(true), "Open Sidebar" }
 ///     Offcanvas { show: show, title: "Menu", placement: OffcanvasPlacement::Start,
@@ -25,6 +28,7 @@ use dioxus::prelude::*;
 ///         }
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props

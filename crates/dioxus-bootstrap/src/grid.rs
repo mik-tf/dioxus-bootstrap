@@ -12,11 +12,15 @@ use crate::types::ColumnSize;
 /// | `<div class="container-fluid">` | `Container { fluid: true }` |
 /// | `<div class="container py-4">` | `Container { class: "py-4" }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Container { "Fixed width content" }
 ///     Container { fluid: true, "Full width content" }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ContainerProps {
@@ -61,13 +65,17 @@ pub fn Container(props: ContainerProps) -> Element {
 /// | `<div class="row g-3">` | `Row { class: "g-3" }` |
 /// | `<div class="row align-items-center">` | `Row { class: "align-items-center" }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Row { class: "g-3",
 ///         Col { lg: ColumnSize::Span(6), "Left" }
 ///         Col { lg: ColumnSize::Span(6), "Right" }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct RowProps {
@@ -106,13 +114,17 @@ pub fn Row(props: RowProps) -> Element {
 /// | `<div class="col-auto">` | `Col { xs: ColumnSize::Auto }` |
 /// | `<div class="col-md-6 offset-md-3">` | `Col { md: ColumnSize::Span(6), offset_md: Some(3) }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Col { xs: ColumnSize::Span(12), md: ColumnSize::Span(6), lg: ColumnSize::Span(4),
 ///         "Responsive column"
 ///     }
 ///     Col { lg: ColumnSize::Auto, "Auto-width column" }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ColProps {

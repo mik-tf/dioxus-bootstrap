@@ -19,6 +19,9 @@ use dioxus::prelude::*;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent
 /// let open = use_signal(|| Some(0usize));
 /// rsx! {
@@ -31,6 +34,7 @@ use dioxus::prelude::*;
 ///         }
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props

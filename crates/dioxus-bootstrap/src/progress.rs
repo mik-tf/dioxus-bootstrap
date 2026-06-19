@@ -19,6 +19,9 @@ use crate::types::Color;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Progress {
 ///         ProgressBar { value: 75.0, color: Color::Success, show_label: true }
@@ -33,6 +36,7 @@ use crate::types::Color;
 ///         ProgressBar { value: 50.0, striped: true, animated: true }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ProgressProps {

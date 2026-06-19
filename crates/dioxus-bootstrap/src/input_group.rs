@@ -12,7 +12,10 @@ use crate::types::Size;
 /// | `<div class="input-group input-group-sm">` | `InputGroup { size: Size::Sm, ... }` |
 /// | `<span class="input-group-text">@</span>` | `InputGroupText { "@" }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     InputGroup {
 ///         InputGroupText { "@" }
@@ -25,6 +28,7 @@ use crate::types::Size;
 ///         }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct InputGroupProps {

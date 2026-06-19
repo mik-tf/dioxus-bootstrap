@@ -22,6 +22,9 @@ use crate::types::{Color, Size};
 /// | `<button class="btn btn-primary" title="Tip">` | `Button { color: Color::Primary, title: "Tip", "Text" }` |
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Button { color: Color::Primary, "Click me" }
 ///     Button { color: Color::Danger, outline: true, size: Size::Sm, "Delete" }
@@ -33,6 +36,7 @@ use crate::types::{Color, Size};
 ///     Button { color: Color::Secondary, title: "Tooltip text", "Hover me" }
 ///     Button { color: Color::Primary, "data-bs-toggle": "modal", "Open Modal" }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ButtonProps {
@@ -141,6 +145,9 @@ pub fn Button(props: ButtonProps) -> Element {
 /// Bootstrap ButtonGroup component.
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     ButtonGroup {
 ///         Button { color: Color::Primary, "Left" }
@@ -148,6 +155,7 @@ pub fn Button(props: ButtonProps) -> Element {
 ///         Button { color: Color::Primary, "Right" }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ButtonGroupProps {
@@ -186,6 +194,9 @@ pub fn ButtonGroup(props: ButtonGroupProps) -> Element {
 /// Bootstrap ButtonToolbar — groups multiple ButtonGroups.
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     ButtonToolbar {
 ///         ButtonGroup {
@@ -197,6 +208,7 @@ pub fn ButtonGroup(props: ButtonGroupProps) -> Element {
 ///         }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ButtonToolbarProps {

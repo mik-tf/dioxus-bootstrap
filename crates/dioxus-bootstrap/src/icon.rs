@@ -11,11 +11,15 @@ use dioxus::prelude::*;
 /// | `<i class="bi bi-search">` | `Icon { name: "search" }` |
 /// | `<i class="bi bi-shield-lock me-2 fs-4">` | `Icon { name: "shield-lock", class: "me-2 fs-4" }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Icon { name: "search" }
 ///     Icon { name: "shield-lock", class: "me-2 fs-4" }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct IconProps {

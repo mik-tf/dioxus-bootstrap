@@ -9,7 +9,10 @@ use dioxus::prelude::*;
 /// | `<nav><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/">Home</a></li>...` | `Breadcrumb { BreadcrumbItem { href: "/", "Home" } ... }` |
 /// | `<li class="breadcrumb-item active" aria-current="page">Current</li>` | `BreadcrumbItem { active: true, "Current" }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Breadcrumb {
 ///         BreadcrumbItem { href: "/", "Home" }
@@ -17,6 +20,7 @@ use dioxus::prelude::*;
 ///         BreadcrumbItem { active: true, "Current Page" }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct BreadcrumbProps {

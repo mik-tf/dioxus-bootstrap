@@ -13,7 +13,10 @@ use dioxus::prelude::*;
 /// | `<body data-bs-spy="scroll" data-bs-target="#nav" data-bs-offset="80">` | `Scrollspy { target: "body", active: signal, offset: 80 }` |
 /// | Check active section via JS | `if *active.read() == "intro" { "active" }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// let active_section = use_signal(|| String::new());
 /// rsx! {
 ///     Scrollspy { target: "main", active: active_section, offset: 80 }
@@ -24,6 +27,7 @@ use dioxus::prelude::*;
 ///             href: "#features", "Features" }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ScrollspyProps {

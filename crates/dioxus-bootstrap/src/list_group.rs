@@ -17,6 +17,10 @@ use crate::types::Color;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
+/// # let handler = move |_: MouseEvent| {};
 /// rsx! {
 ///     ListGroup { flush: true,
 ///         ListGroupItem { active: true, "Active" }
@@ -34,6 +38,7 @@ use crate::types::Color;
 ///         ListGroupItem { "Second" }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ListGroupProps {

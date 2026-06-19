@@ -22,6 +22,9 @@ pub enum PopoverPlacement {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent — no JavaScript needed
 /// rsx! {
 ///     Popover {
@@ -31,6 +34,7 @@ pub enum PopoverPlacement {
 ///         Button { color: Color::Info, "Click for details" }
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props
