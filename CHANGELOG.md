@@ -4,6 +4,20 @@ All notable changes to dioxus-bootstrap-css are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.1] — Maintenance
+
+### Changed
+
+- Bumped the `gloo-timers` requirement from 0.3 to 0.4 (verified against the e2e suite).
+
+### Added
+
+- docs.rs metadata and a documentation badge.
+
+### CI
+
+- Added an end-to-end Playwright job, an MSRV (1.85) build check, and carousel unit tests; component doc examples now compile as doctests; enabled Dependabot and moved workflow actions off the deprecated Node 20 runtime.
+
 ## [0.5.0] — Theming fidelity, forward-compatible construction, tested examples
 
 ### Changed
