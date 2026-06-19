@@ -270,21 +270,22 @@ struct DerivedScale {
 
 fn derive_scale((red, green, blue): (u8, u8, u8), variant: ThemeVariant) -> DerivedScale {
     let base = (red, green, blue);
+    const BLACK: (u8, u8, u8) = (0, 0, 0);
+    const WHITE: (u8, u8, u8) = (255, 255, 255);
 
+    // Bootstrap 5.3 derives these with Sass shade-color (mix toward black) and
+    // tint-color (mix toward white) at these fixed weights.
     let (text_emphasis, bg_subtle, border_subtle) = match variant {
         ThemeVariant::Light => (
-            mix_rgb(base, (0, 0, 0), 0.35),
-            mix_rgb(base, (255, 255, 255), 0.85),
-            mix_rgb(base, (255, 255, 255), 0.65),
+            mix_rgb(base, BLACK, 0.60), // shade 60%
+            mix_rgb(base, WHITE, 0.80), // tint 80%
+            mix_rgb(base, WHITE, 0.60), // tint 60%
         ),
-        ThemeVariant::Dark => {
-            let subtle = mix_rgb(base, (0, 0, 0), 0.75);
-            (
-                mix_rgb(base, (255, 255, 255), 0.55),
-                subtle,
-                mix_rgb(subtle, (255, 255, 255), 0.08),
-            )
-        }
+        ThemeVariant::Dark => (
+            mix_rgb(base, WHITE, 0.40), // tint 40%
+            mix_rgb(base, BLACK, 0.80), // shade 80%
+            mix_rgb(base, BLACK, 0.40), // shade 40%
+        ),
     };
 
     DerivedScale {
@@ -423,5 +424,26 @@ mod tests {
         assert_eq!(scale.text_emphasis.as_deref(), Some("#084298"));
         assert_eq!(scale.bg_subtle.as_deref(), Some("#cfe2ff"));
         assert_eq!(scale.border_subtle.as_deref(), Some("#9ec5fe"));
+    }
+
+    #[test]
+    fn derived_tokens_match_bootstrap_light() {
+        // Bootstrap 5.3's published --bs-primary tokens for #0d6efd (light mode).
+        let css = build_theme_css(&BootstrapTheme {
+            colors: ThemeColors {
+                primary: Some(SemanticColorScale::new("#0d6efd")),
+                ..Default::default()
+            },
+            ..Default::default()
+        });
+        assert!(
+            css.contains("--bs-primary-text-emphasis: #052c65;"),
+            "{css}"
+        );
+        assert!(css.contains("--bs-primary-bg-subtle: #cfe2ff;"), "{css}");
+        assert!(
+            css.contains("--bs-primary-border-subtle: #9ec5fe;"),
+            "{css}"
+        );
     }
 }
