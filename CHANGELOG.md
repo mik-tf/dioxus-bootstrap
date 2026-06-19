@@ -4,6 +4,21 @@ All notable changes to dioxus-bootstrap-css are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.0] — Theming fidelity, forward-compatible construction, tested examples
+
+### Changed
+
+- Derived theme tokens (`-text-emphasis`, `-bg-subtle`, `-border-subtle`) now use Bootstrap 5.3's exact Sass weights (light: shade 60% / tint 80% / tint 60%; dark: tint 40% / shade 80% / shade 40%), so `BootstrapThemeProvider` output matches a native Bootstrap build.
+
+### Added
+
+- `SemanticColorScale` builder methods: `with_rgb`, `with_text_emphasis`, `with_bg_subtle`, `with_border_subtle`, for forward-compatible construction without struct literals.
+- Docs distinguishing `ThemeProvider` (light/dark mode) from `BootstrapThemeProvider` (color overrides), and a `BootstrapHead` recipe for apps embedded in a host that already loads Bootstrap.
+
+### Fixed
+
+- Component doc examples now compile as doctests, and CI runs `cargo test`, so the examples stay correct.
+
 ## [0.4.0] — Runtime CSS Variable Theming
 
 ### Added
