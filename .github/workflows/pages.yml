@@ -40,7 +40,7 @@ jobs:
 
       - name: Build showcase
         working-directory: examples/showcase
-        run: dx build --release --base-path dioxus-bootstrap
+        run: dx build --release --base-path dioxus-bootstrap-css
 
       - name: Prepare pages artifact
         run: |
