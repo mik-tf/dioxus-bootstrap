@@ -3,6 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/dioxus-bootstrap-css.svg)](https://crates.io/crates/dioxus-bootstrap-css)
 [![License](https://img.shields.io/crates/l/dioxus-bootstrap-css.svg)](LICENSE)
 [![CI](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml/badge.svg)](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml)
+[![docs.rs](https://img.shields.io/docsrs/dioxus-bootstrap-css)](https://docs.rs/dioxus-bootstrap-css)
 
 Complete 1-to-1 [Bootstrap 5.3](https://getbootstrap.com/) component library for [Dioxus](https://dioxuslabs.com/). 50+ components covering every Bootstrap CSS class and JS behavior — modals, dropdowns, carousel, accordion, offcanvas, tooltips, and more — all driven by Dioxus signals. Zero JavaScript. Offline-first. Type-safe.
 
