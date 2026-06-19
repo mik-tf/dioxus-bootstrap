@@ -4,6 +4,16 @@ All notable changes to dioxus-bootstrap-css are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.0] — Runtime CSS Variable Theming
+
+### Added
+
+- `BootstrapThemeProvider` and the `theme_vars` module (`BootstrapTheme`, `ThemeColors`, `SurfaceColors`) for overriding Bootstrap 5.3 CSS variables at runtime, with separate light and dark tokens. Set custom brand colors and surfaces without rebuilding the CSS. Thanks to @enaut for the contribution.
+
+### Fixed
+
+- Removed a redundant clone in `Toast` that failed clippy on recent toolchains.
+
 ## [0.3.1] — Configurable Bootstrap CSS Loading
 
 ### Added
