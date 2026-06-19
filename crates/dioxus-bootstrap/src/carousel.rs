@@ -334,3 +334,64 @@ fn build_slide_style(
         None => String::new(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn slide_class_no_transition() {
+        assert_eq!(build_slide_class(2, 2, None, false), "carousel-item active");
+        assert_eq!(build_slide_class(1, 2, None, false), "carousel-item");
+    }
+
+    #[test]
+    fn slide_class_sliding_next() {
+        let trans = Some((0, 1, SlideDirection::Next));
+        assert_eq!(
+            build_slide_class(0, 0, trans, false),
+            "carousel-item active carousel-item-start"
+        );
+        assert_eq!(
+            build_slide_class(1, 0, trans, false),
+            "carousel-item carousel-item-next carousel-item-start"
+        );
+        assert_eq!(build_slide_class(2, 0, trans, false), "carousel-item");
+    }
+
+    #[test]
+    fn slide_class_sliding_prev() {
+        let trans = Some((1, 0, SlideDirection::Prev));
+        assert_eq!(
+            build_slide_class(1, 1, trans, false),
+            "carousel-item active carousel-item-end"
+        );
+        assert_eq!(
+            build_slide_class(0, 1, trans, false),
+            "carousel-item carousel-item-prev carousel-item-end"
+        );
+    }
+
+    #[test]
+    fn slide_class_fade() {
+        let trans = Some((0, 1, SlideDirection::Next));
+        assert_eq!(build_slide_class(0, 0, trans, true), "carousel-item active");
+        assert_eq!(
+            build_slide_class(1, 0, trans, true),
+            "carousel-item carousel-item-next carousel-item-start active"
+        );
+        assert_eq!(build_slide_class(2, 0, trans, true), "carousel-item");
+    }
+
+    #[test]
+    fn slide_style_only_on_active_pair() {
+        let trans = Some((0, 1, SlideDirection::Next));
+        let css = "transition: transform 0.6s ease-in-out;";
+        assert_eq!(build_slide_style(0, 0, trans, false), css);
+        assert_eq!(build_slide_style(1, 0, trans, false), css);
+        assert_eq!(build_slide_style(2, 0, trans, false), "");
+        assert_eq!(build_slide_style(0, 0, None, false), "");
+        // Fade mode never emits an inline transition.
+        assert_eq!(build_slide_style(0, 0, trans, true), "");
+    }
+}
