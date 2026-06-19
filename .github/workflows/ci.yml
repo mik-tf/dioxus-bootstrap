@@ -49,3 +49,17 @@ jobs:
 
       - name: Run tests
         run: cargo test -p dioxus-bootstrap-css
+
+  msrv:
+    name: MSRV (1.85)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust 1.85
+        uses: dtolnay/rust-toolchain@1.85.0
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Build on MSRV
+        run: cargo build --target wasm32-unknown-unknown -p dioxus-bootstrap-css
