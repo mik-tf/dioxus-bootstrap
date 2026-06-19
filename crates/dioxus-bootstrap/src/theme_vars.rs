@@ -116,7 +116,12 @@ enum ThemeVariant {
     Dark,
 }
 
-/// Injects Bootstrap 5.3 CSS variables as a runtime `<style>` block.
+/// Overrides Bootstrap 5.3 color CSS variables at runtime for custom branding,
+/// by injecting a `<style>` block.
+///
+/// This is distinct from [`ThemeProvider`](crate::theme::ThemeProvider), which
+/// toggles light/dark *mode*. Use both together: `ThemeProvider` for the mode,
+/// `BootstrapThemeProvider` for the colors.
 #[derive(Clone, PartialEq, Props)]
 pub struct BootstrapThemeProviderProps {
     pub theme: BootstrapTheme,

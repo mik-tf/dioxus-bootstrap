@@ -72,6 +72,14 @@ pub enum BootstrapIcons {
 ///     link { rel: "stylesheet", href: "my-custom-bootstrap.css" }
 /// }
 /// ```
+///
+/// # Embedded in a host that already loads Bootstrap
+///
+/// When your app renders inside a host page that already includes Bootstrap
+/// (for example an outer shell), set both to `None` so it is not loaded twice:
+/// ```rust,ignore
+/// rsx! { BootstrapHead { css: BootstrapCss::None, icons: BootstrapIcons::None } }
+/// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct BootstrapHeadProps {
     /// How to load Bootstrap CSS. Default: bundled v5.3.3.

@@ -38,6 +38,11 @@ impl std::fmt::Display for Theme {
 ///
 /// Place this at the top of your app. It reactively sets `data-bs-theme` on `<html>`.
 ///
+/// This controls the light/dark *mode* only. To customize the actual *colors*
+/// (brand palette and surfaces), use
+/// [`BootstrapThemeProvider`](crate::theme_vars::BootstrapThemeProvider); the
+/// two compose, one for the mode and one for the colors.
+///
 /// # Bootstrap HTML → Dioxus
 ///
 /// ```html
