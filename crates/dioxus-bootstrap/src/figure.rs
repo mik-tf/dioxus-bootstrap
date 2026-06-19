@@ -13,6 +13,9 @@ use dioxus::prelude::*;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Figure { src: "/photo.jpg", alt: "A photo",
 ///         caption: "A caption for the image.",
@@ -20,6 +23,7 @@ use dioxus::prelude::*;
 ///         rounded: true,
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props
@@ -115,6 +119,9 @@ pub fn Figure(props: FigureProps) -> Element {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Ratio { aspect: "16x9",
 ///         iframe { src: "https://www.youtube.com/embed/..." }
@@ -123,6 +130,7 @@ pub fn Figure(props: FigureProps) -> Element {
 ///         div { class: "bg-primary text-white d-flex align-items-center justify-content-center", "1:1" }
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props

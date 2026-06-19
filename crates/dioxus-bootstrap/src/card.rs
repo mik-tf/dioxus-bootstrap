@@ -14,6 +14,9 @@ use dioxus::prelude::*;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent
 /// rsx! {
 ///     Card {
@@ -42,6 +45,7 @@ use dioxus::prelude::*;
 ///         div { class: "card-body", h5 { "Title" } p { "Text" } }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct CardProps {

@@ -12,6 +12,9 @@ use crate::types::Color;
 /// | `<div class="alert alert-danger alert-dismissible">` | `Alert { color: Color::Danger, dismissible: true, "Text" }` |
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Alert { color: Color::Success, "Operation completed!" }
 ///     Alert { color: Color::Danger, dismissible: true,
@@ -24,6 +27,7 @@ use crate::types::Color;
 ///         "Dismissible with callback."
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct AlertProps {

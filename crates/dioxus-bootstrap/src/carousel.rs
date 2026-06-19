@@ -27,7 +27,10 @@ pub struct CarouselSlide {
 /// | `<div class="carousel slide carousel-fade">` | `Carousel { fade: true, ... }` |
 /// | `data-bs-interval="3000"` | `interval: 3000` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// let active = use_signal(|| 0usize);
 /// rsx! {
 ///     Carousel {
@@ -42,6 +45,7 @@ pub struct CarouselSlide {
 ///         interval: 5000,
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct CarouselProps {

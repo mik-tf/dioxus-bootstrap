@@ -20,6 +20,9 @@ use dioxus::prelude::*;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent
 /// let open = use_signal(|| false);
 /// rsx! {
@@ -37,6 +40,7 @@ use dioxus::prelude::*;
 ///         menu: rsx! { DropdownItem { "Confirm Delete" } },
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props

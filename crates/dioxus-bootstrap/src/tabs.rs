@@ -5,6 +5,9 @@ use dioxus::prelude::*;
 /// Used with [`TabList`] to define tab labels, icons, and content.
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> dioxus_bootstrap_css::tabs::TabDef {
 /// use dioxus_bootstrap_css::tabs::TabDef;
 ///
 /// TabDef {
@@ -12,6 +15,7 @@ use dioxus::prelude::*;
 ///     icon: Some("house".into()),  // Bootstrap Icon name without "bi-" prefix
 ///     content: rsx! { p { "Home content" } },
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq)]
 pub struct TabDef {
@@ -43,6 +47,9 @@ pub struct TabDef {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// use dioxus_bootstrap_css::tabs::TabDef;
 ///
 /// let active = use_signal(|| 0usize);
@@ -58,6 +65,7 @@ pub struct TabDef {
 ///         ],
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props

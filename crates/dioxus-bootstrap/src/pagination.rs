@@ -20,11 +20,15 @@ use crate::types::Size;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent — fully automatic
 /// let page = use_signal(|| 1usize);
 /// rsx! {
 ///     Pagination { current: page, total: 20, window: 2, size: Size::Sm }
 /// }
+/// # }
 /// ```
 ///
 /// # Props

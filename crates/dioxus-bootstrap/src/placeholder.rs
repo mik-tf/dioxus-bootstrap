@@ -13,7 +13,10 @@ use crate::types::{Color, Size};
 /// | `<p class="placeholder-glow"><span class="placeholder col-7">` | `Placeholder { width: 7, glow: true }` |
 /// | `<p class="placeholder-wave"><span class="placeholder col-5">` | `Placeholder { width: 5, wave: true }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Placeholder { width: 75 }
 ///     Placeholder { width: 50, color: Color::Primary, size: Size::Lg }
@@ -25,6 +28,7 @@ use crate::types::{Color, Size};
 ///         },
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct PlaceholderProps {
@@ -93,10 +97,14 @@ pub fn Placeholder(props: PlaceholderProps) -> Element {
 
 /// Quick placeholder paragraph with multiple lines.
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     PlaceholderParagraph { lines: 3, glow: true }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct PlaceholderParagraphProps {

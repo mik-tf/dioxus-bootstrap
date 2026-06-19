@@ -11,14 +11,18 @@ use dioxus::prelude::*;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent
-/// let expanded = use_signal(|| false);
+/// let mut expanded = use_signal(|| false);
 /// rsx! {
 ///     Button { onclick: move |_| expanded.toggle(), "Toggle Content" }
 ///     Collapse { expanded: expanded,
 ///         Card { body: rsx! { "Collapsible content here." } }
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props

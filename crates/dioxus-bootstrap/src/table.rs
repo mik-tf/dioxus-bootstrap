@@ -18,6 +18,9 @@ use crate::types::{Color, Size};
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent
 /// rsx! {
 ///     Table { striped: true, hover: true, responsive: true,
@@ -30,6 +33,7 @@ use crate::types::{Color, Size};
 ///         }
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// # Props

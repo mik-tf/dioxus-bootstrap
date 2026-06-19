@@ -15,11 +15,15 @@ use crate::types::Size;
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     FormGroup { label: "Email",
 ///         Input { r#type: "email", placeholder: "you@example.com" }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct FormGroupProps {
@@ -66,11 +70,15 @@ pub fn FormGroup(props: FormGroupProps) -> Element {
 /// | `<input class="form-control" disabled>` | `Input { disabled: true }` |
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Input { r#type: "text", value: "hello", placeholder: "Enter text" }
 ///     Input { r#type: "email", size: Size::Sm, oninput: move |evt| { /* handle */ } }
 ///     Input { r#type: "password", disabled: true }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct InputProps {
@@ -147,12 +155,16 @@ pub fn Input(props: InputProps) -> Element {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Select { value: "opt2", onchange: move |evt| { /* handle */ },
 ///         option { value: "opt1", "Option 1" }
 ///         option { value: "opt2", "Option 2" }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct SelectProps {
@@ -216,10 +228,14 @@ pub fn Select(props: SelectProps) -> Element {
 /// | `<textarea class="form-control" rows="5">` | `Textarea { rows: 5 }` |
 /// | `<textarea class="form-control" placeholder="..." disabled>` | `Textarea { placeholder: "...", disabled: true }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Textarea { rows: 5, placeholder: "Enter description..." }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct TextareaProps {
@@ -288,11 +304,15 @@ pub fn Textarea(props: TextareaProps) -> Element {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Checkbox { checked: true, label: "Accept terms",
 ///         onchange: move |evt| { /* handle */ },
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct CheckboxProps {
@@ -358,11 +378,15 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Switch { checked: true, label: "Enable notifications",
 ///         onchange: move |evt| { /* handle */ },
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct SwitchProps {
@@ -425,10 +449,14 @@ pub fn Switch(props: SwitchProps) -> Element {
 /// | `<input type="range" class="form-range" min="0" max="100">` | `Range { min: "0", max: "100" }` |
 /// | `<input type="range" class="form-range" step="5" disabled>` | `Range { step: "5".into(), disabled: true }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Range { value: "50", min: "0", max: "100" }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct RangeProps {
@@ -496,12 +524,16 @@ pub fn Range(props: RangeProps) -> Element {
 /// |---|---|
 /// | `<div class="form-floating"><input class="form-control" placeholder="..."><label>Email</label></div>` | `FloatingLabel { label: "Email", Input { placeholder: "..." } }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     FloatingLabel { label: "Email address",
 ///         Input { r#type: "email", placeholder: "name@example.com" }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct FloatingLabelProps {
@@ -543,11 +575,15 @@ pub fn FloatingLabel(props: FloatingLabelProps) -> Element {
 /// | `<div class="valid-feedback">Looks good!</div>` | `FormFeedback { valid: true, "Looks good!" }` |
 /// | `<div class="invalid-feedback">Required.</div>` | `FormFeedback { "Required." }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Input { class: "is-valid".to_string(), value: "correct" }
 ///     FormFeedback { valid: true, "Looks good!" }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct FormFeedbackProps {
@@ -590,11 +626,15 @@ pub fn FormFeedback(props: FormFeedbackProps) -> Element {
 /// |---|---|
 /// | `<div class="form-text">Must be 8-20 characters.</div>` | `FormText { "Must be 8-20 characters." }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Input { r#type: "password" }
 ///     FormText { "Must be 8-20 characters long." }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct FormTextProps {
@@ -638,10 +678,14 @@ pub fn FormText(props: FormTextProps) -> Element {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Radio { name: "color", label: "Red", checked: true }
 ///     Radio { name: "color", label: "Blue" }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct RadioProps {

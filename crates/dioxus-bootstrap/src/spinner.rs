@@ -13,11 +13,15 @@ use crate::types::{Color, Size, SpinnerStyle};
 /// | `<div class="spinner-border spinner-border-sm">` | `Spinner { size: Size::Sm }` |
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Spinner {}
 ///     Spinner { color: Color::Success, style: SpinnerStyle::Grow }
 ///     Spinner { size: Size::Sm, "Loading..." }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct SpinnerProps {

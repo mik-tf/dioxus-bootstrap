@@ -12,12 +12,16 @@ use crate::types::Color;
 /// | `<span class="badge rounded-pill text-bg-danger">99+</span>` | `Badge { color: Color::Danger, pill: true, "99+" }` |
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Badge { color: Color::Primary, "New" }
 ///     Badge { color: Color::Danger, pill: true, "99+" }
 ///     // Inside a heading
 ///     h1 { "Messages " Badge { color: Color::Info, "4" } }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct BadgeProps {

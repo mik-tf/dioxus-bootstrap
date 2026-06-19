@@ -16,6 +16,9 @@ use crate::types::{Color, NavbarExpand};
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     Nav { pills: true, fill: true,
 ///         NavItem { NavLink { active: true, "Home" } }
@@ -29,6 +32,7 @@ use crate::types::{Color, NavbarExpand};
 ///     // Vertical with pills
 ///     Nav { pills: true, vertical: true, /* ... */ }
 /// }
+/// # }
 /// ```
 ///
 /// # Props
@@ -123,6 +127,9 @@ pub fn Nav(props: NavProps) -> Element {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus equivalent
 /// let collapsed = use_signal(|| true);
 /// rsx! {
@@ -135,6 +142,7 @@ pub fn Nav(props: NavProps) -> Element {
 ///         }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct NavbarProps {
@@ -207,10 +215,15 @@ pub fn Navbar(props: NavbarProps) -> Element {
 /// |---|---|
 /// | `<button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">` | `NavbarToggler { collapsed: signal }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
+/// # let collapsed_signal = use_signal(|| false);
 /// rsx! {
 ///     NavbarToggler { collapsed: collapsed_signal }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct NavbarTogglerProps {
@@ -256,7 +269,10 @@ pub fn NavbarToggler(props: NavbarTogglerProps) -> Element {
 /// |---|---|
 /// | `<div class="collapse navbar-collapse" id="nav">` | `NavbarCollapse { collapsed: signal, ... }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// let collapsed = use_signal(|| true);
 /// rsx! {
 ///     NavbarToggler { collapsed: collapsed }
@@ -264,6 +280,7 @@ pub fn NavbarToggler(props: NavbarTogglerProps) -> Element {
 ///         NavItem { NavLink { href: "/", "Home" } }
 ///     }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct NavbarCollapseProps {
@@ -339,10 +356,14 @@ pub fn NavItem(props: NavItemProps) -> Element {
 /// | `<a class="nav-link active" href="/">Home</a>` | `NavLink { href: "/", active: true, "Home" }` |
 /// | `<a class="nav-link disabled">Disabled</a>` | `NavLink { disabled: true, "Disabled" }` |
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// rsx! {
 ///     NavLink { href: "/dashboard", active: true, "Dashboard" }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct NavLinkProps {

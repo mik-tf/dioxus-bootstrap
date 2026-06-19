@@ -46,6 +46,9 @@ impl std::fmt::Display for Theme {
 /// ```
 ///
 /// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// // Dioxus — reactive theme switching
 /// let theme = use_signal(|| Theme::Dark);
 /// rsx! {
@@ -54,6 +57,7 @@ impl std::fmt::Display for Theme {
 ///     ThemeToggle { theme }  // sun/moon toggle button
 ///     // your app content
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ThemeProviderProps {
@@ -79,12 +83,16 @@ pub fn ThemeProvider(props: ThemeProviderProps) -> Element {
 
 /// A toggle button that switches between light and dark mode.
 ///
-/// ```rust
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
 /// let theme = use_signal(|| Theme::Dark);
 /// rsx! {
 ///     ThemeProvider { theme: theme }
 ///     ThemeToggle { theme: theme }
 /// }
+/// # }
 /// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct ThemeToggleProps {
