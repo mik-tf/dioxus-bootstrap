@@ -20,12 +20,18 @@ Complete 1-to-1 [Bootstrap 5.3](https://getbootstrap.com/) component library for
 
 ## Quick Start
 
-Add to your `Cargo.toml`:
+Add it with `cargo add` (always pulls the latest release):
+
+```sh
+cargo add dioxus-bootstrap-css
+```
+
+Or pin it in your `Cargo.toml`:
 
 ```toml
 [dependencies]
 dioxus = { version = "0.7", features = ["web"] }
-dioxus-bootstrap-css = "0.3.1"
+dioxus-bootstrap-css = "0.4"
 ```
 
 ```rust
