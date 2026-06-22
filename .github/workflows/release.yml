@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -13,7 +13,7 @@ env:
 
 jobs:
   publish:
-    name: Publish to crates.io
+    name: Publish crates.io
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -32,7 +32,7 @@ jobs:
             exit 1
           fi
 
-      - name: Check crates.io for existing version
+      - name: Check crates.io existing version
         id: published
         run: |
           ver="${GITHUB_REF_NAME#v}"
@@ -42,7 +42,7 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish to crates.io
+      - name: Publish crates.io
         if: steps.published.outputs.exists == 'false'
         run: cargo publish -p dioxus-bootstrap-css --token "${{ secrets.CARGO_REGISTRY_TOKEN }}"
 
