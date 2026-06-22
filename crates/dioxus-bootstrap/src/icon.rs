@@ -28,6 +28,9 @@ pub struct IconProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -38,6 +41,6 @@ pub fn Icon(props: IconProps) -> Element {
         format!("bi bi-{} {}", props.name, props.class)
     };
     rsx! {
-        i { class: "{icon_class}" }
+    i { class: "{icon_class}", ..props.attributes }
     }
 }

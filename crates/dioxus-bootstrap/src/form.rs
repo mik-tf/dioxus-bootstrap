@@ -91,6 +91,15 @@ pub struct InputProps {
     /// Placeholder text.
     #[props(default)]
     pub placeholder: String,
+    /// Minimum value for numeric/date inputs.
+    #[props(default)]
+    pub min: Option<String>,
+    /// Maximum value for numeric/date inputs.
+    #[props(default)]
+    pub max: Option<String>,
+    /// Browser autocomplete hint.
+    #[props(default)]
+    pub autocomplete: Option<String>,
     /// Input size.
     #[props(default)]
     pub size: Size,
@@ -103,6 +112,15 @@ pub struct InputProps {
     /// Input event handler.
     #[props(default)]
     pub oninput: Option<EventHandler<FormEvent>>,
+    /// Change event handler.
+    #[props(default)]
+    pub onchange: Option<EventHandler<FormEvent>>,
+    /// Key down event handler.
+    #[props(default)]
+    pub onkeydown: Option<EventHandler<KeyboardEvent>>,
+    /// Key up event handler.
+    #[props(default)]
+    pub onkeyup: Option<EventHandler<KeyboardEvent>>,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -130,10 +148,28 @@ pub fn Input(props: InputProps) -> Element {
             r#type: "{props.r#type}",
             value: "{props.value}",
             placeholder: "{props.placeholder}",
+            min: props.min.clone(),
+            max: props.max.clone(),
+            autocomplete: props.autocomplete.clone(),
             disabled: props.disabled,
             readonly: props.readonly,
             oninput: move |evt| {
                 if let Some(handler) = &props.oninput {
+                    handler.call(evt);
+                }
+            },
+            onchange: move |evt| {
+                if let Some(handler) = &props.onchange {
+                    handler.call(evt);
+                }
+            },
+            onkeydown: move |evt| {
+                if let Some(handler) = &props.onkeydown {
+                    handler.call(evt);
+                }
+            },
+            onkeyup: move |evt| {
+                if let Some(handler) = &props.onkeyup {
                     handler.call(evt);
                 }
             },
@@ -226,6 +262,7 @@ pub fn Select(props: SelectProps) -> Element {
 /// | HTML | Dioxus |
 /// |---|---|
 /// | `<textarea class="form-control" rows="5">` | `Textarea { rows: 5 }` |
+/// | `<textarea class="form-control form-control-sm">` | `Textarea { size: Size::Sm }` |
 /// | `<textarea class="form-control" placeholder="..." disabled>` | `Textarea { placeholder: "...", disabled: true }` |
 ///
 /// ```rust,no_run
@@ -248,6 +285,9 @@ pub struct TextareaProps {
     /// Placeholder text.
     #[props(default)]
     pub placeholder: String,
+    /// Textarea size.
+    #[props(default)]
+    pub size: Size,
     /// Disabled state.
     #[props(default)]
     pub disabled: bool,
@@ -257,6 +297,15 @@ pub struct TextareaProps {
     /// Input event handler.
     #[props(default)]
     pub oninput: Option<EventHandler<FormEvent>>,
+    /// Change event handler.
+    #[props(default)]
+    pub onchange: Option<EventHandler<FormEvent>>,
+    /// Key down event handler.
+    #[props(default)]
+    pub onkeydown: Option<EventHandler<KeyboardEvent>>,
+    /// Key up event handler.
+    #[props(default)]
+    pub onkeyup: Option<EventHandler<KeyboardEvent>>,
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
@@ -267,10 +316,14 @@ pub struct TextareaProps {
 
 #[component]
 pub fn Textarea(props: TextareaProps) -> Element {
+    let size_class = match props.size {
+        Size::Md => String::new(),
+        s => format!(" form-control-{s}"),
+    };
     let full_class = if props.class.is_empty() {
-        "form-control".to_string()
+        format!("form-control{size_class}")
     } else {
-        format!("form-control {}", props.class)
+        format!("form-control{size_class} {}", props.class)
     };
 
     rsx! {
@@ -283,6 +336,21 @@ pub fn Textarea(props: TextareaProps) -> Element {
             value: "{props.value}",
             oninput: move |evt| {
                 if let Some(handler) = &props.oninput {
+                    handler.call(evt);
+                }
+            },
+            onchange: move |evt| {
+                if let Some(handler) = &props.onchange {
+                    handler.call(evt);
+                }
+            },
+            onkeydown: move |evt| {
+                if let Some(handler) = &props.onkeydown {
+                    handler.call(evt);
+                }
+            },
+            onkeyup: move |evt| {
+                if let Some(handler) = &props.onkeyup {
                     handler.call(evt);
                 }
             },
@@ -319,6 +387,9 @@ pub struct CheckboxProps {
     /// Whether the checkbox is checked.
     #[props(default)]
     pub checked: bool,
+    /// Optional id applied to the checkbox input.
+    #[props(default)]
+    pub input_id: Option<String>,
     /// Label text.
     #[props(default)]
     pub label: String,
@@ -328,6 +399,9 @@ pub struct CheckboxProps {
     /// Change event handler.
     #[props(default)]
     pub onchange: Option<EventHandler<FormEvent>>,
+    /// Click event handler for the checkbox input.
+    #[props(default)]
+    pub onclick: Option<EventHandler<MouseEvent>>,
     /// Additional CSS classes for the wrapper.
     #[props(default)]
     pub class: String,
@@ -343,26 +417,33 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
     } else {
         format!("form-check {}", props.class)
     };
+    let label_for = props.input_id.clone().unwrap_or_default();
 
     rsx! {
-        div { class: "{full_class}",
-            ..props.attributes,
-            input {
-                class: "form-check-input",
-                r#type: "checkbox",
-                checked: props.checked,
-                disabled: props.disabled,
-                onchange: move |evt| {
-                    if let Some(handler) = &props.onchange {
-                        handler.call(evt);
-                    }
-                },
-            }
-            if !props.label.is_empty() {
-                label { class: "form-check-label", "{props.label}" }
+            div { class: "{full_class}",
+                ..props.attributes,
+    input {
+    class: "form-check-input",
+    r#type: "checkbox",
+                    id: props.input_id.unwrap_or_default(),
+                    checked: props.checked,
+                    disabled: props.disabled,
+                    onclick: move |evt| {
+                        if let Some(handler) = &props.onclick {
+                            handler.call(evt);
+                        }
+                    },
+                    onchange: move |evt| {
+                        if let Some(handler) = &props.onchange {
+                            handler.call(evt);
+                        }
+                    },
+                }
+    if !props.label.is_empty() {
+    label { class: "form-check-label", r#for: "{label_for}", "{props.label}" }
+    }
             }
         }
-    }
 }
 
 /// Bootstrap Switch (toggle) component.

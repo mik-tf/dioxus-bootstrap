@@ -10,6 +10,7 @@ use crate::types::Color;
 /// |---|---|
 /// | `<span class="badge text-bg-primary">New</span>` | `Badge { color: Color::Primary, "New" }` |
 /// | `<span class="badge rounded-pill text-bg-danger">99+</span>` | `Badge { color: Color::Danger, pill: true, "99+" }` |
+/// | `<span class="badge text-bg-secondary" role="button">Open</span>` | `Badge { color: Color::Secondary, onclick: move |_| {}, "Open" }` |
 ///
 /// ```rust,no_run
 /// # use dioxus::prelude::*;
@@ -34,6 +35,9 @@ pub struct BadgeProps {
     /// Additional CSS classes.
     #[props(default)]
     pub class: String,
+    /// Click event handler.
+    #[props(default)]
+    pub onclick: Option<EventHandler<MouseEvent>>,
     /// Any additional HTML attributes.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -51,6 +55,15 @@ pub fn Badge(props: BadgeProps) -> Element {
     };
 
     rsx! {
-        span { class: "{full_class}", ..props.attributes, {props.children} }
+        span {
+            class: "{full_class}",
+            onclick: move |evt| {
+                if let Some(handler) = &props.onclick {
+                    handler.call(evt);
+                }
+            },
+            ..props.attributes,
+            {props.children}
+        }
     }
 }

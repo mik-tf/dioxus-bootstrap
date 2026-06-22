@@ -4,6 +4,19 @@ All notable changes to dioxus-bootstrap-css are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.2] — Form and button event parity
+
+### Added
+
+- Added `onchange`, `onkeydown`, and `onkeyup` handlers to `Input` and `Textarea`.
+- Added `min`, `max`, and `autocomplete` props to `Input`.
+- Added `size` prop to `Textarea`.
+- Added optional `onclick` handler to `Badge`.
+- Added `Button { link: true }` for Bootstrap `btn-link` styling.
+- Added `Checkbox::input_id` and `Checkbox::onclick` for typed checkbox input targeting.
+- Added forwarded HTML attributes to `Icon`.
+- Added standalone `DropdownMenu` for signal-owned context/dropdown menus.
+
 ## [0.5.1] — Maintenance
 
 ### Changed
