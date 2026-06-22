@@ -4,6 +4,12 @@ All notable changes to dioxus-bootstrap-css are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+
+- `tools/check-no-raw-bootstrap.mjs`: a migration-completeness gate that fails when consumer code reintroduces remote CDN assets, Bootstrap JavaScript (`data-bs-*`, `bootstrap.bundle.js`), or raw Bootstrap component classes instead of the typed components. Run with `npm run lint:bootstrap` or point it at any consumer crate. Wired into CI against the bundled examples. Documented in `docs/MIGRATION_GUIDE.md`.
+
 ## [0.5.2] — Form and button event parity
 
 ### Added

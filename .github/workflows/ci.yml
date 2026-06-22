@@ -50,6 +50,9 @@ jobs:
       - name: Run tests
         run: cargo test -p dioxus-bootstrap-css
 
+      - name: Migration gate (no raw Bootstrap / CDN / JS in examples)
+        run: node tools/check-no-raw-bootstrap.mjs examples
+
   msrv:
     name: MSRV (1.85)
     runs-on: ubuntu-latest

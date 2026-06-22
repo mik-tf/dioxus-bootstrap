@@ -181,6 +181,31 @@ The test script (`perceptual_diff.mjs`) uses:
 node tests/perceptual_diff.mjs
 ```
 
+## Step 6: Enforce — the migration gate
+
+### What "raw Bootstrap" means
+
+Plain Bootstrap is used by hand-writing its class names (`<button class="btn btn-primary">`) and loading its CSS and JavaScript bundle. This crate replaces that with typed Rust components (`Button { color: Color::Primary }`) and CSS bundled into the binary. **"Raw Bootstrap" is anything that bypasses the crate**: hand-written component class strings, a remote stylesheet, or Bootstrap's JS. A finished migration contains none of it. The gate, `tools/check-no-raw-bootstrap.mjs`, makes that mechanical instead of a thing reviewers have to remember.
+
+### Why it fails on three things
+
+1. **CDN** — a remote `<link>`/`<script>` to Bootstrap. A sovereign or offline machine cannot reach it and the app renders unstyled. The crate bundles its assets through `BootstrapHead`, so no remote fetch is needed.
+2. **JS** — Bootstrap's JavaScript (`data-bs-toggle`, `bootstrap.bundle.min.js`, `new bootstrap.Modal(...)`). That JS is never loaded in a WASM app, so a `data-bs-toggle="modal"` button *looks* right but does nothing. Interactive widgets must be the crate's signal-driven components.
+3. **Raw classes** — a component class string like `class="card"` or `class="btn btn-primary"` instead of `Card {}` / `Button {}`. This loses the type safety and styling consistency the crate exists to provide.
+
+### What stays raw (allowed)
+
+Layout and utilities have no component and are meant to be written directly: `container`, `row`, `col-*`, spacing (`m-*`/`p-*`), flex (`d-flex`), text (`text-*`), `form-label`. Also allowed are *content* classes that live inside a component and have no typed equivalent: `card-title`, `card-text`, `modal-title`. The gate knows this difference, so it flags `card` but not `card-title`.
+
+### How to run it
+
+```bash
+node tools/check-no-raw-bootstrap.mjs path/to/your-app/src   # any consumer crate, point at your src
+npm run lint:bootstrap                                        # the bundled examples
+```
+
+It scans `.rs`, `.html`, and `.js` (not `.css`, where bundled Bootstrap legitimately contains these tokens, and not this crate's own `crates/`, which is what *emits* the classes). A clean port prints `OK` and exits 0. A violation prints each `file:line`, which rule tripped, and the offending line, then exits 1. It is wired into CI here next to clippy; wire it into the consumer's CI the same way. **A migration is done when this exits 0.**
+
 ## Common Mistakes
 
 | Mistake | Consequence | Fix |
@@ -217,4 +242,5 @@ Rules:
 4. Use plain div { class: "..." } for static Bootstrap layout
 5. Load CSS via BootstrapHead { css: BootstrapCss::Url("...") } if migrating from SSR
 6. All interactive state via Dioxus signals (use_signal)
+7. The port is done only when `node tools/check-no-raw-bootstrap.mjs <src>` exits 0 (see Step 6)
 ```
