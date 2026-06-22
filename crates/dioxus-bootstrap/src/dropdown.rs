@@ -179,6 +179,46 @@ pub fn Dropdown(props: DropdownProps) -> Element {
     }
 }
 
+/// Standalone Bootstrap dropdown menu.
+///
+/// Use this when open/position behavior is owned by a surrounding component
+/// but the menu and items should still use Bootstrap dropdown structure.
+#[derive(Clone, PartialEq, Props)]
+pub struct DropdownMenuProps {
+    /// Whether to show the menu.
+    #[props(default)]
+    pub show: bool,
+    /// Align menu to the end side.
+    #[props(default)]
+    pub align_end: bool,
+    /// Additional CSS classes.
+    #[props(default)]
+    pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+    /// Child menu items.
+    pub children: Element,
+}
+
+#[component]
+pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
+    let mut classes = vec!["dropdown-menu".to_string()];
+    if props.align_end {
+        classes.push("dropdown-menu-end".to_string());
+    }
+    if props.show {
+        classes.push("show".to_string());
+    }
+    if !props.class.is_empty() {
+        classes.push(props.class.clone());
+    }
+    let full_class = classes.join(" ");
+    rsx! {
+    ul { class: "{full_class}", ..props.attributes, {props.children} }
+    }
+}
+
 /// A single item in a Dropdown menu.
 #[derive(Clone, PartialEq, Props)]
 pub struct DropdownItemProps {

@@ -16,6 +16,7 @@ use crate::types::{Color, Size};
 /// |---|---|
 /// | `<button class="btn btn-primary">` | `Button { color: Color::Primary, "Text" }` |
 /// | `<button class="btn btn-outline-danger btn-sm">` | `Button { color: Color::Danger, outline: true, size: Size::Sm, "Text" }` |
+/// | `<button class="btn btn-link btn-sm">` | `Button { link: true, size: Size::Sm, "Text" }` |
 /// | `<button class="btn btn-success btn-lg" disabled>` | `Button { color: Color::Success, size: Size::Lg, disabled: true, "Text" }` |
 /// | `<a class="btn btn-primary" href="/page">` | `Button { color: Color::Primary, href: "/page", "Link" }` |
 /// | `<a class="btn btn-sm" href="f.json" target="_blank" download="f.json">` | `Button { size: Size::Sm, href: "f.json", target: "_blank", download: "f.json", "DL" }` |
@@ -46,6 +47,9 @@ pub struct ButtonProps {
     /// Use outline style instead of filled.
     #[props(default)]
     pub outline: bool,
+    /// Use Bootstrap link-button style (`btn-link`).
+    #[props(default)]
+    pub link: bool,
     /// Button size.
     #[props(default)]
     pub size: Size,
@@ -82,9 +86,13 @@ pub struct ButtonProps {
 
 #[component]
 pub fn Button(props: ButtonProps) -> Element {
-    let style = if props.outline { "btn-outline" } else { "btn" };
-    let color = props.color;
-    let color_class = format!("{style}-{color}");
+    let color_class = if props.link {
+        "btn-link".to_string()
+    } else {
+        let style = if props.outline { "btn-outline" } else { "btn" };
+        let color = props.color;
+        format!("{style}-{color}")
+    };
 
     let size_class = match props.size {
         Size::Md => String::new(),

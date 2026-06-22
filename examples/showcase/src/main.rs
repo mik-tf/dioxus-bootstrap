@@ -891,11 +891,23 @@ fn OverlaysSection() -> Element {
     }
 }
 
+fn showcase_svg(width: u32, height: u32, fill: &str, label: &str) -> String {
+    let fill = fill.replace('#', "%23");
+    let label = label.replace(' ', "%20");
+    format!(
+        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' viewBox='0 0 {width} {height}'%3E%3Crect width='{width}' height='{height}' fill='{fill}'/%3E%3Ctext x='50%25' y='52%25' text-anchor='middle' font-family='Arial,sans-serif' font-size='34' font-weight='700' fill='white'%3E{label}%3C/text%3E%3C/svg%3E"
+    )
+}
+
 // ── Media (Carousel, Figure, Ratio) ────────────────────────────────────────
 
 #[component]
 fn MediaSection() -> Element {
     let carousel_active = use_signal(|| 0usize);
+    let slide_one = showcase_svg(600, 300, "#0d6efd", "First Slide");
+    let slide_two = showcase_svg(600, 300, "#198754", "Second Slide");
+    let slide_three = showcase_svg(600, 300, "#6f42c1", "Third Slide");
+    let figure_image = showcase_svg(400, 250, "#0dcaf0", "Figure");
 
     rsx! {
         div { class: "mt-3",
@@ -906,21 +918,21 @@ fn MediaSection() -> Element {
                     active: carousel_active,
                     ride: true,
                     interval: 4000,
-                    slides: vec![
-                        CarouselSlide {
-                            src: "https://picsum.photos/600/300?random=1".into(),
+                slides: vec![
+                    CarouselSlide {
+                        src: slide_one,
                             alt: "First slide".into(),
                             caption_title: Some("First Slide".into()),
                             caption_text: Some("This is the first slide caption.".into()),
                         },
-                        CarouselSlide {
-                            src: "https://picsum.photos/600/300?random=2".into(),
+                    CarouselSlide {
+                        src: slide_two,
                             alt: "Second slide".into(),
                             caption_title: Some("Second Slide".into()),
                             caption_text: Some("Another slide with a caption.".into()),
                         },
-                        CarouselSlide {
-                            src: "https://picsum.photos/600/300?random=3".into(),
+                    CarouselSlide {
+                        src: slide_three,
                             alt: "Third slide".into(),
                             caption_title: None,
                             caption_text: None,
@@ -933,7 +945,7 @@ fn MediaSection() -> Element {
             // Figure
             h3 { class: "mb-3", "Figure" }
             Figure {
-                src: "https://picsum.photos/400/250?random=4".to_string(),
+                src: figure_image,
                 alt: "Sample image".to_string(),
                 caption: "A caption for this figure image.".to_string(),
                 rounded: true,
