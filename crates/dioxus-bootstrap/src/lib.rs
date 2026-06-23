@@ -76,6 +76,7 @@ pub mod list_group;
 pub mod modal;
 pub mod nav;
 pub mod offcanvas;
+pub mod overlay;
 pub mod pagination;
 pub mod placeholder;
 pub mod popover;
@@ -111,6 +112,7 @@ pub mod prelude {
     pub use crate::modal::*;
     pub use crate::nav::*;
     pub use crate::offcanvas::*;
+    pub use crate::overlay::*;
     pub use crate::pagination::*;
     pub use crate::placeholder::*;
     pub use crate::popover::*;
