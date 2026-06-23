@@ -1,59 +1,72 @@
 # Roadmap
 
-## Status: Complete
+## Current Status
 
-All Bootstrap 5.3 components are implemented.
+The Bootstrap 5.3 component surface is implemented and covered by local tests,
+doctests, migration tooling, the raw-Bootstrap gate, and Playwright e2e checks.
 
-### Components
+## Component Surface
 
-**Layout & Head:**
-Container, Row, Col (offset, order), BootstrapHead, ThemeProvider, ThemeToggle
+Layout and head:
 
-**Content:**
-Button (active, outline, sizes), ButtonGroup, ButtonToolbar, Card, Alert,
-Badge, Icon, Spinner, Progress/ProgressBar, Placeholder/PlaceholderParagraph,
-Figure, Ratio
+- `BootstrapHead`
+- `ThemeProvider`, `ThemeToggle`
+- `Container`, `Row`, `Col`
 
-**Data Display:**
-Table (striped, striped-columns, hover, bordered, responsive, caption),
-ListGroup/ListGroupItem, Pagination
+Content and data display:
 
-**Forms:**
-FormGroup, Input, Select, Textarea, Checkbox, Radio, Switch, Range,
-FloatingLabel, InputGroup/InputGroupText, FormFeedback, FormText
+- `Button`, `ButtonGroup`, `ButtonToolbar`
+- `Card`, `Alert`, `Badge`, `Icon`, `Spinner`
+- `Progress`, `ProgressBar`, `Placeholder`, `PlaceholderParagraph`
+- `Figure`, `Ratio`, `Table`, `ListGroup`, `ListGroupItem`, `Pagination`
 
-**Interactive (Signal-Driven, Zero JS):**
-Modal (sizes, fullscreen, centered, scrollable), Dropdown (split, directions),
-Collapse, Tabs/Tab/TabList (pills, fill, justified, vertical),
-Accordion/AccordionItem, Offcanvas (placements, responsive), Toast/ToastContainer,
-Carousel (indicators, controls, fade, dark, auto-play, pause-on-hover,
-keyboard nav, touch swipe, slide/fade transitions), Tooltip, Popover, Scrollspy
+Forms:
 
-**Navigation:**
-Navbar, NavbarToggler, NavbarCollapse, Nav (pills, tabs, underline, fill,
-justified, vertical), NavItem, NavLink, Breadcrumb/BreadcrumbItem
+- `FormGroup`, `Input`, `Select`, `Textarea`
+- `Checkbox`, `Radio`, `Switch`, `Range`
+- `FloatingLabel`, `InputGroup`, `InputGroupText`, `FormFeedback`, `FormText`
 
-### Notes
+Interactive components:
 
-- **Tooltip** uses CSS-based positioning relative to the trigger element.
-  For most use cases this works well. Edge cases near viewport boundaries
-  may require the app to adjust placement manually.
+- `Modal`, `Dropdown`, `Collapse`, `Tabs`, `Tab`, `TabList`
+- `Accordion`, `AccordionItem`, `Offcanvas`, `Toast`, `ToastContainer`
+- `Carousel`, `Tooltip`, `Popover`, `Scrollspy`
 
-- **Popover** follows the same CSS positioning approach as Tooltip, with
-  click-to-toggle and click-outside-to-close behavior.
+Navigation:
 
-- **Scrollspy** uses `document::eval` with a scroll event listener to track
-  visible sections and update a signal with the active section id.
+- `Navbar`, `NavbarToggler`, `NavbarCollapse`
+- `Nav`, `NavItem`, `NavLink`
+- `Breadcrumb`, `BreadcrumbItem`
 
-### Next Steps
+## Quality Gates
 
-- [x] CI workflow (cargo fmt, clippy, WASM build check)
-- [x] Deploy showcase to GitHub Pages
-- [x] Rustdoc examples on key components
-- [x] Playwright E2E tests (local + CI)
-- [x] Update README with live demo link
-- [x] Publish v0.1.6 to crates.io
+Changes should keep these checks green:
 
-### Design Principles
+```bash
+cargo +1.96 fmt --all -- --check
+cargo +1.96 clippy --target wasm32-unknown-unknown -p dioxus-bootstrap-css -- -D warnings
+cargo +1.96 clippy --target wasm32-unknown-unknown -p showcase -- -D warnings
+cargo +1.96 check --target wasm32-unknown-unknown -p dioxus-bootstrap-css
+cargo +1.96 check --target wasm32-unknown-unknown -p showcase
+cargo +1.96 test -p dioxus-bootstrap-css
+npm run test:migrate
+npm run lint:bootstrap
+npm run test:e2e -- --reporter=list
+```
 
-See [DESIGN.md](DESIGN.md) — strict 1-to-1 Bootstrap 5.3 parity.
+## Maintenance Direction
+
+- Keep Bootstrap parity in the crate API instead of asking downstream apps to
+  keep raw Bootstrap component classes.
+- Expand the converter when common static Bootstrap RSX can be mapped safely.
+- Flag dynamic or ambiguous conversion cases for manual review.
+- Keep the migration gate aligned with the component surface.
+- Use screenshot tests for visual confidence whenever component output or
+  migration behavior changes.
+
+## Known Caveats
+
+- Tooltip and popover positioning is CSS-based and relative to the trigger.
+  Apps with viewport-edge requirements may need to choose placement explicitly.
+- Scrollspy uses browser scroll observation through Dioxus document evaluation,
+  so tests should allow the page to settle before asserting active sections.

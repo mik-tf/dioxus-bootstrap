@@ -1,56 +1,59 @@
-# Design Principles
+# Design
 
-## 1-to-1 Bootstrap Parity
+`dioxus-bootstrap-css` is a typed Dioxus layer over Bootstrap 5.3. It does not
+rewrite Bootstrap, approximate Bootstrap, or invent a separate design system.
 
-`dioxus-bootstrap-css` is a strict 1-to-1 mapping of Bootstrap 5.3 for Dioxus.
+## Parity Contract
 
-- **CSS** — Real Bootstrap 5.3.3 CSS, bundled and served via `asset!()`. Not a reimplementation, not a subset, not a superset.
-- **JS → Signals** — Bootstrap's JavaScript behaviors (dropdowns, modals, tabs, collapse, etc.) are replaced with Dioxus signals. Same behavior, same classes, no JS dependency.
-- **Icons** — Real Bootstrap Icons CSS with inlined fonts.
+If Bootstrap 5.3 supports a component state, class, structure, size, color,
+wrapper, or interaction pattern, this crate should expose a typed Dioxus way to
+express it.
 
-### What belongs in this library
+If Bootstrap does not define the behavior, it belongs in the consuming
+application, not in this crate.
 
-- Type-safe RSX wrappers for Bootstrap components
-- Signal-driven replacements for Bootstrap JS behaviors
-- Bundled Bootstrap CSS and Bootstrap Icons
+## What Belongs In The Crate
 
-### What does NOT belong in this library
+- Type-safe RSX wrappers for Bootstrap components.
+- Signal-driven replacements for Bootstrap JavaScript behavior.
+- Bundled Bootstrap CSS and Bootstrap Icons for offline-first apps.
+- Minimal escape hatches such as `class` and forwarded attributes for Bootstrap
+  utilities and ordinary HTML behavior.
 
-- Custom CSS beyond what Bootstrap provides
-- App-specific styling (gradients, scroll offsets, page layouts)
-- Opinionated defaults that Bootstrap doesn't have
-- Extra components that Bootstrap doesn't define
+## What Does Not Belong In The Crate
 
-### The rule
+- App-specific page layout, branding, gradients, or scroll offsets.
+- Custom CSS beyond what Bootstrap provides.
+- Opinionated defaults that Bootstrap does not define.
+- Extra components that are not Bootstrap components.
 
-> If Bootstrap 5.3 does it, we do it. If Bootstrap doesn't, we don't.
+## Rendering Model
 
-App-specific styling, custom themes, and layout decisions belong in the consuming application's own CSS, not in this library.
+The crate emits ordinary Bootstrap HTML structure and class names. Bootstrap CSS
+does the styling. Dioxus signals replace Bootstrap JavaScript state machines for
+interactive components such as modals, dropdowns, tabs, collapse, offcanvas,
+toast, carousel, tooltip, popover, and scrollspy.
 
-## Architecture
+Every component follows the same pattern:
 
-```
-┌─────────────────────────────────────┐
-│          Your Dioxus App            │
-│  ┌───────────────────────────────┐  │
-│  │   app-specific CSS / logic    │  │
-│  └───────────────────────────────┘  │
-│  ┌───────────────────────────────┐  │
-│  │    dioxus-bootstrap-css       │  │
-│  │  ┌─────────┐ ┌─────────────┐ │  │
-│  │  │Bootstrap │ │  Dioxus RSX │ │  │
-│  │  │ 5.3 CSS  │ │  Components │ │  │
-│  │  │ + Icons  │ │  + Signals  │ │  │
-│  │  └─────────┘ └─────────────┘ │  │
-│  └───────────────────────────────┘  │
-└─────────────────────────────────────┘
-```
+1. Props represent Bootstrap component intent.
+2. Residual utility classes pass through with `class`.
+3. Interactive state is explicit Dioxus state.
+4. Output remains standard Bootstrap HTML.
 
-## Component Design
+## Migration Quality Bar
 
-Each component follows the same pattern:
+Migration is not complete merely because raw Bootstrap classes are gone. The
+typed component must preserve the original Bootstrap intent.
 
-1. **Props** mirror Bootstrap's HTML attributes and classes
-2. **Signals** replace `data-bs-toggle` / `data-bs-dismiss` JS behaviors
-3. **Output** is standard Bootstrap HTML with the right CSS classes
-4. **No custom CSS** — if Bootstrap's classes handle it, that's all we emit
+The migration bar is:
+
+- Convert safe static Bootstrap intent to typed props.
+- Flag dynamic or ambiguous class strings instead of guessing.
+- Reject raw Bootstrap component classes, CDN assets, and Bootstrap JavaScript
+  with `tools/check-no-raw-bootstrap.mjs`.
+- Prove visual fidelity with Playwright screenshots or explicit screenshot
+  review.
+
+This keeps the crate honest: parity gaps are fixed in the crate or converter,
+not hidden as downstream Bootstrap workarounds.

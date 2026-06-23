@@ -72,5 +72,5 @@ set in `tools/check-no-raw-bootstrap.mjs` (`FORBID_PREFIX`, `FORBID_EXACT`,
 write by hand, update the forbidden list so the gate enforces the new typed
 surface.
 
-See `docs/MIGRATION_GUIDE.md` for the full migration workflow and definition of
+See `docs/MIGRATION.md` for the full migration workflow and definition of
 done.
