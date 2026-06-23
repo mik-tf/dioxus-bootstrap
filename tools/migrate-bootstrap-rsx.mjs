@@ -235,13 +235,42 @@ function findTopLevelClassAttr(content) {
 function removeRanges(content, ranges) {
   let out = content;
   for (const range of ranges.sort((a, b) => b.start - a.start)) {
-    out = `${out.slice(0, range.start)}${out.slice(range.end)}`;
+    out = `${out.slice(0, range.start)}${range.replacement ?? ''}${out.slice(range.end)}`;
   }
   return out;
 }
 
 function removeClassAttr(content, attr) {
   return removeRanges(content, [attr]);
+}
+
+function quoteTopLevelAttr(content, name) {
+  const ranges = [];
+  let depth = 0;
+  for (let i = 0; i < content.length; i += 1) {
+    const ignoredEnd = skipIgnored(content, i);
+    if (ignoredEnd !== null) {
+      i = ignoredEnd - 1;
+      continue;
+    }
+    if (content[i] === '{' || content[i] === '(' || content[i] === '[') {
+      depth += 1;
+      continue;
+    }
+    if (content[i] === '}' || content[i] === ')' || content[i] === ']') {
+      depth = Math.max(0, depth - 1);
+      continue;
+    }
+    if (depth !== 0 || !content.startsWith(name, i) || isWord(content[i - 1]) || isWord(content[i + name.length])) {
+      continue;
+    }
+    let j = i + name.length;
+    while (/\s/.test(content[j] || '')) j += 1;
+    if (content[j] === ':' || content[j] === '=') {
+      ranges.push({ start: i, end: i + name.length, replacement: `"${name}"` });
+    }
+  }
+  return removeRanges(content, ranges);
 }
 
 function normalizeBlock(content) {
@@ -576,7 +605,9 @@ function buildRsxProp(lines, propIndent, name, content) {
 
 function buildPlainElement(sourceBody, element, mapping, content) {
   const classAttr = findTopLevelClassAttr(content);
-  const kept = normalizeBlock(removeClassAttr(content, classAttr));
+  let keptContent = removeClassAttr(content, classAttr);
+  if (mapping.component === 'Spinner') keptContent = quoteTopLevelAttr(keptContent, 'style');
+  const kept = normalizeBlock(keptContent);
   const indent = lineIndent(sourceBody, element.start);
   const propIndent = `${indent}    `;
   const props = [...mapping.props];

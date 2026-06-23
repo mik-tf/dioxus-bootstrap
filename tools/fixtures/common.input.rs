@@ -30,6 +30,7 @@ fn app() -> Element {
         }
         div {
             class: "spinner-grow spinner-grow-sm text-success",
+            style: "width:16px;height:16px;",
             "Loading"
         }
         input {
