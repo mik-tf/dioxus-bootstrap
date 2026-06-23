@@ -6,6 +6,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.5] — Tooltip, Popover, Scrollspy parity release
+
+### Added
+
+- Shared viewport-aware overlay positioning core for Tooltip and Popover:
+  requested placement, fallback placement, Bootstrap-compatible orientation
+  classes, Bootstrap-style offsets, scroll/resize updates, and cleanup on
+  close/unmount.
+- `Tooltip` parity props: `TooltipPlacement::Auto`, fallback placements,
+  `TooltipTriggers`, `TooltipDelay`, controlled `open`, overlay offset,
+  boundary padding, custom tooltip class, and `TooltipDisabledTrigger`.
+- `Popover` parity props: `PopoverPlacement::Auto`, fallback placements,
+  `PopoverTriggers`, `PopoverDelay`, controlled `open`, overlay offset,
+  boundary padding, outside-click dismiss, custom popover class, and
+  `PopoverDisabledTrigger`.
+- Scoped `Scrollspy` implementation with Bootstrap target semantics, body or
+  custom scroll roots, `root_margin`, `threshold`, `refresh_key`,
+  `smooth_scroll`, offset compatibility, active link updates, and per-instance
+  cleanup.
+- Migration converter support for safe static Tooltip and Popover
+  `data-bs-*` attributes, plus Scrollspy manual-review warnings.
+- Converter fixtures covering static overlay conversion and Scrollspy manual
+  review.
+
+### Changed
+
+- Updated showcase examples to dogfood the new typed overlay and Scrollspy
+  behavior.
+- Updated migration/design/tooling docs with the converter rule, Forge primary
+  repository guidance, release flow, and current parity behavior.
+- Removed the completed parity tracker document; new parity gaps should be
+  tracked as focused Forge issues with acceptance criteria.
+- Raw-Bootstrap gate now flags Tooltip/Popover raw overlay classes and links to
+  `docs/MIGRATION.md`.
+
+### Fixed
+
+- Popover and Tooltip viewport-edge placement now falls back instead of
+  overflowing the viewport.
+- Scrollspy no longer uses shared global active state; multiple instances and
+  custom scroll containers are scoped independently.
+
 ## [0.5.4] — NavbarNav dogfood release
 
 ### Added

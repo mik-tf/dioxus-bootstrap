@@ -10,7 +10,7 @@ mirrored to GitHub.
 - Crate: https://crates.io/crates/dioxus-bootstrap-css
 
 `development` is the release branch. Tags use the crate version with a leading
-`v`, for example `v0.5.4`.
+`v`, for example `vX.Y.Z`.
 
 ## Checklist
 
@@ -25,15 +25,15 @@ mirrored to GitHub.
 2. Move the current changelog notes from `Unreleased` to the new version.
 
    ```markdown
-   ## [Unreleased]
+## [Unreleased]
 
-   ## [0.5.4] - Short release title
+## [X.Y.Z] - Short release title
    ```
 
 3. Bump the crate version in `crates/dioxus-bootstrap/Cargo.toml`.
 
    ```toml
-   version = "0.5.4"
+version = "X.Y.Z"
    ```
 
 4. Run the release checks.
@@ -54,7 +54,7 @@ mirrored to GitHub.
 
    ```bash
    git add CHANGELOG.md crates/dioxus-bootstrap/Cargo.toml
-   git commit -m "chore: release dbcss 0.5.4"
+git commit -m "chore: release dbcss X.Y.Z"
    ```
 
 6. Push `development` to Forge primary and GitHub mirror.
@@ -67,9 +67,9 @@ mirrored to GitHub.
 7. Create and push the release tag to both remotes.
 
    ```bash
-   git tag -a v0.5.4 -m "dioxus-bootstrap-css 0.5.4"
-   git push origin v0.5.4
-   git push github v0.5.4
+git tag -a vX.Y.Z -m "dioxus-bootstrap-css X.Y.Z"
+git push origin vX.Y.Z
+git push github vX.Y.Z
    ```
 
 8. Verify the automated release flow.

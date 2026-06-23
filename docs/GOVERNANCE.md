@@ -38,7 +38,7 @@ Bootstrap workarounds.
 ## Release Policy
 
 `development` is the release branch. Release tags use the crate version with a
-leading `v`, for example `v0.5.4`.
+leading `v`, for example `vX.Y.Z`.
 
 Follow [RELEASE.md](RELEASE.md) for the release checklist. Public release notes
 should describe user-visible behavior, migration impact, documentation changes,
