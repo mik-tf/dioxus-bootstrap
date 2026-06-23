@@ -106,6 +106,8 @@ not hidden as downstream Bootstrap workarounds.
 - Use screenshot tests for visual confidence whenever component output or
   migration behavior changes.
 
+- Track active tooltip, popover, scrollspy parity work in [PARITY.md](PARITY.md).
+
 ## Quality Gates
 
 Changes should keep these checks green:
