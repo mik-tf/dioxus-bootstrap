@@ -178,6 +178,10 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 See [docs/RELEASE.md](docs/RELEASE.md).
 
+## Governance
+
+See [docs/GOVERNANCE.md](docs/GOVERNANCE.md).
+
 ## License
 
 Apache-2.0.
