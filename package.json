@@ -2,6 +2,7 @@
   "private": true,
   "scripts": {
     "lint:bootstrap": "node tools/check-no-raw-bootstrap.mjs examples",
+    "test:migrate": "node tools/test-migrate-bootstrap-rsx.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed"
   },

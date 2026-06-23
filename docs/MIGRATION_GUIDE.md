@@ -150,6 +150,84 @@ Container {
 }
 ```
 
+## Converter workflow
+
+The converter follows three rules:
+
+1. **Bootstrap parity lives in the crate.** If Bootstrap supports a component state, class, structure, size, color, wrapper, or interaction pattern, `dioxus-bootstrap-css` should expose a typed way to express it 1-to-1.
+2. **The converter maps Bootstrap intent to the crate API.** It rewrites raw Bootstrap RSX to typed components and props, preserving residual utility classes, attributes, handlers, children, and nested layout.
+3. **Every limitation feeds back upstream.** A failed conversion is classified as a crate parity gap, converter gap, or manual-review case. Do not leave downstream projects with permanent Bootstrap workarounds.
+
+Run the converter in dry-run mode first:
+
+```bash
+node tools/migrate-bootstrap-rsx.mjs path/to/app/src
+```
+
+Check mode fails if safe rewrites are available:
+
+```bash
+node tools/migrate-bootstrap-rsx.mjs --check path/to/app/src
+```
+
+Write mode applies safe conversions:
+
+```bash
+node tools/migrate-bootstrap-rsx.mjs --write path/to/app/src
+```
+
+The first supported mappings cover common static RSX cases:
+
+- `button.btn` / `a.btn` -> `Button`
+- `div.card` with `card-header` / `card-body` / `card-footer` slots -> `Card`
+- `span.badge` -> `Badge`
+- `div.alert` -> `Alert`
+- `div.spinner-*` / `span.spinner-*` -> `Spinner`
+- `input.form-control` -> `Input`
+- `select.form-select` -> `Select`
+- `textarea.form-control` -> `Textarea`
+- `table.table` -> `Table`
+
+Examples:
+
+```rust
+// Raw Bootstrap
+button {
+    class: "btn btn-sm btn-outline-secondary border-0",
+    onclick: move |_| refresh(),
+    "Refresh"
+}
+
+// Converted
+Button {
+    size: Size::Sm,
+    color: Color::Secondary,
+    outline: true,
+    class: "border-0",
+    onclick: move |_| refresh(),
+    "Refresh"
+}
+```
+
+Bare neutral buttons are explicit:
+
+```rust
+button { class: "btn btn-sm", "Cancel" }
+// becomes
+Button { plain: true, size: Size::Sm, "Cancel" }
+```
+
+Dynamic class strings are flagged for review rather than guessed:
+
+```rust
+button {
+    class: if active { "btn btn-primary" } else { "btn btn-secondary" },
+    "Save"
+}
+```
+
+If a raw Bootstrap case cannot be represented by typed props, fix the crate first, release a new version, then continue the downstream migration.
+
 ## Step 5: Visual Testing
 
 ### Setup
