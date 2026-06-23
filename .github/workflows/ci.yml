@@ -53,6 +53,9 @@ jobs:
       - name: Migration gate (no raw Bootstrap / CDN / JS in examples)
         run: node tools/check-no-raw-bootstrap.mjs examples
 
+      - name: Migration converter fixtures
+        run: node tools/test-migrate-bootstrap-rsx.mjs
+
   msrv:
     name: MSRV (1.85)
     runs-on: ubuntu-latest
