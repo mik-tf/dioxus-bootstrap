@@ -27,6 +27,7 @@ jobs:
           if [ -f "$HOME/.cargo/env" ]; then
             source "$HOME/.cargo/env"
           fi
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           rustup toolchain install stable --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
           rustup default stable
           apt-get update

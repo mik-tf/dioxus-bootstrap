@@ -26,6 +26,7 @@ jobs:
           if [ -f "$HOME/.cargo/env" ]; then
             source "$HOME/.cargo/env"
           fi
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           rustup toolchain install stable --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
           rustup default stable
           apt-get update
@@ -63,6 +64,7 @@ jobs:
           if [ -f "$HOME/.cargo/env" ]; then
             source "$HOME/.cargo/env"
           fi
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           rustup toolchain install 1.85.0 --profile minimal --target wasm32-unknown-unknown
       - name: Build on MSRV
         run: cargo +1.85.0 check --target wasm32-unknown-unknown -p dioxus-bootstrap-css
