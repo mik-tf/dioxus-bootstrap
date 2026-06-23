@@ -118,7 +118,10 @@ pub fn Button(props: ButtonProps) -> Element {
     let full_class = if props.class.is_empty() {
         format!("btn{variant_class}{size_class}{active_class}")
     } else {
-        format!("btn{variant_class}{size_class}{active_class} {}", props.class)
+        format!(
+            "btn{variant_class}{size_class}{active_class} {}",
+            props.class
+        )
     };
 
     if let Some(href) = &props.href {
