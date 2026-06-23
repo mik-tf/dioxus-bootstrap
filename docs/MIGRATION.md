@@ -108,6 +108,13 @@ Supported static mappings include:
 - `select.form-select` -> `Select`
 - `textarea.form-control` -> `Textarea`
 - `table.table` -> `Table`
+- static `data-bs-toggle="tooltip"` + `title`/`data-bs-title` -> `Tooltip`
+- static `data-bs-toggle="popover"` + `data-bs-content` -> `Popover`
+
+Scrollspy is intentionally manual review in the converter: raw Bootstrap
+`data-bs-spy="scroll"` does not name the app-owned `Signal<String>` required by
+`Scrollspy { target, root, active }`. Add the signal and typed `Scrollspy`
+marker by hand, then remove `data-bs-spy`/`data-bs-target`.
 
 Example:
 
@@ -166,6 +173,9 @@ Bootstrap JavaScript is not loaded. Replace JS attributes with Dioxus state.
 | accordion | `Accordion` / `AccordionItem` | `Signal<Option<usize>>` |
 | offcanvas | `Offcanvas { show, ... }` | `Signal<bool>` |
 | toast | `Toast { show, ... }` | `Signal<bool>` |
+| tooltip + static `title` | `Tooltip { text, placement?, trigger?, children }` | owned by component or `open` |
+| popover + static `data-bs-content` | `Popover { title?, body, placement?, trigger?, children }` | owned by component or `open` |
+| `data-bs-spy="scroll"` | `Scrollspy { target, root, active }` | `Signal<String>` |
 
 Never keep `data-bs-*`, `bootstrap.bundle.js`, or `new bootstrap.*` in a Dioxus
 WASM app.
@@ -243,7 +253,7 @@ Rules:
 4. Map component intent to typed props; do not drop color, outline, size, href,
    target, state, or slot information.
 5. Preserve residual utility classes, layout, and spacing.
-6. Flag dynamic or ambiguous class strings instead of guessing.
+6. Flag dynamic or ambiguous class strings and Bootstrap attributes instead of guessing.
 7. Run the converter, no-raw-Bootstrap gate, cargo checks, and screenshot
    comparison before calling the migration done.
 ```

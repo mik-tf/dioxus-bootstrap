@@ -38,6 +38,16 @@ assertEqual('navbar nav conversion changed flag', String(navbarNav.changed), 'tr
 assertEqual('navbar nav warnings', JSON.stringify(navbarNav.warnings), '[]');
 assertEqual('navbar nav conversion', navbarNav.source, read('navbar-nav.expected.rs'));
 
+const overlays = transformSource(read('overlays.input.rs'), 'overlays.input.rs');
+assertEqual('overlay conversion changed flag', String(overlays.changed), 'true');
+assertEqual('overlay warnings', JSON.stringify(overlays.warnings), '[]');
+assertEqual('overlay conversion', overlays.source, read('overlays.expected.rs'));
+
+const scrollspyManual = transformSource(read('scrollspy-manual.input.rs'), 'scrollspy-manual.input.rs');
+assertEqual('scrollspy manual unchanged', scrollspyManual.source, read('scrollspy-manual.input.rs'));
+assertEqual('scrollspy manual warning count', String(scrollspyManual.warnings.length), '1');
+assertEqual('scrollspy manual warning kind', scrollspyManual.warnings[0].kind, 'manual_review');
+
 const dynamic = transformSource(read('dynamic.input.rs'), 'dynamic.input.rs');
 assertEqual('dynamic unchanged', dynamic.source, read('dynamic.input.rs'));
 assertEqual('dynamic warning count', String(dynamic.warnings.length), '1');

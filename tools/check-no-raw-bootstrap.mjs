@@ -8,7 +8,7 @@
 //
 // Layout/utility classes (container, row, col-*, d-flex, m-*, p-*, text-*, form-label, ...) are allowed:
 // the guide says to use plain `div { class: "..." }` for static layout. Only component classes that have a
-// typed equivalent in this crate are forbidden, matching docs/MIGRATION_GUIDE.md Step 4.
+// typed equivalent in this crate are forbidden, matching docs/MIGRATION.md.
 //
 // Usage:
 //   node tools/check-no-raw-bootstrap.mjs [dir ...]     # default: examples
@@ -23,7 +23,7 @@ import path from 'path';
 const ROOTS = process.argv.slice(2);
 const TARGETS = ROOTS.length ? ROOTS : ['examples'];
 
-// Component classes with a typed equivalent in the crate (docs/MIGRATION_GUIDE.md Step 4).
+// Component classes with a typed equivalent in the crate (docs/MIGRATION.md).
 //
 // Two match modes, because some roots own a whole family (every `dropdown-*` is rendered by Dropdown)
 // while others have *content* sub-classes with no typed equivalent (`card-title`/`card-text` live inside a
@@ -33,7 +33,8 @@ const TARGETS = ROOTS.length ? ROOTS : ['examples'];
 // Whole family forbidden: token === base OR token starts with "<base>-".
 const FORBID_PREFIX = [
   'btn', 'dropdown', 'accordion', 'offcanvas', 'toast', 'carousel',
-  'list-group', 'breadcrumb', 'spinner-border', 'spinner-grow',
+  'list-group', 'breadcrumb', 'spinner-border', 'spinner-grow', 'tooltip', 'popover',
+  'bs-tooltip', 'bs-popover',
   'navbar-toggler', 'navbar-collapse',
 ];
 // Only these exact structural classes forbidden; their content siblings (card-title, modal-title,
@@ -44,6 +45,7 @@ const FORBID_EXACT = new Set([
   'alert', 'badge', 'table', 'collapse',
   'nav-tabs', 'nav-pills', 'navbar-nav', 'navbar-nav-scroll',
   'progress', 'progress-bar', 'pagination', 'page-item', 'page-link',
+  'popover-header', 'popover-body',
 ]);
 // Allowed even though a FORBID_PREFIX base would otherwise catch them (utilities / state, no component).
 const ALLOW_EXACT = new Set(['btn-close', 'collapsed', 'collapsing']);
@@ -90,7 +92,7 @@ function scanFile(file) {
       // strip RSX interpolation braces so `{foo}` inside a class string is ignored
       const tokens = m[1].replace(/\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean);
       const bad = tokens.filter(tokenForbidden);
-      if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" (use the typed component, see MIGRATION_GUIDE.md Step 4)`);
+        if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" (use the typed component, see docs/MIGRATION.md)`);
     }
     // conditional class attrs: check every string literal in `class: if/match { … }`
     let c;
@@ -99,7 +101,7 @@ function scanFile(file) {
       for (const lit of c[0].match(/"[^"]*"/g) || []) {
         const tokens = lit.slice(1, -1).replace(/\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean);
         const bad = tokens.filter(tokenForbidden);
-        if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" in a conditional class (use the typed component, see MIGRATION_GUIDE.md Step 4)`);
+      if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" in a conditional class (use the typed component, see docs/MIGRATION.md)`);
       }
       if (c.index === COND_CLASS_RE.lastIndex) COND_CLASS_RE.lastIndex++; // guard zero-width
     }
@@ -134,5 +136,5 @@ for (const v of violations) {
   console.error(`      ${v.msg}`);
   console.error(`      > ${v.src}`);
 }
-console.error(`\nFix: replace with typed components (docs/MIGRATION_GUIDE.md Step 4), drop CDN links (use BootstrapHead), and drive interactive state with Dioxus signals.`);
+console.error(`\nFix: replace with typed components (docs/MIGRATION.md), drop CDN links (use BootstrapHead), and drive interactive state with Dioxus signals.`);
 process.exit(1);

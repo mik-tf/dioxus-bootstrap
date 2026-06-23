@@ -1,10 +1,9 @@
 # Bootstrap Parity Matrix
 
-This document tracks the remaining Bootstrap 5.3 parity work for Tooltip,
-Popover, and Scrollspy.
+This document records how `dioxus-bootstrap-css` (`dbcss`) maps Bootstrap 5.3
+behavior into typed Dioxus APIs for Tooltip, Popover, and Scrollspy.
 
-Parent tracker:
-https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css/issues/1
+Parent tracker: https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css/issues/1
 
 Official Bootstrap references:
 
@@ -17,178 +16,143 @@ Official Bootstrap references:
 If Bootstrap does it, dbcss should expose a typed Dioxus way to express it. If
 Bootstrap does not do it, dbcss should not invent it.
 
-For JavaScript plugin behavior, dbcss should expose Dioxus state, props, and
-callbacks instead of requiring `bootstrap.bundle.js`.
+For JavaScript plugin behavior, dbcss uses Dioxus state, props, and callbacks
+instead of requiring `bootstrap.bundle.js`.
 
-## Tracking Split
+## Tracker Split
 
-- #8 Overlay: add shared viewport-aware positioning core
-- #9 Tooltip: implement Bootstrap trigger and positioning parity
-- #10 Popover: implement Bootstrap trigger, dismiss, and positioning parity
-- #11 Scrollspy: replace global eval with scoped observer parity
-- #12 Migration/docs: finish overlay and scrollspy parity cleanup
+- #8 Overlay: shared viewport-aware positioning core
+- #9 Tooltip: Bootstrap trigger and positioning parity
+- #10 Popover: Bootstrap trigger, dismiss, and positioning parity
+- #11 Scrollspy: scoped observer parity
+- #12 Migration/docs: converter, docs, and migration-gate cleanup
 
-Issue #7 is this parity spec.
+## Shared Overlay
 
-## Shared Overlay API
+Tooltip and Popover share crate-owned overlay positioning. The shared behavior:
 
-Tooltip and Popover should share the same positioning foundation.
+- measures trigger and overlay rectangles while visible
+- chooses the requested placement when it fits
+- falls back when the requested placement would overflow
+- exposes Bootstrap-compatible placement classes
+- supports Bootstrap-style offset defaults through typed `OverlayOffset`
+- avoids Bootstrap JavaScript and Popper.js
 
-Proposed shared concepts:
+Bootstrap options that accept raw HTML strings (`template`, `sanitize`,
+`allowList`, `sanitizeFn`) are not copied as unsafe string APIs. dbcss should
+prefer typed Dioxus elements or plain text.
 
-- `OverlayPlacement`: `Auto`, `Top`, `Bottom`, `Start`, `End`
-- `OverlayTrigger`: `Hover`, `Focus`, `Click`, `Manual`
-- `OverlayDelay`: `show_ms`, `hide_ms`
-- `OverlayOffset`: `skidding`, `distance`
-- `OverlayBoundary`: viewport/body/selector-based boundary
-- `OverlayContainer`: inline/body/selector-based render container
+## Tooltip
 
-The exact names may change in #8, but the behavior should remain stable:
-
-- measure trigger and overlay rectangles while visible
-- choose the requested placement when it fits
-- choose fallback placement when the requested placement would overflow
-- keep the effective placement available to render Bootstrap orientation classes
-- update positioning on scroll, resize, and relevant layout changes while open
-- clean up listeners/observers when the overlay closes or unmounts
-
-## Shared Overlay Out Of Scope
-
-Bootstrap exposes several JavaScript plugin options that should not become raw
-dbcss APIs:
-
-- `popperConfig`: dbcss does not embed Popper or expose Popper config objects.
-- `template`: dbcss owns the Bootstrap-compatible markup it renders.
-- `selector`: delegated JavaScript plugin setup is not how Dioxus components are
-  instantiated.
-- `allowList`, `sanitize`, `sanitizeFn`: dbcss should prefer typed Dioxus
-  `Element` or plain text APIs instead of accepting unsafe HTML strings.
-
-Bootstrap plugin methods and events should map to Dioxus state and callbacks.
-For example, manual show/hide/toggle should be represented through explicit
-state/control props rather than runtime plugin instance methods.
-
-## Tooltip Matrix
-
-Current dbcss:
+Current dbcss API:
 
 - `TooltipPlacement`: `Auto`, `Top`, `Bottom`, `Start`, `End`
-- Props: `text`, `placement`, `fallback_placements`, `trigger`,
-  `delay`, `open`, `offset`, `boundary_padding`, `class`, `children`
-- Behavior: typed hover/focus/click/manual control, viewport-aware fallback
-  placement through the shared overlay core, Bootstrap role/classes, stable
-  `aria-describedby`, and `TooltipDisabledTrigger` wrapper support
+- `TooltipTriggers`: `HOVER_FOCUS`, `HOVER`, `FOCUS`, `CLICK`, `MANUAL`
+- `TooltipDelay { show_ms, hide_ms }`
+- Props: `text`, `placement`, `fallback_placements`, `trigger`, `delay`,
+  `open`, `offset`, `boundary_padding`, `class`, `children`
+- Helper: `TooltipDisabledTrigger`
 
-| Bootstrap behavior | dbcss target |
-|---|---|
-| default placement `top` | Keep default `Top`. |
-| placement `auto`, `top`, `bottom`, `left`, `right` | Add `Auto`; map Bootstrap left/right to `Start`/`End` with RTL-aware class output where practical. |
-| fallback placements | Add typed fallback placement list. |
-| boundary / prevent overflow | Use shared overlay boundary logic. |
-| container, especially body | Add typed container option without requiring Bootstrap JS. |
-| offset default `[0, 6]` | Add typed offset with Bootstrap-compatible default. |
-| trigger default `hover focus` | Add trigger set with default hover+focus. |
-| click and manual triggers | Add typed trigger/control API. |
-| delay show/hide | Add typed delay struct or millisecond pair. |
-| custom class | Keep `class`, ensure it augments the tooltip element without losing Bootstrap classes. |
-| zero-length title hidden | Empty `text` or empty rendered content should not show a tooltip. |
-| HTML tooltip content | Prefer typed Dioxus content over an `html: bool` string API. Keep `text` as the safe simple path. |
-| disabled elements need wrapper | Document wrapper guidance or add a small trigger wrapper helper. |
-| accessibility | Preserve `role="tooltip"`, add stable `aria-describedby`, and support keyboard focus behavior. |
-| plugin events/methods | Map to Dioxus state and optional callbacks after trigger/control API exists. |
+Bootstrap mapping:
 
-Issue #9 owns Tooltip behavior. Remaining follow-up is any future callback
-surface for Bootstrap plugin event equivalents.
+| Bootstrap behavior | dbcss expression |
+| --- | --- |
+| default placement `top` | `placement: TooltipPlacement::Top` default |
+| `auto`, `top`, `bottom`, `left`, `right` | `Auto`, `Top`, `Bottom`, `Start`, `End` |
+| fallback placements | `fallback_placements` |
+| prevent overflow | shared viewport-aware overlay core |
+| offset default `[0, 6]` | `OverlayOffset::TOOLTIP` default |
+| trigger default `hover focus` | `TooltipTriggers::HOVER_FOCUS` default |
+| click, focus, hover, manual | `TooltipTriggers` or controlled `open` |
+| show/hide delay | `TooltipDelay` |
+| custom class | `class` on rendered tooltip element |
+| disabled controls | wrap with `TooltipDisabledTrigger` |
+| accessibility | Bootstrap role/classes and stable `aria-describedby` |
 
-## Popover Matrix
+Migration converter:
 
-Current dbcss:
+- Converts static `data-bs-toggle="tooltip"` with static `title` or
+  `data-bs-title`.
+- Preserves static placement, trigger, and custom class when supported.
+- Flags dynamic or unsupported Bootstrap attributes for manual review.
 
-- `PopoverPlacement`: `Auto`, `Top`, `Bottom`, `Start`, `End`; default `End`
-  matches Bootstrap's right-side default.
+## Popover
+
+Current dbcss API:
+
+- `PopoverPlacement`: `Auto`, `Top`, `Bottom`, `Start`, `End`
+- `PopoverTriggers`: `CLICK`, `HOVER_FOCUS`, `HOVER`, `FOCUS`, `MANUAL`
+- `PopoverDelay { show_ms, hide_ms }`
 - Props: `title`, `body`, `placement`, `fallback_placements`, `trigger`,
-  `delay`, `open`, `offset`, `boundary_padding`,
-  `dismiss_on_outside_click`, `class`, `children`.
-- Behavior: typed click/hover/focus/manual control, outside and focus dismiss,
-  viewport-aware fallback placement through the shared overlay core, Bootstrap
-  role/classes, stable `aria-describedby`, empty title/body suppression, and
-  `PopoverDisabledTrigger` wrapper support.
+  `delay`, `open`, `offset`, `boundary_padding`, `dismiss_on_outside_click`,
+  `class`, `children`
+- Helper: `PopoverDisabledTrigger`
 
-| Bootstrap behavior | dbcss target |
-|---|---|
-| default placement `right` | Align default to `End` or document release migration if changed from current `Top`. |
-| placement `auto`, `top`, `bottom`, `left`, `right` | Add `Auto`; map left/right to `Start`/`End`. |
-| fallback placements | Add typed fallback placement list. |
-| boundary / prevent overflow | Use shared overlay boundary logic. |
-| container, especially body | Add typed container option without requiring Bootstrap JS. |
-| offset default `[0, 8]` | Add typed offset with Bootstrap-compatible default. |
-| trigger default `click` | Keep click default. |
-| hover, focus, manual triggers | Add typed trigger/control API. |
-| focus dismiss pattern | Support focus-dismiss behavior and document trigger requirements. |
-| delay show/hide | Add typed delay struct or millisecond pair. |
-| custom class | Keep `class`, ensure it augments the popover element without losing Bootstrap classes. |
-| title/content empty handling | Preserve Bootstrap-compatible rendering of absent title/body sections. |
-| HTML content | Already typed through `body: Element`; do not add unsafe HTML string API. |
-| disabled elements need wrapper | Document wrapper guidance or add a small trigger wrapper helper. |
-| accessibility | Preserve `role="tooltip"`, add stable `aria-describedby`, and document focus-order limits. |
-| plugin events/methods | Map to Dioxus state and optional callbacks after trigger/control API exists. |
+Bootstrap mapping:
 
-Issue #10 owns Popover behavior after #8 lands. Remaining follow-up is any
-future callback/plugin-event equivalents and shared portal-style container
-support with Tooltip.
+| Bootstrap behavior | dbcss expression |
+| --- | --- |
+| default placement `right` | `placement: PopoverPlacement::End` default |
+| `auto`, `top`, `bottom`, `left`, `right` | `Auto`, `Top`, `Bottom`, `Start`, `End` |
+| fallback placements | `fallback_placements` |
+| prevent overflow | shared viewport-aware overlay core |
+| offset default `[0, 8]` | `OverlayOffset::POPOVER` default |
+| trigger default `click` | `PopoverTriggers::CLICK` default |
+| hover, focus, manual | `PopoverTriggers` or controlled `open` |
+| outside click dismiss | `dismiss_on_outside_click` |
+| show/hide delay | `PopoverDelay` |
+| custom class | `class` on rendered popover element |
+| typed rich content | `body: Element` |
+| disabled controls | wrap with `PopoverDisabledTrigger` |
+| accessibility | Bootstrap role/classes and stable `aria-describedby` |
 
-## Scrollspy Matrix
+Migration converter:
 
-Current dbcss:
+- Converts static `data-bs-toggle="popover"` with static `data-bs-content`.
+- Preserves static title, placement, trigger, and custom class when supported.
+- Flags dynamic, raw-HTML, sanitize, template, container, boundary, offset, or
+  fallback-placement attributes for manual review instead of guessing.
+
+## Scrollspy
+
+Current dbcss API:
 
 - Props: `target`, `root`, `active`, `offset`, `root_margin`, `threshold`,
-  `refresh_key`, `smooth_scroll`.
-- Behavior: scoped IntersectionObserver/listener state per Scrollspy instance,
-  Bootstrap `target` semantics for nav/list/simple-link containers, body or
-  custom scroll roots, non-visible section filtering, deterministic active
-  section selection, active link class updates, signal updates, MutationObserver
-  refresh, and optional smooth scroll.
+  `refresh_key`, `smooth_scroll`
+- Defaults: `target: "body"`, `root: "body"`,
+  `root_margin: "0px 0px -25%"`, `threshold: [0.1, 0.5, 1.0]`
+- Behavior: scoped per-instance observer/listener state, body or custom scroll
+  roots, Bootstrap target semantics for nav/list/simple anchor containers,
+  non-visible section filtering, active link class updates, signal updates,
+  dynamic refresh, and optional smooth scroll
 
-Bootstrap 5.3 uses an IntersectionObserver-style model with `rootMargin`,
-`threshold`, `target`, optional smooth scrolling, non-visible element handling,
-and refresh.
+Bootstrap mapping:
 
-| Bootstrap behavior | dbcss target |
-|---|---|
-| `target` points to nav/list/simple-anchor container | Add or correct typed `target` semantics to mean Bootstrap's target selector. |
-| element being spied on is body or custom scroll container | Add explicit scroll container/root prop. |
-| `rootMargin` default `0px 0px -25%` | Add `root_margin` prop. |
-| `threshold` default `[0.1, 0.5, 1]` | Add typed threshold list. |
-| deprecated `offset` compatibility | Keep compatibility if practical by mapping offset to root-margin semantics. |
-| smooth scroll | Add `smooth_scroll` when dbcss can own click handling safely. |
-| non-visible targets ignored | Observer logic must ignore invisible sections. |
-| dynamic sections require refresh | Add refresh mechanism, likely a `refresh_key` prop or MutationObserver-backed refresh. |
-| multiple instances | Remove shared global state; each instance must be scoped. |
-| active nav/list/simple anchors | Expose active id through Dioxus state and provide enough info for apps/components to apply `.active`. |
-| activation event | Map to signal update and optional callback. |
+| Bootstrap behavior | dbcss expression |
+| --- | --- |
+| `data-bs-target` points nav/list/simple links | `target: "#nav"` |
+| body scroll | `root: "body"` default |
+| custom scroll container | `root: "#scroll-area"` |
+| `rootMargin` | `root_margin` |
+| `threshold` | `threshold` |
+| deprecated `offset` compatibility | `offset` |
+| dynamic sections | `refresh_key` plus MutationObserver refresh |
+| active section id | app-owned `Signal<String>` via `active` |
 
-Issue #11 owns Scrollspy behavior. `target` now follows Bootstrap
-`data-bs-target` semantics. Use `root` for the body or custom scroll container.
-`offset` remains as the compatibility path for existing fixed-header callers;
-new code should prefer `root_margin` and `threshold` for observer behavior.
+Migration converter:
 
-## Converter And Docs
+- Flags `data-bs-spy="scroll"` for manual review.
+- The converter does not invent the required `Signal<String>`. Add the signal
+  and `Scrollspy { target, root, active }` marker by hand, then remove raw
+  `data-bs-spy` and `data-bs-target` attributes.
 
-Issue #12 owns follow-through after behavior lands:
+## Definition Of Done
 
-- update component docs and examples
-- remove completed caveats from `docs/DESIGN.md`
-- map safe static tooltip/popover/scrollspy Bootstrap attributes in the
-  converter
-- flag dynamic or ambiguous data attributes for manual review
-- keep the raw-Bootstrap gate aligned with the typed surface
+Tracker work is done when:
 
-## Done Criteria For Tracker
-
-Issue #1 can close only after:
-
-- #8 through #12 are complete
-- local and Forge CI checks are green
-- tooltip/popover viewport-edge behavior is covered by e2e tests
-- scrollspy multi-instance and custom-container behavior is covered by tests
-- caveats in `docs/DESIGN.md` reflect reality after implementation
+- implementation issues are closed
+- local checks and Forge CI are green
+- tooltip/popover viewport-edge behavior is covered by E2E tests
+- scrollspy body/custom-root/multi-instance behavior is covered by tests
+- converter fixtures cover safe static mappings and manual-review cases
+- `docs/DESIGN.md` describes current implementation behavior

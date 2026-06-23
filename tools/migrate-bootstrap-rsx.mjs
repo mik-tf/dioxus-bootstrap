@@ -244,6 +244,121 @@ function removeClassAttr(content, attr) {
   return removeRanges(content, [attr]);
 }
 
+function findTopLevelAttr(content, names) {
+  const wanted = new Set(names);
+  let depth = 0;
+  for (let i = 0; i < content.length; i += 1) {
+    if (depth === 0 && content[i] === '"') {
+      const nameEnd = skipString(content, i);
+      const name = content.slice(i + 1, nameEnd - 1);
+      if (!wanted.has(name)) {
+        i = nameEnd - 1;
+        continue;
+      }
+      let j = nameEnd;
+      while (/\s/.test(content[j] || '')) j += 1;
+      if (content[j] !== ':' && content[j] !== '=') {
+        i = nameEnd - 1;
+        continue;
+      }
+      j += 1;
+      while (/\s/.test(content[j] || '')) j += 1;
+      if (content[j] !== '"') {
+        const end = readAttrEnd(content, j);
+        return { name, dynamic: true, start: i, end, expression: content.slice(j, end) };
+      }
+      const valueStart = j + 1;
+      const valueEnd = skipString(content, j) - 1;
+      let end = valueEnd + 1;
+      while (/[ \t]/.test(content[end] || '')) end += 1;
+      if (content[end] === ',') end += 1;
+      return { name, dynamic: false, start: i, end, value: content.slice(valueStart, valueEnd) };
+    }
+
+    const ignoredEnd = skipIgnored(content, i);
+    if (ignoredEnd !== null) {
+      i = ignoredEnd - 1;
+      continue;
+    }
+    if (content[i] === '{' || content[i] === '(' || content[i] === '[') {
+      depth += 1;
+      continue;
+    }
+    if (content[i] === '}' || content[i] === ')' || content[i] === ']') {
+      depth = Math.max(0, depth - 1);
+      continue;
+    }
+    if (depth !== 0 || isWord(content[i - 1])) continue;
+    const match = /^(?:r#)?[A-Za-z_][A-Za-z0-9_-]*/.exec(content.slice(i));
+    if (!match || !wanted.has(match[0])) continue;
+    let j = i + match[0].length;
+    while (/\s/.test(content[j] || '')) j += 1;
+    if (content[j] !== ':' && content[j] !== '=') continue;
+    j += 1;
+    while (/\s/.test(content[j] || '')) j += 1;
+    if (content[j] !== '"') {
+      const end = readAttrEnd(content, j);
+      return { name: match[0], dynamic: true, start: i, end, expression: content.slice(j, end) };
+    }
+    const valueStart = j + 1;
+    const valueEnd = skipString(content, j) - 1;
+    let end = valueEnd + 1;
+    while (/[ \t]/.test(content[end] || '')) end += 1;
+    if (content[end] === ',') end += 1;
+    return { name: match[0], dynamic: false, start: i, end, value: content.slice(valueStart, valueEnd) };
+  }
+  return null;
+}
+
+function findStaticAttr(content, names) {
+  const attr = findTopLevelAttr(content, names);
+  return attr && !attr.dynamic ? attr : null;
+}
+
+function removeTopLevelAttrs(content, attrs) {
+  return removeRanges(content, attrs.filter(Boolean));
+}
+
+function rustString(value) {
+  return JSON.stringify(value);
+}
+
+function mapOverlayPlacement(value, enumName) {
+  const normalized = value.trim().toLowerCase();
+  const variants = new Map([
+    ['auto', 'Auto'],
+    ['top', 'Top'],
+    ['bottom', 'Bottom'],
+    ['left', 'Start'],
+    ['start', 'Start'],
+    ['right', 'End'],
+    ['end', 'End'],
+  ]);
+  const variant = variants.get(normalized);
+  return variant ? `${enumName}::${variant}` : null;
+}
+
+function mapOverlayTrigger(value, typeName) {
+  const tokens = new Set(value.trim().toLowerCase().split(/\s+/).filter(Boolean));
+  const hover = tokens.has('hover');
+  const focus = tokens.has('focus');
+  const click = tokens.has('click');
+  const manual = tokens.has('manual');
+  if (manual && tokens.size === 1) return `${typeName}::MANUAL`;
+  if (hover && focus && !click && tokens.size === 2) return `${typeName}::HOVER_FOCUS`;
+  if (hover && !focus && !click && tokens.size === 1) return `${typeName}::HOVER`;
+  if (!hover && focus && !click && tokens.size === 1) return `${typeName}::FOCUS`;
+  if (!hover && !focus && click && tokens.size === 1) return `${typeName}::CLICK`;
+  if (!manual && (hover || focus || click) && tokens.size === Number(hover) + Number(focus) + Number(click)) {
+    return `${typeName} { hover: ${hover}, focus: ${focus}, click: ${click} }`;
+  }
+  return null;
+}
+
+function trueString(value) {
+  return value.trim().toLowerCase() === 'true';
+}
+
 function quoteTopLevelAttr(content, name) {
   const ranges = [];
   let depth = 0;
@@ -533,6 +648,177 @@ function mapCard(tag, tokens) {
   return { component: 'Card', props: [], residual: residual(tokens, consumed), card: true };
 }
 
+function unsupportedOverlayAttr(content, names, component) {
+  const attr = findTopLevelAttr(content, names);
+  if (!attr) return null;
+  const attrName = attr.name;
+  return `${component} uses ${attrName}; converter cannot safely map that Bootstrap option yet`;
+}
+
+function staticOverlayAttr(content, names, component) {
+  const attr = findTopLevelAttr(content, names);
+  if (!attr) return { attr: null, warning: null };
+  if (attr.dynamic) {
+    return {
+      attr,
+      warning: `${component} has dynamic ${attr.name}; converter cannot safely map Bootstrap intent`,
+    };
+  }
+  return { attr, warning: null };
+}
+
+function mapTooltipDataElement(tag, content, toggleAttr) {
+  const title = staticOverlayAttr(content, ['data-bs-title', 'title'], 'tooltip');
+  if (title.warning) return { warning: title.warning };
+  if (!title.attr) {
+    return { warning: 'tooltip has no static title/data-bs-title; converter cannot safely map text' };
+  }
+
+  const removeAttrs = [toggleAttr, title.attr];
+  for (const names of [
+    ['data-bs-delay'],
+    ['data-bs-html'],
+    ['data-bs-offset'],
+    ['data-bs-boundary'],
+    ['data-bs-container'],
+    ['data-bs-template'],
+    ['data-bs-fallback-placements'],
+  ]) {
+    const unsupported = unsupportedOverlayAttr(content, names, 'tooltip');
+    if (unsupported) {
+      const attr = findStaticAttr(content, names);
+      if (attr?.name === 'data-bs-html' && !trueString(attr.value)) {
+        removeAttrs.push(attr);
+        continue;
+      }
+      return { warning: unsupported };
+    }
+  }
+
+  const props = [`text: ${rustString(title.attr.value)}`];
+
+  const placement = staticOverlayAttr(content, ['data-bs-placement'], 'tooltip');
+  if (placement.warning) return { warning: placement.warning };
+  if (placement.attr) {
+    const mapped = mapOverlayPlacement(placement.attr.value, 'TooltipPlacement');
+    if (!mapped) return { warning: `tooltip has unsupported data-bs-placement "${placement.attr.value}"` };
+    props.push(`placement: ${mapped}`);
+    removeAttrs.push(placement.attr);
+  }
+
+  const trigger = staticOverlayAttr(content, ['data-bs-trigger'], 'tooltip');
+  if (trigger.warning) return { warning: trigger.warning };
+  if (trigger.attr) {
+    const mapped = mapOverlayTrigger(trigger.attr.value, 'TooltipTriggers');
+    if (!mapped) return { warning: `tooltip has unsupported data-bs-trigger "${trigger.attr.value}"` };
+    props.push(`trigger: ${mapped}`);
+    removeAttrs.push(trigger.attr);
+  }
+
+  const customClass = staticOverlayAttr(content, ['data-bs-custom-class'], 'tooltip');
+  if (customClass.warning) return { warning: customClass.warning };
+  if (customClass.attr) {
+    props.push(`class: ${rustString(customClass.attr.value)}`);
+    removeAttrs.push(customClass.attr);
+  }
+
+  return { component: 'Tooltip', props, residual: [], removeAttrs, wrap: true };
+}
+
+function mapPopoverDataElement(tag, content, toggleAttr) {
+  const body = staticOverlayAttr(content, ['data-bs-content'], 'popover');
+  if (body.warning) return { warning: body.warning };
+  if (!body.attr) {
+    return { warning: 'popover has no static data-bs-content; converter cannot safely map body' };
+  }
+
+  const removeAttrs = [toggleAttr, body.attr];
+  for (const names of [
+    ['data-bs-delay'],
+    ['data-bs-html'],
+    ['data-bs-offset'],
+    ['data-bs-boundary'],
+    ['data-bs-container'],
+    ['data-bs-template'],
+    ['data-bs-fallback-placements'],
+    ['data-bs-sanitize'],
+    ['data-bs-allow-list'],
+    ['data-bs-sanitize-fn'],
+  ]) {
+    const unsupported = unsupportedOverlayAttr(content, names, 'popover');
+    if (unsupported) {
+      const attr = findStaticAttr(content, names);
+      if ((attr?.name === 'data-bs-html' || attr?.name === 'data-bs-sanitize') && !trueString(attr.value)) {
+        removeAttrs.push(attr);
+        continue;
+      }
+      return { warning: unsupported };
+    }
+  }
+
+  const props = [`body: rsx! { ${rustString(body.attr.value)} }`];
+
+  const title = staticOverlayAttr(content, ['data-bs-title', 'title'], 'popover');
+  if (title.warning) return { warning: title.warning };
+  if (title.attr) {
+    props.unshift(`title: ${rustString(title.attr.value)}`);
+    removeAttrs.push(title.attr);
+  }
+
+  const placement = staticOverlayAttr(content, ['data-bs-placement'], 'popover');
+  if (placement.warning) return { warning: placement.warning };
+  if (placement.attr) {
+    const mapped = mapOverlayPlacement(placement.attr.value, 'PopoverPlacement');
+    if (!mapped) return { warning: `popover has unsupported data-bs-placement "${placement.attr.value}"` };
+    props.push(`placement: ${mapped}`);
+    removeAttrs.push(placement.attr);
+  }
+
+  const trigger = staticOverlayAttr(content, ['data-bs-trigger'], 'popover');
+  if (trigger.warning) return { warning: trigger.warning };
+  if (trigger.attr) {
+    const mapped = mapOverlayTrigger(trigger.attr.value, 'PopoverTriggers');
+    if (!mapped) return { warning: `popover has unsupported data-bs-trigger "${trigger.attr.value}"` };
+    props.push(`trigger: ${mapped}`);
+    removeAttrs.push(trigger.attr);
+  }
+
+  const customClass = staticOverlayAttr(content, ['data-bs-custom-class'], 'popover');
+  if (customClass.warning) return { warning: customClass.warning };
+  if (customClass.attr) {
+    props.push(`class: ${rustString(customClass.attr.value)}`);
+    removeAttrs.push(customClass.attr);
+  }
+
+  return { component: 'Popover', props, residual: [], removeAttrs, wrap: true };
+}
+
+function mapBootstrapDataElement(tag, content) {
+  const spy = findTopLevelAttr(content, ['data-bs-spy']);
+  if (spy) {
+    if (spy.dynamic) {
+      return { warning: `${tag} has dynamic data-bs-spy; converter cannot safely map Scrollspy intent` };
+    }
+    if (spy.value.trim().toLowerCase() === 'scroll') {
+      return {
+        warning:
+          'scrollspy requires manual review: create a Signal<String>, add Scrollspy { target, root, active }, and remove data-bs-spy/data-bs-target attributes',
+      };
+    }
+  }
+
+  const toggle = findTopLevelAttr(content, ['data-bs-toggle']);
+  if (!toggle) return null;
+  if (toggle.dynamic) {
+    return { warning: `${tag} has dynamic data-bs-toggle; converter cannot safely map Bootstrap intent` };
+  }
+
+  const value = toggle.value.trim().toLowerCase();
+  if (value === 'tooltip') return mapTooltipDataElement(tag, content, toggle);
+  if (value === 'popover') return mapPopoverDataElement(tag, content, toggle);
+  return null;
+}
+
 function mapElement(tag, classValue) {
   const tokens = tokenSet(classValue);
   return (
@@ -560,10 +846,18 @@ function classifyUnmapped(tag, classValue) {
 
 function importsForMapping(mapping) {
   const imports = new Set([mapping.component]);
+  for (const name of mapping.imports || []) imports.add(name);
   for (const prop of mapping.props) {
     if (prop.includes('Color::')) imports.add('Color');
     if (prop.includes('Size::')) imports.add('Size');
     if (prop.includes('SpinnerStyle::')) imports.add('SpinnerStyle');
+    if (prop.includes('TooltipPlacement::')) imports.add('TooltipPlacement');
+    if (prop.includes('TooltipTriggers')) imports.add('TooltipTriggers');
+    if (prop.includes('PopoverPlacement::')) imports.add('PopoverPlacement');
+    if (prop.includes('PopoverTriggers')) imports.add('PopoverTriggers');
+  }
+  if (mapping.childMapping) {
+    for (const name of importsForMapping(mapping.childMapping)) imports.add(name);
   }
   return imports;
 }
@@ -630,6 +924,38 @@ function buildPlainElement(sourceBody, element, mapping, content) {
   const lines = [`${mapping.component} {`];
   for (const prop of props) lines.push(`${propIndent}${prop},`);
   pushLines(lines, propIndent, kept);
+  lines.push(`${indent}}`);
+  return lines.join('\n');
+}
+
+function buildWrappedElement(sourceBody, element, mapping, content, file, lineBase, warnings) {
+  let childContent = removeTopLevelAttrs(content, mapping.removeAttrs || []);
+  const classAttr = findTopLevelClassAttr(childContent);
+  let child = null;
+
+  if (classAttr?.dynamic && dynamicClassHasComponentToken(classAttr.expression)) {
+    const loc = lineCol(sourceBody, element.start);
+    warnings.push({
+      kind: 'manual_review',
+      file,
+      line: lineBase + loc.line - 1,
+      message: `${element.tag} has dynamic Bootstrap component class; converter cannot safely map Bootstrap intent`,
+    });
+  } else if (classAttr) {
+    const childMapping = mapElement(element.tag, classAttr.value);
+    if (childMapping && !childMapping.card) {
+      mapping.childMapping = childMapping;
+      child = buildPlainElement(sourceBody, element, childMapping, childContent);
+    }
+  }
+
+  if (!child) child = rebuildWithContent(sourceBody, element, childContent);
+
+  const indent = lineIndent(sourceBody, element.start);
+  const propIndent = `${indent}    `;
+  const lines = [`${mapping.component} {`];
+  for (const prop of mapping.props) lines.push(`${propIndent}${prop},`);
+  pushLines(lines, propIndent, normalizeBlock(child));
   lines.push(`${indent}}`);
   return lines.join('\n');
 }
@@ -724,32 +1050,48 @@ function transformRsxBody(body, file, lineBase, warnings, imports) {
     let rewritten = null;
 
     if (RAW_TAGS.has(element.tag)) {
-      const classAttr = findTopLevelClassAttr(transformedContent);
-      if (classAttr?.dynamic) {
-        if (dynamicClassHasComponentToken(classAttr.expression)) {
-          const loc = lineCol(out, element.start);
-          warnings.push({
-            kind: 'manual_review',
-            file,
-            line: lineBase + loc.line - 1,
-            message: `${element.tag} has dynamic Bootstrap component class; converter cannot safely map Bootstrap intent`,
-          });
-        }
-      } else if (classAttr) {
-        const mapping = mapElement(element.tag, classAttr.value);
-        if (mapping?.card) {
-          rewritten = buildCardElement(out, element, mapping, transformedContent, file, lineBase, warnings);
-          if (rewritten) for (const name of importsForMapping(mapping)) imports.add(name);
-        } else if (mapping) {
-          rewritten = buildPlainElement(out, element, mapping, transformedContent);
-          for (const name of importsForMapping(mapping)) imports.add(name);
-        } else {
-          const message = classifyUnmapped(element.tag, classAttr.value);
-          if (message) {
+      const dataMapping = mapBootstrapDataElement(element.tag, transformedContent);
+      if (dataMapping?.warning) {
+        const loc = lineCol(out, element.start);
+        warnings.push({
+          kind: 'manual_review',
+          file,
+          line: lineBase + loc.line - 1,
+          message: dataMapping.warning,
+        });
+      } else if (dataMapping?.wrap) {
+        rewritten = buildWrappedElement(out, element, dataMapping, transformedContent, file, lineBase, warnings);
+        for (const name of importsForMapping(dataMapping)) imports.add(name);
+      }
+
+      if (!rewritten) {
+        const classAttr = findTopLevelClassAttr(transformedContent);
+        if (classAttr?.dynamic) {
+          if (dynamicClassHasComponentToken(classAttr.expression)) {
             const loc = lineCol(out, element.start);
-            warnings.push({ kind: 'manual_review', file, line: lineBase + loc.line - 1, message });
+            warnings.push({
+              kind: 'manual_review',
+              file,
+              line: lineBase + loc.line - 1,
+              message: `${element.tag} has dynamic Bootstrap component class; converter cannot safely map Bootstrap intent`,
+            });
           }
-        }
+        } else if (classAttr) {
+          const mapping = mapElement(element.tag, classAttr.value);
+          if (mapping?.card) {
+            rewritten = buildCardElement(out, element, mapping, transformedContent, file, lineBase, warnings);
+            if (rewritten) for (const name of importsForMapping(mapping)) imports.add(name);
+          } else if (mapping) {
+            rewritten = buildPlainElement(out, element, mapping, transformedContent);
+            for (const name of importsForMapping(mapping)) imports.add(name);
+          } else {
+            const message = classifyUnmapped(element.tag, classAttr.value);
+            if (message) {
+              const loc = lineCol(out, element.start);
+              warnings.push({ kind: 'manual_review', file, line: lineBase + loc.line - 1, message });
+            }
+          }
+      }
       }
     }
 
