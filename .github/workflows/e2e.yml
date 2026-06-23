@@ -30,7 +30,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             target
-          key: ${{ runner.os }}-cargo-e2e-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-e2e-${{ hashFiles('**/Cargo.toml', 'tools/install-dioxus-cli.sh') }}
           restore-keys: ${{ runner.os }}-cargo-e2e-
 
       - name: Install Dioxus CLI

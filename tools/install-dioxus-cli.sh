@@ -2,33 +2,29 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-lockfile="$repo_root/Cargo.lock"
 
 dioxus_version="$(
-  awk '
-    $0 == "[[package]]" {
-      in_package = 1
-      name = ""
-      version = ""
-      next
-    }
-    in_package && $1 == "name" && $3 == "\"dioxus\"" {
-      name = "dioxus"
-      next
-    }
-    in_package && $1 == "version" {
-      gsub(/"/, "", $3)
-      version = $3
-    }
-    in_package && name == "dioxus" && version != "" {
-      print version
-      exit
-    }
-  ' "$lockfile"
+  cargo metadata --format-version 1 --manifest-path "$repo_root/Cargo.toml" |
+    python3 -c '
+import json
+import sys
+
+metadata = json.load(sys.stdin)
+versions = sorted({
+    package["version"]
+    for package in metadata["packages"]
+    if package["name"] == "dioxus"
+})
+
+if len(versions) != 1:
+    raise SystemExit(f"Expected exactly one resolved dioxus version, found: {versions}")
+
+print(versions[0])
+'
 )"
 
 if [ -z "$dioxus_version" ]; then
-  echo "Could not find resolved dioxus version in $lockfile" >&2
+  echo "Could not find resolved dioxus version from cargo metadata" >&2
   exit 1
 fi
 

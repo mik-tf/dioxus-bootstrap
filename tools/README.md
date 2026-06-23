@@ -66,9 +66,9 @@ node tools/migrate-bootstrap-rsx.mjs --write path/to/app/src
 
 ## install-dioxus-cli.sh - Dioxus CLI pin
 
-Installs `dioxus-cli` version matching resolved `dioxus` package in
-`Cargo.lock`. Run before `dx build`, `dx serve`, or Playwright checks when
-lockfile changes.
+Installs `dioxus-cli` version matching resolved `dioxus` package from Cargo
+metadata. Run before `dx build`, `dx serve`, or Playwright checks when Dioxus
+dependencies change.
 
 ```bash
 tools/install-dioxus-cli.sh
