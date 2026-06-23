@@ -174,6 +174,10 @@ npm run lint:bootstrap
 
 See [CHANGELOG.md](CHANGELOG.md).
 
+## Release
+
+See [docs/RELEASE.md](docs/RELEASE.md).
+
 ## License
 
 Apache-2.0.
