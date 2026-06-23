@@ -14,6 +14,7 @@ env:
 jobs:
   publish:
     name: Publish crates.io
+    if: ${{ github.server_url == 'https://github.com' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

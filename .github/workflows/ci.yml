@@ -12,6 +12,7 @@ env:
 jobs:
   check:
     name: Check, Lint & Format
+    if: ${{ github.server_url == 'https://github.com' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -58,6 +59,7 @@ jobs:
 
   msrv:
     name: MSRV (1.85)
+    if: ${{ github.server_url == 'https://github.com' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

@@ -12,6 +12,7 @@ env:
 jobs:
   e2e:
     name: Playwright (showcase)
+    if: ${{ github.server_url == 'https://github.com' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
