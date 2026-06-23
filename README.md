@@ -13,6 +13,10 @@ JavaScript behavior with Dioxus signals.
 
 **API docs:** https://docs.rs/dioxus-bootstrap-css
 
+**Primary repository:** https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css
+
+**GitHub mirror:** https://github.com/mik-tf/dioxus-bootstrap-css
+
 Short name: `dbcss` means `dioxus-bootstrap-css`. The full crate name is long,
 so issues and notes may use the abbreviation.
 

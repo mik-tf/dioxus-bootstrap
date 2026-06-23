@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+jobs:
+  publish:
+    name: Publish crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+      - name: Verify release tag matches crate version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          crate="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "dioxus-bootstrap-css") | .version')"
+          if [ "$tag" != "$crate" ]; then
+            echo "Tag $tag does not match crate version $crate"
+            exit 1
+          fi
+      - name: Format check
+        run: cargo fmt --all -- --check
+      - name: Clippy library
+        run: cargo clippy --target wasm32-unknown-unknown -p dioxus-bootstrap-css -- -D warnings
+      - name: WASM check library
+        run: cargo check --target wasm32-unknown-unknown -p dioxus-bootstrap-css
+      - name: Unit tests and doctests
+        run: cargo test -p dioxus-bootstrap-css
+      - name: Migration converter fixtures
+        run: node tools/test-migrate-bootstrap-rsx.mjs
+      - name: Migration gate
+        run: node tools/check-no-raw-bootstrap.mjs examples
+      - name: Dry-run publish
+        run: cargo publish -p dioxus-bootstrap-css --dry-run
+      - name: Check crates.io existing version
+        id: published
+        run: |
+          ver="${GITHUB_REF_NAME#v}"
+          if curl -s -H "User-Agent: dioxus-bootstrap-css-release" "https://crates.io/api/v1/crates/dioxus-bootstrap-css" | jq -e --arg v "$ver" 'any(.versions[]; .num == $v)' >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish crates.io
+        if: steps.published.outputs.exists == 'false'
+        run: cargo publish -p dioxus-bootstrap-css --token "$CARGO_REGISTRY_TOKEN"

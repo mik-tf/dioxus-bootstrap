@@ -6,7 +6,7 @@ edition = "2024"
 rust-version = "1.85"
 license = "Apache-2.0"
 description = "Bootstrap 5.3 components for Dioxus — type-safe RSX wrappers powered by Bootstrap CSS"
-repository = "https://github.com/mik-tf/dioxus-bootstrap-css"
+repository = "https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css"
 keywords = ["dioxus", "bootstrap", "wasm", "ui", "components"]
 categories = ["gui", "wasm", "web-programming"]
 

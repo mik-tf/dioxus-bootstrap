@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [development, main]
+  pull_request:
+    branches: [development, main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: Check, lint, format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+      - name: Format check
+        run: cargo fmt --all -- --check
+      - name: Clippy library
+        run: cargo clippy --target wasm32-unknown-unknown -p dioxus-bootstrap-css -- -D warnings
+      - name: Clippy showcase
+        run: cargo clippy --target wasm32-unknown-unknown -p showcase -- -D warnings
+      - name: WASM check library
+        run: cargo check --target wasm32-unknown-unknown -p dioxus-bootstrap-css
+      - name: WASM check showcase
+        run: cargo check --target wasm32-unknown-unknown -p showcase
+      - name: Unit tests and doctests
+        run: cargo test -p dioxus-bootstrap-css
+      - name: Migration gate
+        run: node tools/check-no-raw-bootstrap.mjs examples
+      - name: Migration converter fixtures
+        run: node tools/test-migrate-bootstrap-rsx.mjs
+
+  msrv:
+    name: MSRV 1.85
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Rust 1.85
+        uses: dtolnay/rust-toolchain@1.85.0
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Build on MSRV
+        run: cargo check --target wasm32-unknown-unknown -p dioxus-bootstrap-css
