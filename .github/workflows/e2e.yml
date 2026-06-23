@@ -34,7 +34,7 @@ jobs:
           restore-keys: ${{ runner.os }}-cargo-e2e-
 
       - name: Install Dioxus CLI
-        run: command -v dx >/dev/null || cargo install dioxus-cli --locked
+        run: tools/install-dioxus-cli.sh
 
       - name: Setup Node
         uses: actions/setup-node@v6

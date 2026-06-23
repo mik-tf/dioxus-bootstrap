@@ -12,7 +12,7 @@ export default defineConfig({
     { name: "chromium", use: { browserName: "chromium" } },
   ],
   webServer: {
-    command: "dx serve --port 8080",
+    command: "../../tools/install-dioxus-cli.sh && dx serve --port 8080",
     cwd: "examples/showcase",
     url: "http://localhost:8080",
     timeout: 180_000,

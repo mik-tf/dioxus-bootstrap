@@ -64,6 +64,16 @@ node tools/migrate-bootstrap-rsx.mjs --check path/to/app/src
 node tools/migrate-bootstrap-rsx.mjs --write path/to/app/src
 ```
 
+## install-dioxus-cli.sh - Dioxus CLI pin
+
+Installs `dioxus-cli` version matching resolved `dioxus` package in
+`Cargo.lock`. Run before `dx build`, `dx serve`, or Playwright checks when
+lockfile changes.
+
+```bash
+tools/install-dioxus-cli.sh
+```
+
 ## Tuning
 
 The migration gate's forbidden list is calibrated against the crate's component

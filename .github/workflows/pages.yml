@@ -37,7 +37,7 @@ jobs:
           restore-keys: ${{ runner.os }}-cargo-pages-
 
       - name: Install Dioxus CLI
-        run: cargo install dioxus-cli --locked
+        run: tools/install-dioxus-cli.sh
 
       - name: Build showcase
         working-directory: examples/showcase
