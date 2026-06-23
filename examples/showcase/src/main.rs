@@ -835,19 +835,32 @@ fn OverlaysSection() -> Element {
         div { class: "mt-3",
             // Tooltips
             h3 { class: "mb-3", "Tooltips" }
-            p { class: "text-muted mb-3", "Hover over the buttons to see tooltips." }
             div { class: "d-flex flex-wrap gap-3 mb-4",
                 Tooltip { text: "Tooltip on top".to_string(), placement: TooltipPlacement::Top,
-                    Button { color: Color::Primary, "Top" }
+                    Button { id: "tooltip-hover-trigger", color: Color::Primary, "Hover" }
                 }
-                Tooltip { text: "Tooltip on bottom".to_string(), placement: TooltipPlacement::Bottom,
-                    Button { color: Color::Secondary, "Bottom" }
+                Tooltip {
+                    text: "Tooltip on focus".to_string(),
+                    placement: TooltipPlacement::Bottom,
+                    trigger: TooltipTriggers::FOCUS,
+                    Button { id: "tooltip-focus-trigger", color: Color::Secondary, "Focus" }
                 }
-                Tooltip { text: "Tooltip on left".to_string(), placement: TooltipPlacement::Start,
-                    Button { color: Color::Success, "Start" }
+                Tooltip {
+                    text: "Tooltip on click".to_string(),
+                    placement: TooltipPlacement::End,
+                    trigger: TooltipTriggers::CLICK,
+                    Button { id: "tooltip-click-trigger", color: Color::Info, "Click" }
                 }
-                Tooltip { text: "Tooltip on right".to_string(), placement: TooltipPlacement::End,
-                    Button { color: Color::Danger, "End" }
+                Tooltip {
+                    text: "Fallback below when top overflows".to_string(),
+                    placement: TooltipPlacement::Top,
+                    fallback_placements: vec![TooltipPlacement::Bottom],
+                    Button { id: "tooltip-edge-trigger", color: Color::Warning, "Viewport fallback" }
+                }
+                Tooltip { text: "Disabled action unavailable".to_string(), placement: TooltipPlacement::Top,
+                    TooltipDisabledTrigger {
+                        Button { id: "tooltip-disabled-trigger", color: Color::Danger, disabled: true, "Disabled" }
+                    }
                 }
             }
 

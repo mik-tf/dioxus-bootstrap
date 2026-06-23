@@ -72,9 +72,12 @@ state/control props rather than runtime plugin instance methods.
 
 Current dbcss:
 
-- `TooltipPlacement`: `Top`, `Bottom`, `Start`, `End`
-- Props: `text`, `placement`, `class`, `children`
-- Behavior: hover-only, CSS-positioned relative to the trigger wrapper
+- `TooltipPlacement`: `Auto`, `Top`, `Bottom`, `Start`, `End`
+- Props: `text`, `placement`, `fallback_placements`, `trigger`,
+  `delay`, `open`, `offset`, `boundary_padding`, `class`, `children`
+- Behavior: typed hover/focus/click/manual control, viewport-aware fallback
+  placement through the shared overlay core, Bootstrap role/classes, stable
+  `aria-describedby`, and `TooltipDisabledTrigger` wrapper support
 
 | Bootstrap behavior | dbcss target |
 |---|---|
@@ -94,7 +97,8 @@ Current dbcss:
 | accessibility | Preserve `role="tooltip"`, add stable `aria-describedby`, and support keyboard focus behavior. |
 | plugin events/methods | Map to Dioxus state and optional callbacks after trigger/control API exists. |
 
-Issue #9 owns Tooltip behavior after #8 lands.
+Issue #9 owns Tooltip behavior. Remaining follow-up is any future callback
+surface for Bootstrap plugin event equivalents.
 
 ## Popover Matrix
 

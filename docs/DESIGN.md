@@ -126,7 +126,7 @@ npm run test:e2e -- --reporter=list
 
 ## Known Caveats
 
-- Tooltip and popover positioning is CSS-based and relative to the trigger.
-  Apps with viewport-edge requirements may need to choose placement explicitly.
+- Popover positioning is still CSS-based and relative to the trigger until
+  the Popover parity issue lands.
 - Scrollspy uses browser scroll observation through Dioxus document evaluation,
   so tests should allow the page to settle before asserting active sections.

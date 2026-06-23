@@ -296,8 +296,67 @@ test.describe("Overlays tab", () => {
     await clickTab(page, "Overlays");
   });
 
-  test("tooltip triggers render", async ({ page }) => {
-    await expect(page.locator("[class*='tooltip-wrapper'], .btn", { hasText: /top|bottom|start|end/i }).first()).toBeVisible();
+  test("tooltip hover shows role, aria, and placement", async ({ page }) => {
+    const trigger = page.locator("#tooltip-hover-trigger");
+    const wrapper = page.locator(".tooltip-wrapper", { has: trigger });
+
+    await trigger.hover();
+
+    const tooltip = page.locator(".tooltip.show", {
+      hasText: "Tooltip on top",
+    });
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toHaveAttribute("role", "tooltip");
+    await expect(tooltip).toHaveClass(/bs-tooltip-top/);
+
+    const tooltipId = await tooltip.getAttribute("id");
+    expect(tooltipId).toBeTruthy();
+    await expect(wrapper).toHaveAttribute("aria-describedby", tooltipId!);
+  });
+
+  test("tooltip opens from keyboard focus", async ({ page }) => {
+    await page.locator("#tooltip-focus-trigger").focus();
+    await expect(
+      page.locator(".tooltip.show", { hasText: "Tooltip on focus" }),
+    ).toBeVisible();
+  });
+
+  test("tooltip click trigger toggles", async ({ page }) => {
+    const trigger = page.locator("#tooltip-click-trigger");
+    const tooltip = page.locator(".tooltip.show", {
+      hasText: "Tooltip on click",
+    });
+
+    await trigger.click();
+    await expect(tooltip).toBeVisible();
+
+    await trigger.click();
+    await expect(tooltip).not.toBeVisible();
+  });
+
+  test("tooltip falls back when requested placement overflows viewport", async ({
+    page,
+  }) => {
+    const trigger = page.locator("#tooltip-edge-trigger");
+    await trigger.evaluate((element) => {
+      const wrapper = element.closest(".tooltip-wrapper") as HTMLElement;
+      wrapper.style.position = "fixed";
+      wrapper.style.top = "2px";
+      wrapper.style.left = "320px";
+      wrapper.style.zIndex = "1100";
+    });
+    await page.waitForTimeout(100);
+
+    await trigger.hover();
+
+    const tooltip = page.locator(".tooltip.show", {
+      hasText: "Fallback below when top overflows",
+    });
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toHaveClass(/bs-tooltip-bottom/);
+
+    const box = await tooltip.boundingBox();
+    expect(box?.y ?? -1).toBeGreaterThanOrEqual(0);
   });
 
   test("popover triggers render", async ({ page }) => {
