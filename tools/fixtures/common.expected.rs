@@ -54,6 +54,7 @@ fn app() -> Element {
             style: SpinnerStyle::Grow,
             size: Size::Sm,
             color: Some(Color::Success),
+            "style": "width:16px;height:16px;",
             "Loading"
         }
         Input {
