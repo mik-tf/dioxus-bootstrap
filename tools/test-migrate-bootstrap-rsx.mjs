@@ -33,6 +33,11 @@ assertEqual('imports conversion changed flag', String(imports.changed), 'true');
 assertEqual('imports warnings', JSON.stringify(imports.warnings), '[]');
 assertEqual('imports conversion', imports.source, read('imports.expected.rs'));
 
+const navbarNav = transformSource(read('navbar-nav.input.rs'), 'navbar-nav.input.rs');
+assertEqual('navbar nav conversion changed flag', String(navbarNav.changed), 'true');
+assertEqual('navbar nav warnings', JSON.stringify(navbarNav.warnings), '[]');
+assertEqual('navbar nav conversion', navbarNav.source, read('navbar-nav.expected.rs'));
+
 const dynamic = transformSource(read('dynamic.input.rs'), 'dynamic.input.rs');
 assertEqual('dynamic unchanged', dynamic.source, read('dynamic.input.rs'));
 assertEqual('dynamic warning count', String(dynamic.warnings.length), '1');

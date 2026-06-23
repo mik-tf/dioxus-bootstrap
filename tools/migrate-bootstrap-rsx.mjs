@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 import { colorProp, sizeProp } from './bootstrap-parity.mjs';
 
-const RAW_TAGS = new Set(['button', 'a', 'span', 'div', 'input', 'select', 'textarea', 'table']);
+const RAW_TAGS = new Set(['button', 'a', 'span', 'div', 'input', 'select', 'textarea', 'table', 'ul']);
 const SKIP_DIRS = new Set(['.git', 'target', 'node_modules', '.dx', 'dist', 'pkg']);
 const SLOT_CLASSES = new Map([
   ['card-header', 'header'],
@@ -516,6 +516,17 @@ function mapTable(tag, tokens) {
   return { component: 'Table', props, residual: residual(tokens, consumed) };
 }
 
+function mapNavbarNav(tag, tokens) {
+  if (tag !== 'ul' || !tokens.includes('navbar-nav')) return null;
+  const consumed = new Set(['navbar-nav']);
+  const props = [];
+  if (tokens.includes('navbar-nav-scroll')) {
+    props.push('scroll: true');
+    consumed.add('navbar-nav-scroll');
+  }
+  return { component: 'NavbarNav', props, residual: residual(tokens, consumed) };
+}
+
 function mapCard(tag, tokens) {
   if (tag !== 'div' || !tokens.includes('card')) return null;
   const consumed = new Set(['card']);
@@ -531,6 +542,7 @@ function mapElement(tag, classValue) {
     mapSpinner(tag, tokens) ||
     mapForm(tag, tokens) ||
     mapTable(tag, tokens) ||
+    mapNavbarNav(tag, tokens) ||
     mapCard(tag, tokens)
   );
 }

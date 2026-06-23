@@ -42,7 +42,7 @@ const FORBID_EXACT = new Set([
   'card', 'card-body', 'card-header', 'card-footer', 'card-group',
   'modal', 'modal-dialog', 'modal-content', 'modal-header', 'modal-body', 'modal-footer',
   'alert', 'badge', 'table', 'collapse',
-  'nav-tabs', 'nav-pills',
+  'nav-tabs', 'nav-pills', 'navbar-nav', 'navbar-nav-scroll',
   'progress', 'progress-bar', 'pagination', 'page-item', 'page-link',
 ]);
 // Allowed even though a FORBID_PREFIX base would otherwise catch them (utilities / state, no component).
