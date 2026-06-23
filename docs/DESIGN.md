@@ -126,7 +126,8 @@ npm run test:e2e -- --reporter=list
 
 ## Known Caveats
 
-- Popover positioning is still CSS-based and relative to the trigger until
-  the Popover parity issue lands.
+- Tooltip and Popover use viewport-aware fixed positioning while rendering
+  overlay markup inside the trigger wrapper. Bootstrap-style portal/container
+  rendering is tracked as shared overlay follow-up work.
 - Scrollspy uses browser scroll observation through Dioxus document evaluation,
   so tests should allow the page to settle before asserting active sections.

@@ -359,8 +359,76 @@ test.describe("Overlays tab", () => {
     expect(box?.y ?? -1).toBeGreaterThanOrEqual(0);
   });
 
-  test("popover triggers render", async ({ page }) => {
-    await expect(page.locator(".btn", { hasText: /popover/i }).first()).toBeVisible();
+  test("popover click shows role, aria, and default placement", async ({ page }) => {
+    const trigger = page.locator("#popover-click-trigger");
+    const wrapper = page.locator(".popover-wrapper", { has: trigger });
+
+    await trigger.click();
+
+    const popover = page.locator(".popover.show", {
+      hasText: "Click Popover",
+    });
+    await expect(popover).toBeVisible();
+    await expect(popover).toHaveAttribute("role", "tooltip");
+    await expect(popover).toHaveClass(/bs-popover-end/);
+
+    const popoverId = await popover.getAttribute("id");
+    expect(popoverId).toBeTruthy();
+    await expect(wrapper).toHaveAttribute("aria-describedby", popoverId!);
+  });
+
+  test("popover focus trigger dismisses on blur", async ({ page }) => {
+    await page.locator("#popover-focus-trigger").focus();
+    const popover = page.locator(".popover.show", {
+      hasText: "Focus Dismiss",
+    });
+    await expect(popover).toBeVisible();
+
+    await page.locator("#popover-click-trigger").focus();
+    await expect(popover).not.toBeVisible();
+  });
+
+  test("popover outside click dismisses", async ({ page }) => {
+    const trigger = page.locator("#popover-outside-trigger");
+    const popover = page.locator(".popover.show", {
+      hasText: "Outside Dismiss",
+    });
+
+    await trigger.click();
+    await expect(popover).toBeVisible();
+
+    await page.locator(".popover-backdrop").click({ position: { x: 5, y: 5 } });
+    await expect(popover).not.toBeVisible();
+  });
+
+  test("popover falls back when requested placement overflows viewport", async ({
+    page,
+  }) => {
+    const trigger = page.locator("#popover-edge-trigger");
+    await page.locator("#popover-edge-container").evaluate((element) => {
+      const wrapper = element as HTMLElement;
+      wrapper.style.position = "fixed";
+      wrapper.style.top = "2px";
+      wrapper.style.left = "320px";
+      wrapper.style.zIndex = "1100";
+    });
+    await page.waitForTimeout(100);
+
+    await trigger.click();
+
+    const popover = page.locator(".popover.show", {
+      hasText: "Fallback Popover",
+    });
+    await expect(popover).toBeVisible();
+    await expect(popover).toHaveClass(/bs-popover-bottom/);
+
+    const box = await popover.boundingBox();
+    expect(box?.y ?? -1).toBeGreaterThanOrEqual(0);
+  });
+
+  test("popover with empty title and body does not render", async ({ page }) => {
+    await page.locator("#popover-empty-trigger").click();
+    await expect(page.locator(".popover.show")).toHaveCount(0);
   });
 });
 

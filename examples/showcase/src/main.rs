@@ -866,28 +866,47 @@ fn OverlaysSection() -> Element {
 
             // Popovers
             h3 { class: "mb-3", "Popovers" }
-            p { class: "text-muted mb-3", "Click the buttons to toggle popovers." }
+            p { class: "text-muted mb-3", "Typed click, focus, viewport fallback, and disabled-trigger popovers." }
             div { class: "d-flex flex-wrap gap-3 mb-4",
                 Popover {
-                    title: "Popover Title".to_string(),
-                    body: rsx! { "And here's some amazing content. It's very engaging. Right?" },
-                    placement: PopoverPlacement::Top,
-                    Button { color: Color::Primary, "Popover Top" }
+                    title: "Click Popover".to_string(),
+                    body: rsx! { "Default click trigger with Bootstrap's right/end placement." },
+                    Button { id: "popover-click-trigger", color: Color::Primary, "Click" }
                 }
                 Popover {
-                    title: "Bottom Popover".to_string(),
-                    body: rsx! { "This popover appears below the trigger." },
+                    title: "Focus Dismiss".to_string(),
+                    body: rsx! { "Move focus away to dismiss this popover." },
                     placement: PopoverPlacement::Bottom,
-                    Button { color: Color::Secondary, "Popover Bottom" }
+                    trigger: PopoverTriggers::FOCUS,
+                    Button { id: "popover-focus-trigger", color: Color::Secondary, "Focus" }
+                }
+                Popover {
+                    title: "Outside Dismiss".to_string(),
+                    body: rsx! { "Click outside the trigger or popover to close." },
+                    placement: PopoverPlacement::Top,
+                    Button { id: "popover-outside-trigger", color: Color::Success, "Outside" }
+                }
+                div { id: "popover-edge-container", style: "display: inline-block;",
+                    Popover {
+                        title: "Fallback Popover".to_string(),
+                        body: rsx! { "Falls back below when top would overflow." },
+                        placement: PopoverPlacement::Top,
+                        fallback_placements: vec![PopoverPlacement::Bottom],
+                        Button { id: "popover-edge-trigger", color: Color::Warning, "Viewport fallback" }
+                    }
                 }
                 Popover {
                     title: "".to_string(),
-                    body: rsx! {
-                        p { "A popover with rich content and no title." }
-                        Button { color: Color::Success, size: Size::Sm, "Action" }
-                    },
-                    placement: PopoverPlacement::End,
-                    Button { color: Color::Info, "Rich Content" }
+                    body: rsx! {},
+                    Button { id: "popover-empty-trigger", color: Color::Light, "Empty content" }
+                }
+                Popover {
+                    title: "Disabled Popover".to_string(),
+                    body: rsx! { "Disabled controls use a focusable wrapper." },
+                    trigger: PopoverTriggers::HOVER_FOCUS,
+                    PopoverDisabledTrigger {
+                        Button { id: "popover-disabled-trigger", color: Color::Danger, disabled: true, "Disabled" }
+                    }
                 }
             }
         }

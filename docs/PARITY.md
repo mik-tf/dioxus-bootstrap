@@ -104,10 +104,15 @@ surface for Bootstrap plugin event equivalents.
 
 Current dbcss:
 
-- `PopoverPlacement`: `Top`, `Bottom`, `Start`, `End`
-- Props: `title`, `body`, `placement`, `class`, `children`
-- Behavior: click toggles open, outside overlay closes, CSS-positioned relative
-  to the trigger wrapper
+- `PopoverPlacement`: `Auto`, `Top`, `Bottom`, `Start`, `End`; default `End`
+  matches Bootstrap's right-side default.
+- Props: `title`, `body`, `placement`, `fallback_placements`, `trigger`,
+  `delay`, `open`, `offset`, `boundary_padding`,
+  `dismiss_on_outside_click`, `class`, `children`.
+- Behavior: typed click/hover/focus/manual control, outside and focus dismiss,
+  viewport-aware fallback placement through the shared overlay core, Bootstrap
+  role/classes, stable `aria-describedby`, empty title/body suppression, and
+  `PopoverDisabledTrigger` wrapper support.
 
 | Bootstrap behavior | dbcss target |
 |---|---|
@@ -128,7 +133,9 @@ Current dbcss:
 | accessibility | Preserve `role="tooltip"`, add stable `aria-describedby`, and document focus-order limits. |
 | plugin events/methods | Map to Dioxus state and optional callbacks after trigger/control API exists. |
 
-Issue #10 owns Popover behavior after #8 lands.
+Issue #10 owns Popover behavior after #8 lands. Remaining follow-up is any
+future callback/plugin-event equivalents and shared portal-style container
+support with Tooltip.
 
 ## Scrollspy Matrix
 
