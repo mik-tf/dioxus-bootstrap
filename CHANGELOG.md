@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- `NavbarNav`: typed wrapper for Bootstrap's `.navbar-nav` list, including `scroll: true` for `.navbar-nav-scroll`.
+
+### Fixed
+
+- Showcase and dashboard navbars now dogfood `NavbarNav`, so navbar links render with Bootstrap's expected spacing and structure.
+
 ## [0.5.3] — Plain button and a stronger migration gate
 
 ### Added

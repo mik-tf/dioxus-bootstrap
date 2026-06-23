@@ -106,7 +106,7 @@ Interactive components:
 - `Modal`, `Dropdown`, `Collapse`, `Tabs`, `TabList`
 - `Accordion`, `Offcanvas`, `Toast`, `Carousel`
 - `Tooltip`, `Popover`, `Scrollspy`
-- `Navbar`, `NavbarToggler`, `NavbarCollapse`, `Nav`, `Breadcrumb`
+- `Navbar`, `NavbarToggler`, `NavbarCollapse`, `NavbarNav`, `Nav`, `Breadcrumb`
 
 ## Dark Mode
 

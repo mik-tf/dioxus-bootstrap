@@ -71,9 +71,11 @@ fn app() -> Element {
             },
             NavbarToggler { collapsed: nav_collapsed }
             NavbarCollapse { collapsed: nav_collapsed,
-                NavItem { NavLink { href: "#", active: true, "Overview" } }
-                NavItem { NavLink { href: "#", "Services" } }
-                NavItem { NavLink { href: "#", "Settings" } }
+                NavbarNav {
+                    NavItem { NavLink { href: "#", active: true, "Overview" } }
+                    NavItem { NavLink { href: "#", "Services" } }
+                    NavItem { NavLink { href: "#", "Settings" } }
+                }
             }
             ThemeToggle { theme: theme }
         }

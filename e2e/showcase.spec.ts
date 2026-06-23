@@ -29,6 +29,28 @@ test.describe("App", () => {
     await expect(page.locator(".navbar")).toBeVisible();
   });
 
+  test("navbar uses navbar-nav structure with separated links", async ({ page }) => {
+    await page.goto("/");
+    await waitForApp(page);
+
+    const links = page.locator(".navbar .navbar-nav .nav-link");
+    await expect(links).toHaveCount(2);
+    await expect(links.nth(0)).toContainText("Showcase");
+    await expect(links.nth(1)).toContainText("Docs");
+
+    for (const link of await links.all()) {
+      const padding = await link.evaluate((el) => {
+        const style = window.getComputedStyle(el);
+        return {
+          left: Number.parseFloat(style.paddingLeft),
+          right: Number.parseFloat(style.paddingRight),
+        };
+      });
+      expect(padding.left).toBeGreaterThanOrEqual(8);
+      expect(padding.right).toBeGreaterThanOrEqual(8);
+    }
+  });
+
   test("theme toggle works", async ({ page }) => {
     await page.goto("/");
     await waitForApp(page);

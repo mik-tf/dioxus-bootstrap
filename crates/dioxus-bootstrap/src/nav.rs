@@ -137,8 +137,10 @@ pub fn Nav(props: NavProps) -> Element {
 ///         brand: rsx! { a { class: "navbar-brand", href: "#", "MyApp" } },
 ///         NavbarToggler { collapsed: collapsed }
 ///         NavbarCollapse { collapsed: collapsed,
-///             NavItem { NavLink { href: "/", active: true, "Home" } }
-///             NavItem { NavLink { href: "/about", "About" } }
+///             NavbarNav {
+///                 NavItem { NavLink { href: "/", active: true, "Home" } }
+///                 NavItem { NavLink { href: "/about", "About" } }
+///             }
 ///         }
 ///     }
 /// }
@@ -277,7 +279,9 @@ pub fn NavbarToggler(props: NavbarTogglerProps) -> Element {
 /// rsx! {
 ///     NavbarToggler { collapsed: collapsed }
 ///     NavbarCollapse { collapsed: collapsed,
-///         NavItem { NavLink { href: "/", "Home" } }
+///         NavbarNav {
+///             NavItem { NavLink { href: "/", "Home" } }
+///         }
 ///     }
 /// }
 /// # }
@@ -313,6 +317,69 @@ pub fn NavbarCollapse(props: NavbarCollapseProps) -> Element {
             {props.children}
         }
     }
+}
+
+/// Bootstrap navbar navigation list.
+///
+/// Use this inside [`NavbarCollapse`] to render Bootstrap's required
+/// `<ul class="navbar-nav">` wrapper around navbar [`NavItem`] children.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<ul class="navbar-nav">...</ul>` | `NavbarNav { ... }` |
+/// | `<ul class="navbar-nav navbar-nav-scroll">...</ul>` | `NavbarNav { scroll: true, ... }` |
+///
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
+/// rsx! {
+///     NavbarNav {
+///         NavItem { NavLink { active: true, href: "#", "Home" } }
+///         NavItem { NavLink { href: "#docs", "Docs" } }
+///     }
+/// }
+/// # }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct NavbarNavProps {
+    /// Enable Bootstrap navbar scroll behavior.
+    #[props(default)]
+    pub scroll: bool,
+    /// Additional CSS classes.
+    #[props(default)]
+    pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+    /// Child elements (NavItem).
+    pub children: Element,
+}
+
+#[component]
+pub fn NavbarNav(props: NavbarNavProps) -> Element {
+    let full_class = navbar_nav_class(props.scroll, &props.class);
+
+    rsx! {
+        ul {
+            class: "{full_class}",
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+fn navbar_nav_class(scroll: bool, class: &str) -> String {
+    let mut classes = vec!["navbar-nav".to_string()];
+    if scroll {
+        classes.push("navbar-nav-scroll".to_string());
+    }
+    if !class.is_empty() {
+        classes.push(class.to_string());
+    }
+    classes.join(" ")
 }
 
 /// Bootstrap NavItem component.
@@ -416,5 +483,23 @@ pub fn NavLink(props: NavLinkProps) -> Element {
             ..props.attributes,
             {props.children}
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn navbar_nav_class_base() {
+        assert_eq!(navbar_nav_class(false, ""), "navbar-nav");
+    }
+
+    #[test]
+    fn navbar_nav_class_scroll_and_extra_classes() {
+        assert_eq!(
+            navbar_nav_class(true, "ms-auto"),
+            "navbar-nav navbar-nav-scroll ms-auto"
+        );
     }
 }

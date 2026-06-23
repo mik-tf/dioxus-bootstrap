@@ -75,7 +75,7 @@ Interactive components:
 
 Navigation:
 
-- `Navbar`, `NavbarToggler`, `NavbarCollapse`
+- `Navbar`, `NavbarToggler`, `NavbarCollapse`, `NavbarNav`
 - `Nav`, `NavItem`, `NavLink`
 - `Breadcrumb`, `BreadcrumbItem`
 

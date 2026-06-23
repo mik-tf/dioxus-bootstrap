@@ -161,7 +161,7 @@ Bootstrap JavaScript is not loaded. Replace JS attributes with Dioxus state.
 | `data-bs-toggle="modal"` | `Modal { show, ... }` | `Signal<bool>` |
 | dropdown + `data-bs-toggle` | `Dropdown { open, ... }` | `Signal<bool>` |
 | `.collapse` | `Collapse { expanded, ... }` | `Signal<bool>` |
-| navbar collapse | `NavbarToggler` + `NavbarCollapse` | `Signal<bool>` |
+| navbar collapse | `NavbarToggler` + `NavbarCollapse` + `NavbarNav` | `Signal<bool>` |
 | tabs | `TabList` / `Tabs` | `Signal<usize>` |
 | accordion | `Accordion` / `AccordionItem` | `Signal<Option<usize>>` |
 | offcanvas | `Offcanvas { show, ... }` | `Signal<bool>` |

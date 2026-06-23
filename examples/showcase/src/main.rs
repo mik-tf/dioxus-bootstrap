@@ -1,15 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_bootstrap_css::prelude::*;
 
-fn scroll_to(id: &str) {
-    if let Some(window) = web_sys::window()
-        && let Some(doc) = window.document()
-        && let Some(el) = doc.get_element_by_id(id)
-    {
-        el.scroll_into_view();
-    }
-}
-
 fn main() {
     dioxus::launch(app);
 }
@@ -138,7 +129,7 @@ fn app() -> Element {
                         }
                         h5 { class: "mt-3", "Navigation" }
                         ul {
-                            li { "Navbar / NavbarToggler / NavbarCollapse" }
+                            li { "Navbar / NavbarToggler / NavbarCollapse / NavbarNav" }
                             li { "Nav (pills, tabs, underline, fill)" }
                             li { "NavItem / NavLink" }
                             li { "Breadcrumb / BreadcrumbItem" }
@@ -166,11 +157,10 @@ fn NavbarDemo(props: NavbarDemoProps) -> Element {
             brand: rsx! { a { class: "navbar-brand", href: "#", Icon { name: "bootstrap", class: "me-2" } "dioxus-bootstrap-css" } },
             NavbarToggler { collapsed: collapsed }
             NavbarCollapse { collapsed: collapsed,
-                NavItem { NavLink { href: "#", active: true, "Showcase" } }
-                NavItem {
-                    a { class: "nav-link", href: "javascript:void(0)",
-                        onclick: move |_| scroll_to("docs-section"),
-                        "Docs"
+                NavbarNav {
+                    NavItem { NavLink { href: "#", active: true, "Showcase" } }
+                    NavItem {
+                        NavLink { href: "#docs-section", "Docs" }
                     }
                 }
             }
