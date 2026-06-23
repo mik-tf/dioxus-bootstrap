@@ -13,6 +13,9 @@ JavaScript behavior with Dioxus signals.
 
 **API docs:** https://docs.rs/dioxus-bootstrap-css
 
+Short name: `dbcss` means `dioxus-bootstrap-css`. The full crate name is long,
+so issues and notes may use the abbreviation.
+
 > Design rule: if Bootstrap does it, this crate should expose a typed Dioxus
 > way to express it. If Bootstrap does not do it, this crate should not invent
 > it.
