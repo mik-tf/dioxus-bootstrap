@@ -12,7 +12,7 @@ env:
 jobs:
   check:
     name: Check, lint, format
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v7
       - name: Install Rust
@@ -39,7 +39,7 @@ jobs:
 
   msrv:
     name: MSRV 1.85
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v7
       - name: Install Rust 1.85
