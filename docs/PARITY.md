@@ -141,9 +141,13 @@ support with Tooltip.
 
 Current dbcss:
 
-- Props: `target`, `active`, `offset`
-- Behavior: document eval, document-wide `[id]` scan, shared
-  `window.__dioxus_scrollspy_active`, scroll listener, signal update
+- Props: `target`, `root`, `active`, `offset`, `root_margin`, `threshold`,
+  `refresh_key`, `smooth_scroll`.
+- Behavior: scoped IntersectionObserver/listener state per Scrollspy instance,
+  Bootstrap `target` semantics for nav/list/simple-link containers, body or
+  custom scroll roots, non-visible section filtering, deterministic active
+  section selection, active link class updates, signal updates, MutationObserver
+  refresh, and optional smooth scroll.
 
 Bootstrap 5.3 uses an IntersectionObserver-style model with `rootMargin`,
 `threshold`, `target`, optional smooth scrolling, non-visible element handling,
@@ -163,8 +167,10 @@ and refresh.
 | active nav/list/simple anchors | Expose active id through Dioxus state and provide enough info for apps/components to apply `.active`. |
 | activation event | Map to signal update and optional callback. |
 
-Issue #11 owns Scrollspy behavior. It should decide the compatibility plan for
-the current `target` prop before implementation starts.
+Issue #11 owns Scrollspy behavior. `target` now follows Bootstrap
+`data-bs-target` semantics. Use `root` for the body or custom scroll container.
+`offset` remains as the compatibility path for existing fixed-header callers;
+new code should prefer `root_margin` and `threshold` for observer behavior.
 
 ## Converter And Docs
 

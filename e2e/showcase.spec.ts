@@ -113,6 +113,7 @@ test.describe("Basics tab", () => {
   test("breadcrumb renders", async ({ page }) => {
     await expect(page.locator(".breadcrumb").first()).toBeVisible();
   });
+
 });
 
 // ---------------------------------------------------------------------------
@@ -492,6 +493,79 @@ test.describe("Navigation tab", () => {
 
   test("breadcrumb renders", async ({ page }) => {
     await expect(page.locator(".breadcrumb").first()).toBeVisible();
+  });
+
+  test("scrollspy tracks body scroll and updates nav target", async ({ page }) => {
+    await page.locator("#scrollspy-body-beta").evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      window.scrollTo({ top: window.scrollY + rect.top - 80, behavior: "auto" });
+      window.dispatchEvent(new Event("scroll"));
+    });
+    await expect(page.locator("#scrollspy-body-active")).toHaveText(
+      "scrollspy-body-beta",
+    );
+    await expect(
+      page.locator('#scrollspy-body-nav .nav-link[href="#scrollspy-body-beta"]'),
+    ).toHaveClass(/active/);
+
+    await page.locator("#scrollspy-body-gamma").evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      window.scrollTo({ top: window.scrollY + rect.top - 80, behavior: "auto" });
+      window.dispatchEvent(new Event("scroll"));
+    });
+    await expect(page.locator("#scrollspy-body-active")).toHaveText(
+      "scrollspy-body-gamma",
+    );
+    await expect(
+      page.locator('#scrollspy-body-nav .nav-link[href="#scrollspy-body-gamma"]'),
+    ).toHaveClass(/active/);
+  });
+
+  test("scrollspy custom container is scoped from body instance", async ({
+    page,
+  }) => {
+    await page.locator("#scrollspy-body-beta").evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      window.scrollTo({ top: window.scrollY + rect.top - 80, behavior: "auto" });
+      window.dispatchEvent(new Event("scroll"));
+    });
+    await expect(page.locator("#scrollspy-body-active")).toHaveText(
+      "scrollspy-body-beta",
+    );
+
+    await page.locator("#scrollspy-custom-root").evaluate((element) => {
+      element.scrollTop = 250;
+      element.dispatchEvent(new Event("scroll"));
+    });
+
+    await expect(page.locator("#scrollspy-custom-active")).toHaveText(
+      "scrollspy-custom-two",
+    );
+    await expect(page.locator("#scrollspy-body-active")).toHaveText(
+      "scrollspy-body-beta",
+    );
+    await expect(
+      page.locator('#scrollspy-custom-nav .nav-link[href="#scrollspy-custom-two"]'),
+    ).toHaveClass(/active/);
+  });
+
+  test("scrollspy refresh picks up dynamic custom sections", async ({ page }) => {
+    await page.locator("#scrollspy-add-section").click();
+    await expect(
+      page.locator('#scrollspy-custom-nav .nav-link[href="#scrollspy-custom-four"]'),
+    ).toBeVisible();
+
+    await page.locator("#scrollspy-custom-root").evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+      element.dispatchEvent(new Event("scroll"));
+    });
+
+    await expect(page.locator("#scrollspy-custom-active")).toHaveText(
+      "scrollspy-custom-four",
+    );
+    await expect(
+      page.locator('#scrollspy-custom-nav .nav-link[href="#scrollspy-custom-four"]'),
+    ).toHaveClass(/active/);
   });
 });
 

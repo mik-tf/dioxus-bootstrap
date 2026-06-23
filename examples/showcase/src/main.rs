@@ -1009,6 +1009,15 @@ fn MediaSection() -> Element {
 
 #[component]
 fn NavigationSection() -> Element {
+    let body_scrollspy_active = use_signal(|| String::new());
+    let custom_scrollspy_active = use_signal(|| String::new());
+    let mut show_dynamic_scrollspy_section = use_signal(|| false);
+    let custom_refresh_key = if *show_dynamic_scrollspy_section.read() {
+        1
+    } else {
+        0
+    };
+
     rsx! {
         div { class: "mt-3",
             // Nav — Pills
@@ -1076,6 +1085,105 @@ fn NavigationSection() -> Element {
                 BreadcrumbItem { href: "#", "Home" }
                 BreadcrumbItem { href: "#", "Library" }
                 BreadcrumbItem { active: true, "Data" }
+            }
+
+            // Scrollspy
+            h3 { class: "mb-3 mt-4", "Scrollspy" }
+            Row { class: "g-3 mb-4",
+                Col { md: ColumnSize::Span(6),
+                    Scrollspy {
+                        target: "#scrollspy-body-nav",
+                        root: "body",
+                        active: body_scrollspy_active,
+                        offset: 96,
+                        root_margin: "0px 0px -65%".to_string(),
+                    }
+                    Nav {
+                        id: "scrollspy-body-nav",
+                        pills: true,
+                        vertical: true,
+                        class: "gap-1 mb-2",
+                        NavItem { NavLink { href: "#scrollspy-body-alpha", "Alpha" } }
+                        NavItem { NavLink { href: "#scrollspy-body-beta", "Beta" } }
+                        NavItem { NavLink { href: "#scrollspy-body-gamma", "Gamma" } }
+                    }
+                    div { class: "small text-muted mb-2",
+                        "Body active: "
+                        span { id: "scrollspy-body-active", "{body_scrollspy_active}" }
+                    }
+                    div { id: "scrollspy-body-content", class: "border rounded p-3",
+                        section { id: "scrollspy-body-alpha", style: "min-height: 260px;",
+                            h4 { "Alpha" }
+                            p { "First body-scrolled section." }
+                        }
+                        section { id: "scrollspy-body-beta", style: "min-height: 260px;",
+                            h4 { "Beta" }
+                            p { "Second body-scrolled section." }
+                        }
+                        section { id: "scrollspy-body-gamma", style: "min-height: 260px;",
+                            h4 { "Gamma" }
+                            p { "Third body-scrolled section." }
+                        }
+                    }
+                }
+                Col { md: ColumnSize::Span(6),
+                    Scrollspy {
+                        target: "#scrollspy-custom-nav",
+                        root: "#scrollspy-custom-root",
+                        active: custom_scrollspy_active,
+                        offset: 12,
+                        root_margin: "0px 0px -60%".to_string(),
+                        refresh_key: custom_refresh_key,
+                    }
+                    Nav {
+                        id: "scrollspy-custom-nav",
+                        pills: true,
+                        class: "gap-1 mb-2",
+                        NavItem { NavLink { href: "#scrollspy-custom-one", "One" } }
+                        NavItem { NavLink { href: "#scrollspy-custom-two", "Two" } }
+                        NavItem { NavLink { href: "#scrollspy-custom-three", "Three" } }
+                        if *show_dynamic_scrollspy_section.read() {
+                            NavItem { NavLink { href: "#scrollspy-custom-four", "Four" } }
+                        }
+                    }
+                    div { class: "d-flex align-items-center gap-2 mb-2",
+                        span { class: "small text-muted",
+                            "Custom active: "
+                            span { id: "scrollspy-custom-active", "{custom_scrollspy_active}" }
+                        }
+                        Button {
+                            id: "scrollspy-add-section",
+                            color: Color::Secondary,
+                            size: Size::Sm,
+                            onclick: move |_| show_dynamic_scrollspy_section.set(true),
+                            "Add section"
+                        }
+                    }
+                    div {
+                        id: "scrollspy-custom-root",
+                        class: "border rounded p-3",
+                        tabindex: "0",
+                        style: "height: 260px; overflow-y: auto; position: relative;",
+                        section { id: "scrollspy-custom-one", style: "min-height: 230px;",
+                            h4 { "One" }
+                            p { "First custom-scroll section." }
+                        }
+                        section { id: "scrollspy-custom-two", style: "min-height: 230px;",
+                            h4 { "Two" }
+                            p { "Second custom-scroll section." }
+                        }
+                        section { id: "scrollspy-custom-three", style: "min-height: 230px;",
+                            h4 { "Three" }
+                            p { "Third custom-scroll section." }
+                        }
+                        if *show_dynamic_scrollspy_section.read() {
+                            section { id: "scrollspy-custom-four", style: "min-height: 230px;",
+                                h4 { "Four" }
+                                p { "Dynamically added custom-scroll section." }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

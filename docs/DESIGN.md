@@ -129,5 +129,6 @@ npm run test:e2e -- --reporter=list
 - Tooltip and Popover use viewport-aware fixed positioning while rendering
   overlay markup inside the trigger wrapper. Bootstrap-style portal/container
   rendering is tracked as shared overlay follow-up work.
-- Scrollspy uses browser scroll observation through Dioxus document evaluation,
-  so tests should allow the page to settle before asserting active sections.
+- Scrollspy uses browser IntersectionObserver, MutationObserver, and scroll
+  listeners through Dioxus document evaluation. Tests should allow the page to
+  settle before asserting active sections.

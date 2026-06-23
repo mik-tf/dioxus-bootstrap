@@ -51,7 +51,7 @@
 //! | `<div class="input-group">` | `InputGroup { InputGroupText { }, Input { } }` |
 //! | `<div class="progress">` | `Progress { ProgressBar { value: 50.0 } }` |
 //! | `<div class="spinner-border">` | `Spinner { }` |
-//! | `data-bs-spy="scroll"` | `Scrollspy { target: "body", active: signal }` |
+//! | `data-bs-spy="scroll"` | `Scrollspy { target: "#nav", root: "body", active: signal }` |
 //!
 //! ## Modules
 //!
