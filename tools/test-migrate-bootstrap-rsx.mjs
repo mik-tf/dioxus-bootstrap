@@ -28,6 +28,11 @@ assertEqual('common conversion changed flag', String(common.changed), 'true');
 assertEqual('common warnings', JSON.stringify(common.warnings), '[]');
 assertEqual('common conversion', common.source, read('common.expected.rs'));
 
+const imports = transformSource(read('imports.input.rs'), 'imports.input.rs');
+assertEqual('imports conversion changed flag', String(imports.changed), 'true');
+assertEqual('imports warnings', JSON.stringify(imports.warnings), '[]');
+assertEqual('imports conversion', imports.source, read('imports.expected.rs'));
+
 const dynamic = transformSource(read('dynamic.input.rs'), 'dynamic.input.rs');
 assertEqual('dynamic unchanged', dynamic.source, read('dynamic.input.rs'));
 assertEqual('dynamic warning count', String(dynamic.warnings.length), '1');
