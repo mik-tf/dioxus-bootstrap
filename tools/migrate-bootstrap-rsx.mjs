@@ -12,6 +12,45 @@ const SLOT_CLASSES = new Map([
   ['card-body', 'body'],
   ['card-footer', 'footer'],
 ]);
+const DYNAMIC_COMPONENT_EXACT = new Set([
+  'btn',
+  'badge',
+  'card',
+  'card-body',
+  'card-header',
+  'card-footer',
+  'card-group',
+  'alert',
+  'table',
+  'modal',
+  'modal-dialog',
+  'modal-content',
+  'modal-header',
+  'modal-body',
+  'modal-footer',
+  'collapse',
+  'progress',
+  'progress-bar',
+  'pagination',
+  'page-item',
+  'page-link',
+]);
+const DYNAMIC_COMPONENT_PREFIXES = [
+  'btn-',
+  'alert-',
+  'table-',
+  'spinner-',
+  'form-control',
+  'form-select',
+  'dropdown',
+  'navbar',
+  'offcanvas',
+  'toast',
+  'accordion',
+  'breadcrumb',
+  'list-group',
+  'carousel',
+];
 
 function isWord(ch) {
   return /[A-Za-z0-9_-]/.test(ch || '');
@@ -180,7 +219,8 @@ function findTopLevelClassAttr(content) {
     j += 1;
     while (/\s/.test(content[j] || '')) j += 1;
     if (content[j] !== '"') {
-      return { dynamic: true, start: i, end: readAttrEnd(content, j) };
+      const end = readAttrEnd(content, j);
+      return { dynamic: true, start: i, end, expression: content.slice(j, end) };
     }
     const valueStart = j + 1;
     const valueEnd = skipString(content, j) - 1;
@@ -238,6 +278,25 @@ function residual(tokens, consumed) {
 
 function tokenSet(classValue) {
   return classValue.split(/\s+/).filter(Boolean);
+}
+
+function isBootstrapComponentToken(token) {
+  return DYNAMIC_COMPONENT_EXACT.has(token) || DYNAMIC_COMPONENT_PREFIXES.some((prefix) => token.startsWith(prefix));
+}
+
+function dynamicClassHasComponentToken(expression) {
+  for (let i = 0; i < expression.length; i += 1) {
+    const ignoredEnd = skipIgnored(expression, i);
+    if (ignoredEnd === null || expression[i] !== '"') {
+      if (ignoredEnd !== null) i = ignoredEnd - 1;
+      continue;
+    }
+    const valueEnd = skipString(expression, i) - 1;
+    const value = expression.slice(i + 1, valueEnd);
+    if (tokenSet(value).some(isBootstrapComponentToken)) return true;
+    i = valueEnd;
+  }
+  return false;
 }
 
 function hasTopLevelAttrs(content) {
@@ -458,6 +517,48 @@ function classifyUnmapped(tag, classValue) {
   return null;
 }
 
+function importsForMapping(mapping) {
+  const imports = new Set([mapping.component]);
+  for (const prop of mapping.props) {
+    if (prop.includes('Color::')) imports.add('Color');
+    if (prop.includes('Size::')) imports.add('Size');
+    if (prop.includes('SpinnerStyle::')) imports.add('SpinnerStyle');
+  }
+  return imports;
+}
+
+function mergePreludeImports(existing, required) {
+  return [...new Set([...existing, ...required])].sort((a, b) => a.localeCompare(b));
+}
+
+function renderPreludeImport(names, multiline) {
+  if (!multiline && names.length <= 6 && names.join(', ').length <= 96) {
+    return `use dioxus_bootstrap_css::prelude::{${names.join(', ')}};`;
+  }
+  return `use dioxus_bootstrap_css::prelude::{\n${names.map((name) => `    ${name},`).join('\n')}\n};`;
+}
+
+function addPreludeImports(source, required) {
+  if (!required.size || source.includes('use dioxus_bootstrap_css::prelude::*;')) return source;
+
+  const grouped = /use\s+dioxus_bootstrap_css::prelude::\{([\s\S]*?)\};/m;
+  const match = grouped.exec(source);
+  if (match) {
+    const existing = [...match[1].matchAll(/\b[A-Z][A-Za-z0-9_]*\b/g)].map((m) => m[0]);
+    const names = mergePreludeImports(existing, required);
+    const multiline = match[0].includes('\n');
+    return `${source.slice(0, match.index)}${renderPreludeImport(names, multiline)}${source.slice(match.index + match[0].length)}`;
+  }
+
+  const importLine = renderPreludeImport([...required].sort((a, b) => a.localeCompare(b)), false);
+  const dioxusPrelude = /use\s+dioxus::prelude::\*;\n?/m.exec(source);
+  if (dioxusPrelude) {
+    const insert = dioxusPrelude.index + dioxusPrelude[0].length;
+    return `${source.slice(0, insert)}${importLine}\n${source.slice(insert)}`;
+  }
+  return `${importLine}\n${source}`;
+}
+
 function pushLines(lines, indent, block) {
   if (!block) return;
   for (const line of block.split('\n')) lines.push(`${indent}${line.trimEnd()}`);
@@ -569,32 +670,36 @@ function rebuildWithContent(sourceBody, element, content) {
   return `${sourceBody.slice(element.start, element.open + 1)}${content}${sourceBody.slice(element.close, element.end)}`;
 }
 
-function transformRsxBody(body, file, lineBase, warnings) {
+function transformRsxBody(body, file, lineBase, warnings, imports) {
   const elements = collectElements(body).sort((a, b) => b.start - a.start);
   let out = body;
 
   for (const element of elements) {
     const content = out.slice(element.open + 1, element.close);
     const childLineBase = lineBase + lineCol(out, element.open + 1).line - 1;
-    const transformedContent = transformRsxBody(content, file, childLineBase, warnings);
+    const transformedContent = transformRsxBody(content, file, childLineBase, warnings, imports);
     let rewritten = null;
 
     if (RAW_TAGS.has(element.tag)) {
       const classAttr = findTopLevelClassAttr(transformedContent);
       if (classAttr?.dynamic) {
-        const loc = lineCol(out, element.start);
-        warnings.push({
-          kind: 'manual_review',
-          file,
-          line: lineBase + loc.line - 1,
-          message: `${element.tag} has dynamic class; converter cannot safely map Bootstrap intent`,
-        });
+        if (dynamicClassHasComponentToken(classAttr.expression)) {
+          const loc = lineCol(out, element.start);
+          warnings.push({
+            kind: 'manual_review',
+            file,
+            line: lineBase + loc.line - 1,
+            message: `${element.tag} has dynamic Bootstrap component class; converter cannot safely map Bootstrap intent`,
+          });
+        }
       } else if (classAttr) {
         const mapping = mapElement(element.tag, classAttr.value);
         if (mapping?.card) {
           rewritten = buildCardElement(out, element, mapping, transformedContent, file, lineBase, warnings);
+          if (rewritten) for (const name of importsForMapping(mapping)) imports.add(name);
         } else if (mapping) {
           rewritten = buildPlainElement(out, element, mapping, transformedContent);
+          for (const name of importsForMapping(mapping)) imports.add(name);
         } else {
           const message = classifyUnmapped(element.tag, classAttr.value);
           if (message) {
@@ -617,6 +722,7 @@ function transformRsxBody(body, file, lineBase, warnings) {
 
 export function transformSource(source, file = '<memory>') {
   const warnings = [];
+  const imports = new Set();
   let out = source;
   const blocks = findRsxBlocks(source).sort((a, b) => b.open - a.open);
   for (const block of blocks) {
@@ -625,9 +731,10 @@ export function transformSource(source, file = '<memory>') {
     const close = block.close - shift;
     const body = out.slice(open + 1, close);
     const lineBase = lineCol(out, open + 1).line;
-    const next = transformRsxBody(body, file, lineBase, warnings);
+    const next = transformRsxBody(body, file, lineBase, warnings, imports);
     out = `${out.slice(0, open + 1)}${next}${out.slice(close)}`;
   }
+  out = addPreludeImports(out, imports);
   return { source: out, changed: out !== source, warnings };
 }
 

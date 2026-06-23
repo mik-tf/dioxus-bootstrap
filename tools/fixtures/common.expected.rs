@@ -1,4 +1,18 @@
 use dioxus::prelude::*;
+use dioxus_bootstrap_css::prelude::{
+    Alert,
+    Badge,
+    Button,
+    Card,
+    Color,
+    Input,
+    Select,
+    Size,
+    Spinner,
+    SpinnerStyle,
+    Table,
+    Textarea,
+};
 
 fn refresh() {}
 
