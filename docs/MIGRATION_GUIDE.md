@@ -1,162 +1,83 @@
-# Bootstrap SSR → Dioxus SPA Migration Guide
+# Bootstrap Dioxus Migration Guide
 
-Complete guide for converting Bootstrap server-side rendered apps (Tera, Askama, Jinja, Handlebars) to Dioxus WASM SPA using `dioxus-bootstrap-css`.
+This guide covers migrating raw Bootstrap HTML or RSX to
+`dioxus-bootstrap-css` typed components.
 
-**Proven on:** Project Mycelium Marketplace — 14 pages, 65 templates, 13/14 pages at <1% perceptual diff.
+The goal is not only to remove raw classes. The goal is visual and behavioral
+equivalence: the same Bootstrap intent represented as typed Dioxus props,
+signal-driven interactions, bundled assets, and screenshot-verified output.
 
-**For AI agents:** This document is structured for both human developers and AI code assistants. The component mapping table and rules are machine-parseable.
-
----
-
-## Prerequisites
-
-- Rust with `wasm32-unknown-unknown` target
-- Dioxus CLI (`cargo install dioxus-cli --locked`)
-- Node.js (for pixelmatch visual testing)
-- Chromium (for headless screenshots)
-
-## Step 1: Assessment
-
-Before starting, audit your SSR app:
-
-```bash
-# Count templates
-find src/views -name "*.html" | wc -l
-
-# Count Bootstrap class usages
-grep -r "class=\"" src/views/ | grep -c "btn\|card\|modal\|table\|nav\|col-\|row"
-
-# Check Bootstrap version
-head -2 src/static/vendor/bootstrap/bootstrap.min.css
-```
-
-## Step 2: Setup
+## Setup
 
 ```toml
-# Cargo.toml
 [dependencies]
 dioxus = { version = "0.7", features = ["web", "router"] }
-dioxus-bootstrap-css = "0.3.1"
-gloo-net = "0.6"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+dioxus-bootstrap-css = "0.5"
 ```
 
-### BootstrapHead configuration
-
 ```rust
+use dioxus::prelude::*;
 use dioxus_bootstrap_css::prelude::*;
 
-// New project (use bundled Bootstrap 5.3.3):
-BootstrapHead {}
+fn app() -> Element {
+    rsx! {
+        BootstrapHead {}
+        // your app
+    }
+}
+```
 
-// Migrating from SSR (match existing Bootstrap version exactly):
+`BootstrapHead {}` loads bundled Bootstrap CSS and Bootstrap Icons. When an
+existing server-rendered app used a different Bootstrap build, point
+`BootstrapHead` at local assets while migrating:
+
+```rust
 BootstrapHead {
     css: BootstrapCss::Url("/static/vendor/bootstrap/bootstrap.min.css".into()),
     icons: BootstrapIcons::Url("/static/vendor/bootstrap-icons/font/bootstrap-icons.css".into()),
 }
-
-// Also load your app's custom CSS:
-link { rel: "stylesheet", href: "/static/css/styles.css" }
 ```
 
-### Static asset proxy
+Do not load Bootstrap from a CDN in the migrated app. The crate is designed for
+offline-first bundled assets.
 
-If the SPA is on a different domain/port than the SSR backend, proxy `/static/` requests:
+## Fidelity Rule
 
-```nginx
-# nginx.conf
-server {
-    listen 80;
-    server_name spa.example.com;
-    location /static/ { proxy_pass http://backend:8000/static/; }
-    location / { proxy_pass http://frontend:80; }
-}
-```
+`tools/check-no-raw-bootstrap.mjs` is a completeness gate, not a
+visual-fidelity proof.
 
-## Step 3: The Conversion Method
+It proves raw Bootstrap component classes, remote Bootstrap assets, and
+Bootstrap JavaScript are gone. It cannot prove the replacement typed component
+received equivalent props. A conversion can pass the gate and still look wrong
+if it drops intent such as color, outline, size, href, state, or slot structure.
 
-For EACH page:
+Use the three-layer migration system:
 
-### 3a. Dump the SSR DOM
+1. **Converter:** maps Bootstrap intent to typed component props.
+2. **Gate:** rejects remaining raw Bootstrap, CDN assets, and Bootstrap JS.
+3. **Visual regression:** verifies the converted UI still looks the same.
 
-```bash
-chromium --headless --disable-gpu --virtual-time-budget=5000 \
-  --dump-dom "https://ssr.example.com/page" > /tmp/ssr_page.html
-```
+Lint-green is not the same as pixel-identical.
 
-### 3b. Read the DOM, write RSX
+## Converter Rule
 
-Match the HTML structure exactly — same classes, same nesting, same text.
+The converter maps Bootstrap intent to the crate API. It must preserve residual
+utility classes, inline styles, event handlers, keys, children, and nested
+layout while turning component classes into typed components.
 
-### 3c. Use crate components for interactive elements
+The converter follows four rules:
 
-**NEVER use `data-bs-toggle` or any `data-bs-*` attributes.** Bootstrap JavaScript is NOT loaded in WASM.
-
-### 3d. Take screenshots and compare
-
-```bash
-node tests/perceptual_diff.mjs
-```
-
-## Step 4: Component Mapping
-
-### Interactive components (replace Bootstrap JS with Dioxus signals)
-
-| Bootstrap HTML | Dioxus RSX | Signal |
-|---------------|------------|--------|
-| `<div class="accordion">` + `data-bs-toggle="collapse"` | `Accordion { open }` + `AccordionItem { index, title, open }` | `Signal<Option<usize>>` |
-| `<div class="modal fade">` + `data-bs-toggle="modal"` | `Modal { show, title, body, footer }` | `Signal<bool>` |
-| `<div class="dropdown">` + `data-bs-toggle="dropdown"` | `Dropdown { open, toggle, menu }` | `Signal<bool>` |
-| `<div class="collapse navbar-collapse">` | `NavbarCollapse { collapsed }` | `Signal<bool>` |
-| `<button class="navbar-toggler">` | `NavbarToggler { collapsed }` | `Signal<bool>` |
-| `<div class="collapse">` | `Collapse { expanded }` | `Signal<bool>` |
-| `<div class="offcanvas">` | `Offcanvas { show }` | `Signal<bool>` |
-| `<div class="toast">` | `Toast { show }` | `Signal<bool>` |
-| `<ul class="nav nav-tabs">` | `TabList` (alias `Tabs`) with `Vec<TabDef>` | `Signal<usize>` |
-
-### CSS-only components (no signals needed)
-
-| Bootstrap HTML | Dioxus RSX |
-|---------------|------------|
-| `<div class="card"><div class="card-body">` | `Card { body: rsx!{...}, header: rsx!{...}, footer: rsx!{...} }` |
-| `<button class="btn btn-primary">` | `Button { color: Color::Primary, "Text" }` |
-| `<button class="btn btn-sm btn-outline-danger">` | `Button { color: Color::Danger, size: Size::Sm, outline: true, "Text" }` |
-| `<table class="table table-striped">` | `Table { striped: true, hover: true }` |
-| `<div class="alert alert-danger">` | `Alert { color: Color::Danger, "Text" }` |
-| `<span class="badge bg-success">` | `Badge { color: Color::Success, "Text" }` |
-| `<div class="spinner-border">` | `Spinner { color: Some(Color::Primary) }` |
-| `<div class="container">` | `Container {}` or `Container { fluid: true }` |
-| `<div class="progress"><div class="progress-bar">` | `Progress { ProgressBar { value: 75 } }` |
-| `<nav aria-label="breadcrumb">` | `Breadcrumb { BreadcrumbItem { "Home" } }` |
-
-### Layout (use plain RSX)
-
-```rust
-// Grid
-div { class: "container",
-    div { class: "row",
-        div { class: "col-md-6", "Left" }
-        div { class: "col-md-6", "Right" }
-    }
-}
-
-// Or use typed components:
-Container {
-    Row {
-        Col { md: ColumnSize::Span(6), "Left" }
-        Col { md: ColumnSize::Span(6), "Right" }
-    }
-}
-```
-
-## Converter workflow
-
-The converter follows three rules:
-
-1. **Bootstrap parity lives in the crate.** If Bootstrap supports a component state, class, structure, size, color, wrapper, or interaction pattern, `dioxus-bootstrap-css` should expose a typed way to express it 1-to-1.
-2. **The converter maps Bootstrap intent to the crate API.** It rewrites raw Bootstrap RSX to typed components and props, preserving residual utility classes, attributes, handlers, children, and nested layout.
-3. **Every limitation feeds back upstream.** A failed conversion is classified as a crate parity gap, converter gap, or manual-review case. Do not leave downstream projects with permanent Bootstrap workarounds.
+1. **Bootstrap parity lives in the crate.** If Bootstrap supports component
+   state, class, structure, size, color, wrapper, or interaction pattern,
+   `dioxus-bootstrap-css` should expose a typed way to express it.
+2. **Static intent is converted deterministically.** Common static RSX gets
+   rewritten to typed components and props.
+3. **Unsafe intent is flagged, not guessed.** Conditional or dynamic class
+   strings, ambiguous nesting, and unsupported component shapes are reported for
+   manual review.
+4. **Limitations feed back upstream.** Classify every failed conversion as a
+   crate parity gap, converter gap, or manual-review case. Do not leave
+   downstream projects with permanent Bootstrap workarounds.
 
 Run the converter in dry-run mode first:
 
@@ -164,7 +85,7 @@ Run the converter in dry-run mode first:
 node tools/migrate-bootstrap-rsx.mjs path/to/app/src
 ```
 
-Check mode fails if safe rewrites are available:
+Check mode fails when safe rewrites are available:
 
 ```bash
 node tools/migrate-bootstrap-rsx.mjs --check path/to/app/src
@@ -176,7 +97,7 @@ Write mode applies safe conversions:
 node tools/migrate-bootstrap-rsx.mjs --write path/to/app/src
 ```
 
-The first supported mappings cover common static RSX cases:
+Supported static mappings include:
 
 - `button.btn` / `a.btn` -> `Button`
 - `div.card` with `card-header` / `card-body` / `card-footer` slots -> `Card`
@@ -188,7 +109,7 @@ The first supported mappings cover common static RSX cases:
 - `textarea.form-control` -> `Textarea`
 - `table.table` -> `Table`
 
-Examples:
+Example:
 
 ```rust
 // Raw Bootstrap
@@ -213,11 +134,12 @@ Bare neutral buttons are explicit:
 
 ```rust
 button { class: "btn btn-sm", "Cancel" }
+
 // becomes
 Button { plain: true, size: Size::Sm, "Cancel" }
 ```
 
-Dynamic class strings are flagged for review rather than guessed:
+Dynamic component classes are manual-review cases:
 
 ```rust
 button {
@@ -226,99 +148,102 @@ button {
 }
 ```
 
-If a raw Bootstrap case cannot be represented by typed props, fix the crate first, release a new version, then continue the downstream migration.
+The converter should report this instead of guessing which typed props to emit.
 
-## Step 5: Visual Testing
+## Component Mapping
 
-### Setup
+### Interactive Components
+
+Bootstrap JavaScript is not loaded. Replace JS attributes with Dioxus state.
+
+| Bootstrap shape | Dioxus shape | State |
+| --- | --- | --- |
+| `data-bs-toggle="modal"` | `Modal { show, ... }` | `Signal<bool>` |
+| dropdown + `data-bs-toggle` | `Dropdown { open, ... }` | `Signal<bool>` |
+| `.collapse` | `Collapse { expanded, ... }` | `Signal<bool>` |
+| navbar collapse | `NavbarToggler` + `NavbarCollapse` | `Signal<bool>` |
+| tabs | `TabList` / `Tabs` | `Signal<usize>` |
+| accordion | `Accordion` / `AccordionItem` | `Signal<Option<usize>>` |
+| offcanvas | `Offcanvas { show, ... }` | `Signal<bool>` |
+| toast | `Toast { show, ... }` | `Signal<bool>` |
+
+Never keep `data-bs-*`, `bootstrap.bundle.js`, or `new bootstrap.*` in a Dioxus
+WASM app.
+
+### CSS-Only Components
+
+| Bootstrap shape | Dioxus shape |
+| --- | --- |
+| `btn btn-primary` | `Button { color: Color::Primary }` |
+| `btn btn-outline-danger btn-sm` | `Button { color: Color::Danger, outline: true, size: Size::Sm }` |
+| bare `btn` | `Button { plain: true }` |
+| `card` + header/body/footer | `Card { header, body, footer }` |
+| `alert alert-warning` | `Alert { color: Color::Warning }` |
+| `badge text-bg-success` | `Badge { color: Color::Success }` |
+| `spinner-border text-primary` | `Spinner { color: Some(Color::Primary) }` |
+| `table table-striped table-hover` | `Table { striped: true, hover: true }` |
+
+Layout and utility classes stay ordinary class strings unless a typed component
+has a dedicated prop. Keep `container`, `row`, `col-*`, `d-flex`, spacing
+utilities, text utilities, `form-label`, `card-title`, and similar classes where
+they are pure layout or text styling.
+
+## Migration Workflow
+
+1. Dump or inspect the existing DOM.
+2. Run the converter in dry-run mode.
+3. Review warnings. Fix crate parity gaps upstream; handle manual-review cases
+   intentionally.
+4. Run the converter with `--write`.
+5. Run `cargo check` or the consumer app's normal build.
+6. Run the no-raw-Bootstrap gate:
 
 ```bash
-cd tests
-npm init -y
-npm install pixelmatch pngjs
+node tools/check-no-raw-bootstrap.mjs path/to/app/src
 ```
 
-### Test script
+7. Run Playwright visual regression, or manually compare screenshots when no
+   golden baseline exists yet.
 
-The test script (`perceptual_diff.mjs`) uses:
-1. **DOM canary wait** — waits for a specific element (e.g., footer text) before screenshotting
-2. **3-run best score** — eliminates timing noise
-3. **pixelmatch** — anti-aliasing aware comparison (ignores font rendering differences)
+## Visual Regression
 
-### Threshold
+Screenshot checks are the only layer that proves visual fidelity. They catch
+wrong colors, missing outlines, changed spacing, font differences, and slot
+structure mistakes that the converter and gate cannot prove.
 
-- **<1% perceptual diff = PASS** (industry standard for SSR→SPA)
-- 0.01-0.05% = pixel-perfect (rendering engine floor)
-- 0.05-0.5% = excellent (minor rendering differences)
-- 0.5-1% = good (tiny structural differences)
-- >1% = structural issue to fix
+Recommended checks:
 
-### Run
+- Wait for a stable DOM canary before taking screenshots.
+- Compare light and dark themes when the app supports them.
+- Use a small threshold for anti-aliasing noise.
+- Treat deliberate visual changes as explicit test fixture updates.
 
-```bash
-node tests/perceptual_diff.mjs
-```
+## Definition Of Done
 
-## Step 6: Enforce — the migration gate
+A migration is done when:
 
-### What "raw Bootstrap" means
-
-Plain Bootstrap is used by hand-writing its class names (`<button class="btn btn-primary">`) and loading its CSS and JavaScript bundle. This crate replaces that with typed Rust components (`Button { color: Color::Primary }`) and CSS bundled into the binary. **"Raw Bootstrap" is anything that bypasses the crate**: hand-written component class strings, a remote stylesheet, or Bootstrap's JS. A finished migration contains none of it. The gate, `tools/check-no-raw-bootstrap.mjs`, makes that mechanical instead of a thing reviewers have to remember.
-
-### Why it fails on three things
-
-1. **CDN** — a remote `<link>`/`<script>` to Bootstrap. A sovereign or offline machine cannot reach it and the app renders unstyled. The crate bundles its assets through `BootstrapHead`, so no remote fetch is needed.
-2. **JS** — Bootstrap's JavaScript (`data-bs-toggle`, `bootstrap.bundle.min.js`, `new bootstrap.Modal(...)`). That JS is never loaded in a WASM app, so a `data-bs-toggle="modal"` button *looks* right but does nothing. Interactive widgets must be the crate's signal-driven components.
-3. **Raw classes** — a component class string like `class="card"` or `class="btn btn-primary"` instead of `Card {}` / `Button {}`. This loses the type safety and styling consistency the crate exists to provide.
-
-### What stays raw (allowed)
-
-Layout and utilities have no component and are meant to be written directly: `container`, `row`, `col-*`, spacing (`m-*`/`p-*`), flex (`d-flex`), text (`text-*`), `form-label`. Also allowed are *content* classes that live inside a component and have no typed equivalent: `card-title`, `card-text`, `modal-title`. The gate knows this difference, so it flags `card` but not `card-title`.
-
-### How to run it
-
-```bash
-node tools/check-no-raw-bootstrap.mjs path/to/your-app/src   # any consumer crate, point at your src
-npm run lint:bootstrap                                        # the bundled examples
-```
-
-It scans `.rs`, `.html`, and `.js` (not `.css`, where bundled Bootstrap legitimately contains these tokens, and not this crate's own `crates/`, which is what *emits* the classes). A clean port prints `OK` and exits 0. A violation prints each `file:line`, which rule tripped, and the offending line, then exits 1. It is wired into CI here next to clippy; wire it into the consumer's CI the same way. **A migration is done when this exits 0.**
-
-## Common Mistakes
-
-| Mistake | Consequence | Fix |
-|---------|-------------|-----|
-| Using `data-bs-toggle` | Clicks do nothing (no Bootstrap JS) | Use crate signal-based components |
-| Hand-rolling modals with `div.modal.d-block` | No backdrop/escape/animation | Use `Modal { show, title, body, footer }` |
-| Adding `fw-bold` to active nav link | Bolder than SSR | SSR uses `nav-link active` (brighter, not bold) |
-| All nav items in one `<ul>` | Can't right-align | Use separate `<ul>` groups with `me-auto` |
-| Using `BootstrapHead {}` with different Bootstrap version | Layout mismatches | Use `BootstrapHead { css: BootstrapCss::Url("...") }` |
-| Not using `--virtual-time-budget` in screenshots | Blank WASM page | Always use 15000+ ms budget |
-| Inventing designs instead of copying SSR DOM | Wastes iteration cycles | Dump DOM first, copy exactly |
-| Changing navbar when fixing other pages | Regresses passing pages | Never change shared components without measuring all pages |
-
-## Crate Audit Results
-
-All 32 components audited against Bootstrap 5.3 HTML docs:
-- **30 of 32 correct** — produce exact Bootstrap HTML
-- **2 bugs fixed in v0.3.0** (NavbarCollapse wrapper, Navbar dark theme attribute)
-- **v0.3.1** added configurable `BootstrapHead`
+- the converter rewrites common static RSX cases deterministically.
+- unsafe cases are reported with file and line, not silently transformed.
+- the migrated app passes `cargo check` or its normal build.
+- `tools/check-no-raw-bootstrap.mjs` exits clean.
+- visual regression confirms typed output matches the raw Bootstrap baseline, or
+  an intentional visual change is documented and accepted.
 
 ## AI Agent Prompt
 
-For AI-assisted conversion, use this prompt:
+Use this when asking an AI coding agent to migrate a page:
 
-```
-Convert this Bootstrap HTML template to Dioxus RSX using dioxus-bootstrap-css 0.3.1:
-
-[paste HTML here]
+```text
+Convert Bootstrap HTML/RSX to Dioxus RSX using dioxus-bootstrap-css 0.5.
 
 Rules:
-1. Match the HTML structure exactly — same classes, same nesting, same text
-2. Use dioxus-bootstrap-css components for interactive elements (see mapping table)
-3. NEVER use data-bs-toggle or any data-bs-* attributes
-4. Use plain div { class: "..." } for static Bootstrap layout
-5. Load CSS via BootstrapHead { css: BootstrapCss::Url("...") } if migrating from SSR
-6. All interactive state via Dioxus signals (use_signal)
-7. The port is done only when `node tools/check-no-raw-bootstrap.mjs <src>` exits 0 (see Step 6)
+1. Match the existing DOM structure unless a typed component requires a wrapper.
+2. Replace Bootstrap JS behavior with Dioxus signals.
+3. Never keep data-bs-* attributes or Bootstrap JavaScript.
+4. Map component intent to typed props; do not drop color, outline, size, href,
+   target, state, or slot information.
+5. Preserve residual utility classes, layout, and spacing.
+6. Flag dynamic or ambiguous class strings instead of guessing.
+7. Run the converter, no-raw-Bootstrap gate, cargo checks, and screenshot
+   comparison before calling the migration done.
 ```

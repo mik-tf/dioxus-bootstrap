@@ -5,34 +5,38 @@
 [![CI](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml/badge.svg)](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml)
 [![docs.rs](https://img.shields.io/docsrs/dioxus-bootstrap-css)](https://docs.rs/dioxus-bootstrap-css)
 
-Complete 1-to-1 [Bootstrap 5.3](https://getbootstrap.com/) component library for [Dioxus](https://dioxuslabs.com/). 50+ components covering every Bootstrap CSS class and JS behavior — modals, dropdowns, carousel, accordion, offcanvas, tooltips, and more — all driven by Dioxus signals. Zero JavaScript. Offline-first. Type-safe.
+Bootstrap 5.3 components for Dioxus. The crate uses real Bootstrap CSS and
+Bootstrap Icons, bundles assets for offline-first apps, and replaces Bootstrap
+JavaScript behavior with Dioxus signals.
 
-**[Live Showcase](https://mik-tf.github.io/dioxus-bootstrap-css/)** | **[API Docs](https://docs.rs/dioxus-bootstrap-css)**
+**Live showcase:** https://mik-tf.github.io/dioxus-bootstrap-css/
 
-> **Design rule:** If Bootstrap does it, we do it. If Bootstrap doesn't, we don't.
+**API docs:** https://docs.rs/dioxus-bootstrap-css
 
-## Why?
+> Design rule: if Bootstrap does it, this crate should expose a typed Dioxus
+> way to express it. If Bootstrap does not do it, this crate should not invent
+> it.
 
-- **Pixel-perfect** — Uses the actual Bootstrap 5.3.3 CSS, not a reimplementation
-- **Zero JavaScript** — Modals, dropdowns, tabs, collapse, accordion, offcanvas, carousel — all driven by Dioxus signals
-- **Offline-first** — CSS and icon fonts bundled as static assets via `asset!()`
-- **Type-safe** — Bootstrap classes become Rust enums and props; no magic strings
-- **Drop-in migration** — Convert Bootstrap HTML templates to RSX with minimal changes
+## Why
+
+- Pixel fidelity by using Bootstrap 5.3 CSS instead of a reimplementation.
+- Zero Bootstrap JavaScript; interactions are driven by Dioxus state.
+- Offline-first CSS and icon assets through `BootstrapHead`.
+- Type-safe component props for color, size, state, slots, and variants.
+- Migration tools for converting raw Bootstrap RSX into typed components.
 
 ## Quick Start
-
-Add it with `cargo add` (always pulls the latest release):
 
 ```sh
 cargo add dioxus-bootstrap-css
 ```
 
-Or pin it in your `Cargo.toml`:
+Or pin it in `Cargo.toml`:
 
 ```toml
 [dependencies]
 dioxus = { version = "0.7", features = ["web"] }
-dioxus-bootstrap-css = "0.4"
+dioxus-bootstrap-css = "0.5"
 ```
 
 ```rust
@@ -47,29 +51,21 @@ fn app() -> Element {
     let theme = use_signal(|| Theme::Dark);
 
     rsx! {
-        ThemeProvider { theme: theme }
+        ThemeProvider { theme }
         BootstrapHead {}
-
         Container { class: "py-4",
-            h1 { "Hello, Bootstrap!" }
             Row { class: "g-3",
                 Col { md: ColumnSize::Span(6),
                     Card {
                         header: rsx! { "Getting Started" },
                         body: rsx! {
-                            p { "Bootstrap in Dioxus — fully offline, fully Rust." }
-                            Button { color: Color::Primary,
-                                Icon { name: "rocket-takeoff", class: "me-1" }
-                                "Launch"
-                            }
+                            p { "Bootstrap in Dioxus - fully offline, fully Rust." }
+                            Button { color: Color::Primary, "Launch" }
                         },
                     }
                 }
                 Col { md: ColumnSize::Span(6),
-                    Alert { color: Color::Success,
-                        Icon { name: "check-circle", class: "me-2" }
-                        "Everything works out of the box."
-                    }
+                    Alert { color: Color::Success, "Everything works out of the box." }
                 }
             }
         }
@@ -79,150 +75,98 @@ fn app() -> Element {
 
 ## Components
 
-### Layout & Head
-| Component | Description |
-|-----------|-------------|
-| `BootstrapHead` | Loads Bootstrap CSS + Icons (bundled, offline) |
-| `ThemeProvider` | Sets `data-bs-theme` on `<html>` reactively |
-| `ThemeToggle` | Dark/light mode toggle button |
-| `Container` | `.container` / `.container-fluid` |
-| `Row` | `.row` with gutter support |
-| `Col` | Responsive columns (`xs`, `sm`, `md`, `lg`, `xl`, `xxl`) |
+Layout and head:
 
-### Content
-| Component | Description |
-|-----------|-------------|
-| `Button` | All variants, sizes, outlines; link-buttons via `href`, `target`, `download` |
-| `ButtonGroup` / `ButtonToolbar` | Button groups and toolbars |
-| `Card` | Cards with `header`, `body`, `footer` slots |
-| `Alert` | Dismissible alerts with `on_dismiss` callback |
-| `Badge` | Badges and pills |
-| `Icon` | Bootstrap Icons (`bi-{name}`) |
-| `Spinner` | Border and grow spinners |
-| `Progress` / `ProgressBar` | Progress bars (striped, animated, stacked) |
-| `Placeholder` / `PlaceholderParagraph` | Loading placeholder elements |
-| `Figure` | Figures with captions |
-| `Ratio` | Responsive aspect ratio embeds |
+- `BootstrapHead`
+- `ThemeProvider`, `ThemeToggle`
+- `Container`, `Row`, `Col`
 
-### Data Display
-| Component | Description |
-|-----------|-------------|
-| `Table` | Striped, striped-columns, hover, bordered, responsive tables |
-| `ListGroup` / `ListGroupItem` | List groups (flush, active, disabled, colored) |
-| `Pagination` | Page navigation with ellipsis |
+Content and data display:
 
-### Forms
-| Component | Description |
-|-----------|-------------|
-| `FormGroup` | Form group wrapper |
-| `Input` | Text inputs with all HTML types |
-| `Select` | Select dropdowns |
-| `Textarea` | Multi-line text input |
-| `Checkbox` / `Radio` / `Switch` | Check, radio, and switch inputs |
-| `Range` | Range slider |
-| `FloatingLabel` | Floating label inputs |
-| `InputGroup` / `InputGroupText` | Input groups with addons |
-| `FormFeedback` / `FormText` | Validation feedback and help text |
+- `Button`, `ButtonGroup`, `ButtonToolbar`
+- `Card`, `Alert`, `Badge`, `Icon`, `Spinner`
+- `Progress`, `ProgressBar`, `Placeholder`, `Figure`, `Ratio`
+- `Table`, `ListGroup`, `Pagination`
 
-### Interactive (Signal-Driven, Zero JS)
-| Component | Bootstrap JS Replaced |
-|-----------|----------------------|
-| `Modal` | `data-bs-toggle="modal"` (sizes, fullscreen, centered, scrollable) |
-| `Dropdown` / `DropdownItem` / `DropdownDivider` / `DropdownHeader` | `data-bs-toggle="dropdown"` + click-outside-to-close |
-| `Collapse` | `data-bs-toggle="collapse"` |
-| `Tabs` / `Tab` / `TabList` | Tab switching (pills, fill, justified, vertical) |
-| `Accordion` / `AccordionItem` | Accordion toggle logic |
-| `Offcanvas` | `data-bs-toggle="offcanvas"` (placements, responsive) |
-| `Toast` / `ToastContainer` | Toast show/dismiss with headerless mode and `on_dismiss` callback |
-| `Carousel` | Slide/fade transitions, auto-play, pause-on-hover, keyboard nav, touch swipe |
-| `Tooltip` | CSS-positioned tooltips (top, bottom, start, end) |
-| `Popover` | Click-to-toggle popovers with click-outside-to-close |
-| `Scrollspy` | Scroll-aware section tracking via signals |
+Forms:
 
-### Navigation
-| Component | Description |
-|-----------|-------------|
-| `Navbar` | Responsive navbar with color schemes |
-| `NavbarToggler` / `NavbarCollapse` | Mobile hamburger toggle |
-| `Nav` / `NavItem` / `NavLink` | Nav (pills, tabs, underline, fill, justified, vertical) |
-| `Breadcrumb` / `BreadcrumbItem` | Breadcrumb navigation |
+- `FormGroup`, `Input`, `Select`, `Textarea`
+- `Checkbox`, `Radio`, `Switch`, `Range`
+- `FloatingLabel`, `InputGroup`, `FormFeedback`, `FormText`
+
+Interactive components:
+
+- `Modal`, `Dropdown`, `Collapse`, `Tabs`, `TabList`
+- `Accordion`, `Offcanvas`, `Toast`, `Carousel`
+- `Tooltip`, `Popover`, `Scrollspy`
+- `Navbar`, `NavbarToggler`, `NavbarCollapse`, `Nav`, `Breadcrumb`
 
 ## Dark Mode
 
 ```rust
 let theme = use_signal(|| Theme::Dark);
+
 rsx! {
-    ThemeProvider { theme: theme }
+    ThemeProvider { theme }
     BootstrapHead {}
-    ThemeToggle { theme: theme }  // sun/moon toggle button
+    ThemeToggle { theme }
 }
 ```
 
-`ThemeProvider` reactively sets `data-bs-theme` on `<html>` — Bootstrap handles the rest.
+`ThemeProvider` sets `data-bs-theme` on the document and lets Bootstrap handle
+the rest.
 
-## How It Works
+## Migration From Bootstrap HTML
 
+Convert Bootstrap HTML or raw Bootstrap RSX by replacing component classes with
+typed components:
+
+```rust
+Button {
+    color: Color::Secondary,
+    outline: true,
+    size: Size::Sm,
+    class: "border-0",
+    "Refresh"
+}
 ```
-+-------------------------------------+
-|          Your Dioxus App            |
-|  +-------------------------------+  |
-|  |    dioxus-bootstrap-css       |  |
-|  |  +-----------+ +------------+ |  |
-|  |  | Bootstrap | | Dioxus RSX | |  |
-|  |  | 5.3 CSS   | | Components | |  |
-|  |  | + Icons   | | + Signals  | |  |
-|  |  +-----------+ +------------+ |  |
-|  +-------------------------------+  |
-+-------------------------------------+
+
+Key principles:
+
+- Use Bootstrap utility classes (`small`, `py-2`, `mb-0`) for layout and spacing.
+- Use component props (`color`, `outline`, `size`, `header_class`, `responsive`)
+  for component intent.
+- Replace Bootstrap JavaScript with Dioxus signals.
+- Treat `tools/check-no-raw-bootstrap.mjs` as a completeness gate, not a
+  visual-fidelity proof.
+- Let the converter map Bootstrap intent to props, flag unsafe cases instead of
+  guessing, then prove fidelity with Playwright screenshots.
+
+See [docs/MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md) for the complete
+workflow.
+
+## Tools
+
+```bash
+node tools/migrate-bootstrap-rsx.mjs path/to/app/src
+node tools/migrate-bootstrap-rsx.mjs --check path/to/app/src
+node tools/migrate-bootstrap-rsx.mjs --write path/to/app/src
+
+node tools/check-no-raw-bootstrap.mjs path/to/app/src
+npm run lint:bootstrap
 ```
 
-- **CSS** — Real `bootstrap.min.css` and `bootstrap-icons.min.css`, bundled via `asset!()`
-- **Icons** — Font files inlined as base64 data URIs (works with Dioxus asset hashing)
-- **Signals** — Replace all Bootstrap JS behaviors; no `<script>` tags needed
-- **Components** — Type-safe RSX wrappers that emit standard Bootstrap HTML classes
+[tools/README.md](tools/README.md) documents the converter and migration gate.
 
 ## Examples
 
-See the [`examples/`](https://github.com/mik-tf/dioxus-bootstrap-css/tree/development/examples) directory:
-
-- **[showcase](https://mik-tf.github.io/dioxus-bootstrap-css/)** — Every component demonstrated in a tabbed interface ([live demo](https://mik-tf.github.io/dioxus-bootstrap-css/))
-- **dashboard** — Realistic admin dashboard with navbar, tables, modals, charts
-
-## Migration from Bootstrap HTML
-
-Convert Bootstrap HTML to Dioxus RSX by replacing HTML elements with typed components:
-
-```rust
-Navbar { expand: NavbarExpand::Lg, class: "bg-body-tertiary border-bottom",
-    brand: rsx! { a { class: "navbar-brand", href: "#", "MyApp" } },
-}
-Container { fluid: true, class: "py-4",
-    Row { class: "g-3",
-        Col { lg: ColumnSize::Span(3),
-            Card { class: "mb-3", header_class: "py-2", body_class: "py-2",
-                header: rsx! { span { class: "small", "Title" } },
-                body: rsx! { Table { size: Size::Sm, class: "mb-0 small", /* ... */ } },
-            }
-        }
-        Col { lg: ColumnSize::Span(9),
-            TabList { active: active_tab, tabs: vec![/* ... */] }
-        }
-    }
-}
-```
-
-**Key principles:**
-
-- **Use Bootstrap utility classes** (`small`, `py-2`, `btn-sm`, `mb-0`) instead of custom CSS
-- **Use component props** (`header_class`, `body_class`, `responsive: true`) instead of wrapper divs
-- **Signals replace JavaScript** — `Signal<bool>` for modals/dropdowns, `Signal<usize>` for tabs/carousel
-
-See [docs/MIGRATION.md](https://github.com/mik-tf/dioxus-bootstrap-css/blob/development/docs/MIGRATION.md) for the complete HTML-to-RSX migration guide.
+- `examples/showcase` demonstrates the component set.
+- `examples/dashboard` is a compact admin dashboard example.
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for version history.
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-Apache 2.0 — Project Mycelium 2026
+Apache-2.0.
