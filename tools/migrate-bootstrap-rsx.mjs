@@ -12,6 +12,45 @@ const SLOT_CLASSES = new Map([
   ['card-body', 'body'],
   ['card-footer', 'footer'],
 ]);
+const DYNAMIC_COMPONENT_EXACT = new Set([
+  'btn',
+  'badge',
+  'card',
+  'card-body',
+  'card-header',
+  'card-footer',
+  'card-group',
+  'alert',
+  'table',
+  'modal',
+  'modal-dialog',
+  'modal-content',
+  'modal-header',
+  'modal-body',
+  'modal-footer',
+  'collapse',
+  'progress',
+  'progress-bar',
+  'pagination',
+  'page-item',
+  'page-link',
+]);
+const DYNAMIC_COMPONENT_PREFIXES = [
+  'btn-',
+  'alert-',
+  'table-',
+  'spinner-',
+  'form-control',
+  'form-select',
+  'dropdown',
+  'navbar',
+  'offcanvas',
+  'toast',
+  'accordion',
+  'breadcrumb',
+  'list-group',
+  'carousel',
+];
 
 function isWord(ch) {
   return /[A-Za-z0-9_-]/.test(ch || '');
@@ -180,7 +219,8 @@ function findTopLevelClassAttr(content) {
     j += 1;
     while (/\s/.test(content[j] || '')) j += 1;
     if (content[j] !== '"') {
-      return { dynamic: true, start: i, end: readAttrEnd(content, j) };
+      const end = readAttrEnd(content, j);
+      return { dynamic: true, start: i, end, expression: content.slice(j, end) };
     }
     const valueStart = j + 1;
     const valueEnd = skipString(content, j) - 1;
@@ -238,6 +278,25 @@ function residual(tokens, consumed) {
 
 function tokenSet(classValue) {
   return classValue.split(/\s+/).filter(Boolean);
+}
+
+function isBootstrapComponentToken(token) {
+  return DYNAMIC_COMPONENT_EXACT.has(token) || DYNAMIC_COMPONENT_PREFIXES.some((prefix) => token.startsWith(prefix));
+}
+
+function dynamicClassHasComponentToken(expression) {
+  for (let i = 0; i < expression.length; i += 1) {
+    const ignoredEnd = skipIgnored(expression, i);
+    if (ignoredEnd === null || expression[i] !== '"') {
+      if (ignoredEnd !== null) i = ignoredEnd - 1;
+      continue;
+    }
+    const valueEnd = skipString(expression, i) - 1;
+    const value = expression.slice(i + 1, valueEnd);
+    if (tokenSet(value).some(isBootstrapComponentToken)) return true;
+    i = valueEnd;
+  }
+  return false;
 }
 
 function hasTopLevelAttrs(content) {
@@ -582,13 +641,15 @@ function transformRsxBody(body, file, lineBase, warnings) {
     if (RAW_TAGS.has(element.tag)) {
       const classAttr = findTopLevelClassAttr(transformedContent);
       if (classAttr?.dynamic) {
-        const loc = lineCol(out, element.start);
-        warnings.push({
-          kind: 'manual_review',
-          file,
-          line: lineBase + loc.line - 1,
-          message: `${element.tag} has dynamic class; converter cannot safely map Bootstrap intent`,
-        });
+        if (dynamicClassHasComponentToken(classAttr.expression)) {
+          const loc = lineCol(out, element.start);
+          warnings.push({
+            kind: 'manual_review',
+            file,
+            line: lineBase + loc.line - 1,
+            message: `${element.tag} has dynamic Bootstrap component class; converter cannot safely map Bootstrap intent`,
+          });
+        }
       } else if (classAttr) {
         const mapping = mapElement(element.tag, classAttr.value);
         if (mapping?.card) {

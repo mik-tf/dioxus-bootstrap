@@ -33,4 +33,8 @@ assertEqual('dynamic unchanged', dynamic.source, read('dynamic.input.rs'));
 assertEqual('dynamic warning count', String(dynamic.warnings.length), '1');
 assertEqual('dynamic warning kind', dynamic.warnings[0].kind, 'manual_review');
 
+const dynamicUtility = transformSource(read('dynamic-utility.input.rs'), 'dynamic-utility.input.rs');
+assertEqual('dynamic utility unchanged', dynamicUtility.source, read('dynamic-utility.input.rs'));
+assertEqual('dynamic utility warnings', JSON.stringify(dynamicUtility.warnings), '[]');
+
 console.log('OK migrate-bootstrap-rsx fixtures passed');
