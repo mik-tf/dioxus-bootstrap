@@ -28,10 +28,23 @@ jobs:
             source "$HOME/.cargo/env"
           fi
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          rustup toolchain install stable --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
+
+          retry() {
+            for attempt in 1 2 3; do
+              "$@" && return 0
+              sleep $((attempt * 5))
+            done
+            "$@"
+          }
+
+          if ! rustup toolchain list | grep -Eq '^stable[^[:space:]]*'; then
+            retry rustup toolchain install stable --profile minimal
+          fi
           rustup default stable
-          apt-get update
-          apt-get install -y nodejs npm jq curl
+          retry rustup component add --toolchain stable rustfmt clippy
+          retry rustup target add --toolchain stable wasm32-unknown-unknown
+          retry apt-get update
+          retry apt-get install -y nodejs npm jq curl
       - name: Verify release tag matches crate version
         run: |
           set -euo pipefail

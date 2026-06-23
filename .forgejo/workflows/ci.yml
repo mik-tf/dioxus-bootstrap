@@ -27,10 +27,23 @@ jobs:
             source "$HOME/.cargo/env"
           fi
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          rustup toolchain install stable --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
+
+          retry() {
+            for attempt in 1 2 3; do
+              "$@" && return 0
+              sleep $((attempt * 5))
+            done
+            "$@"
+          }
+
+          if ! rustup toolchain list | grep -Eq '^stable[^[:space:]]*'; then
+            retry rustup toolchain install stable --profile minimal
+          fi
           rustup default stable
-          apt-get update
-          apt-get install -y nodejs npm
+          retry rustup component add --toolchain stable rustfmt clippy
+          retry rustup target add --toolchain stable wasm32-unknown-unknown
+          retry apt-get update
+          retry apt-get install -y nodejs npm
       - name: Format check
         run: cargo fmt --all -- --check
       - name: Clippy library
@@ -65,6 +78,16 @@ jobs:
             source "$HOME/.cargo/env"
           fi
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          rustup toolchain install 1.85.0 --profile minimal --target wasm32-unknown-unknown
+
+          retry() {
+            for attempt in 1 2 3; do
+              "$@" && return 0
+              sleep $((attempt * 5))
+            done
+            "$@"
+          }
+
+          retry rustup toolchain install 1.85.0 --profile minimal
+          retry rustup target add --toolchain 1.85.0 wasm32-unknown-unknown
       - name: Build on MSRV
         run: cargo +1.85.0 check --target wasm32-unknown-unknown -p dioxus-bootstrap-css
