@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.4] — NavbarNav dogfood release
+
 ### Added
 
 - `NavbarNav`: typed wrapper for Bootstrap's `.navbar-nav` list, including `scroll: true` for `.navbar-nav-scroll`.
