@@ -1009,8 +1009,8 @@ fn MediaSection() -> Element {
 
 #[component]
 fn NavigationSection() -> Element {
-    let body_scrollspy_active = use_signal(|| String::new());
-    let custom_scrollspy_active = use_signal(|| String::new());
+    let body_scrollspy_active = use_signal(String::new);
+    let custom_scrollspy_active = use_signal(String::new);
     let mut show_dynamic_scrollspy_section = use_signal(|| false);
     let custom_refresh_key = if *show_dynamic_scrollspy_section.read() {
         1
