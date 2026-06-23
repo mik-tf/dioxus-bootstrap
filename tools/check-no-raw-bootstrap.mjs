@@ -56,6 +56,12 @@ const JS_DATA_RE = /\bdata-bs-[a-z-]+/g;
 const JS_API_RE = /\b(bootstrap\.bundle(?:\.min)?\.js|bootstrap(?:\.min)?\.js|new\s+bootstrap\.[A-Z]\w*|bootstrap\.(Modal|Dropdown|Collapse|Offcanvas|Tab|Toast|Tooltip|Popover|Carousel|ScrollSpy)\b)/g;
 // class string literals: RSX `class: "..."` and HTML `class="..."`
 const CLASS_RE = /\bclass\s*[:=]\s*"([^"]*)"/g;
+// conditional class attrs: RSX `class: if cond { "a" } else { "b" }` / `class: match … { … }`.
+// The literal CLASS_RE above misses these because the quote isn't adjacent to `class:`.
+// Match from the `class:` up to the next attribute (`, name:`) or end of line, then check
+// every string literal inside. Only triggers on `if`/`match` so it never touches plain
+// `class: "..."` (already covered) — keeps false positives near zero.
+const COND_CLASS_RE = /\bclass\s*[:=]\s*(?:if|match)\b.*?(?=,\s*[a-zA-Z_][\w-]*\s*[:=]|$)/g;
 
 const violations = [];
 function tokenForbidden(tok) {
@@ -85,6 +91,17 @@ function scanFile(file) {
       const tokens = m[1].replace(/\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean);
       const bad = tokens.filter(tokenForbidden);
       if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" (use the typed component, see MIGRATION_GUIDE.md Step 4)`);
+    }
+    // conditional class attrs: check every string literal in `class: if/match { … }`
+    let c;
+    COND_CLASS_RE.lastIndex = 0;
+    while ((c = COND_CLASS_RE.exec(line)) !== null) {
+      for (const lit of c[0].match(/"[^"]*"/g) || []) {
+        const tokens = lit.slice(1, -1).replace(/\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean);
+        const bad = tokens.filter(tokenForbidden);
+        if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" in a conditional class (use the typed component, see MIGRATION_GUIDE.md Step 4)`);
+      }
+      if (c.index === COND_CLASS_RE.lastIndex) COND_CLASS_RE.lastIndex++; // guard zero-width
     }
   });
 }

@@ -6,9 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.3] — Plain button and a stronger migration gate
+
 ### Added
 
+- `Button { plain: true }`: a neutral button with no color variant — bare `.btn`, which Bootstrap's base button already renders neutral (body-colored text, transparent background and border, with the standard focus ring and pointer cursor). Pair it with utility classes (`border-0`, `p-0`, …) for ghost / borderless / text-button styles. Takes precedence over `outline`; ignored when `link` is set.
 - `tools/check-no-raw-bootstrap.mjs`: a migration-completeness gate that fails when consumer code reintroduces remote CDN assets, Bootstrap JavaScript (`data-bs-*`, `bootstrap.bundle.js`), or raw Bootstrap component classes instead of the typed components. Run with `npm run lint:bootstrap` or point it at any consumer crate. Wired into CI against the bundled examples. Documented in `docs/MIGRATION_GUIDE.md`.
+
+### Changed
+
+- `tools/check-no-raw-bootstrap.mjs` now also flags raw Bootstrap component classes inside conditional `class: if … { "…" }` / `class: match … { "…" }` attributes, not only literal `class: "…"` strings, so a conditional cannot smuggle a raw class past the gate.
 
 ## [0.5.2] — Form and button event parity
 

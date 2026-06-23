@@ -17,6 +17,7 @@ use crate::types::{Color, Size};
 /// | `<button class="btn btn-primary">` | `Button { color: Color::Primary, "Text" }` |
 /// | `<button class="btn btn-outline-danger btn-sm">` | `Button { color: Color::Danger, outline: true, size: Size::Sm, "Text" }` |
 /// | `<button class="btn btn-link btn-sm">` | `Button { link: true, size: Size::Sm, "Text" }` |
+/// | `<button class="btn btn-sm">` (neutral, no color variant) | `Button { plain: true, size: Size::Sm, "Text" }` |
 /// | `<button class="btn btn-success btn-lg" disabled>` | `Button { color: Color::Success, size: Size::Lg, disabled: true, "Text" }` |
 /// | `<a class="btn btn-primary" href="/page">` | `Button { color: Color::Primary, href: "/page", "Link" }` |
 /// | `<a class="btn btn-sm" href="f.json" target="_blank" download="f.json">` | `Button { size: Size::Sm, href: "f.json", target: "_blank", download: "f.json", "DL" }` |
@@ -50,6 +51,14 @@ pub struct ButtonProps {
     /// Use Bootstrap link-button style (`btn-link`).
     #[props(default)]
     pub link: bool,
+    /// Render a neutral button with no color variant: bare `.btn` (Bootstrap's
+    /// base button already renders neutral — body-colored text, transparent
+    /// background and border, with the standard focus ring and pointer cursor).
+    /// Pair with utility classes (`border-0`, `p-0`, …) for ghost / borderless /
+    /// text-button styles. Takes precedence over `outline`; ignored when `link`
+    /// is set.
+    #[props(default)]
+    pub plain: bool,
     /// Button size.
     #[props(default)]
     pub size: Size,
@@ -86,12 +95,17 @@ pub struct ButtonProps {
 
 #[component]
 pub fn Button(props: ButtonProps) -> Element {
-    let color_class = if props.link {
-        "btn-link".to_string()
+    // The color/variant segment. A `plain` button is bare `.btn` with no variant
+    // (Bootstrap's base button renders neutral). Each non-empty variant carries
+    // its own leading space, so an empty (plain) segment leaves no double space.
+    let variant_class = if props.plain {
+        String::new()
+    } else if props.link {
+        " btn-link".to_string()
     } else {
         let style = if props.outline { "btn-outline" } else { "btn" };
         let color = props.color;
-        format!("{style}-{color}")
+        format!(" {style}-{color}")
     };
 
     let size_class = match props.size {
@@ -102,12 +116,9 @@ pub fn Button(props: ButtonProps) -> Element {
     let active_class = if props.active { " active" } else { "" };
 
     let full_class = if props.class.is_empty() {
-        format!("btn {color_class}{size_class}{active_class}")
+        format!("btn{variant_class}{size_class}{active_class}")
     } else {
-        format!(
-            "btn {color_class}{size_class}{active_class} {}",
-            props.class
-        )
+        format!("btn{variant_class}{size_class}{active_class} {}", props.class)
     };
 
     if let Some(href) = &props.href {
