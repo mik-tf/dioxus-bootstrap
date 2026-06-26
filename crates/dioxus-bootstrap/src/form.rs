@@ -88,6 +88,13 @@ pub struct InputProps {
     /// Current value.
     #[props(default)]
     pub value: String,
+    /// When `true`, the `value` attribute is omitted so the field is
+    /// *uncontrolled*: the DOM keeps whatever value the user or an external
+    /// script writes, instead of Dioxus forcing it back to `value` on every
+    /// render. Use for a field another script streams into (e.g. a live
+    /// transcript box).
+    #[props(default)]
+    pub uncontrolled: bool,
     /// Placeholder text.
     #[props(default)]
     pub placeholder: String,
@@ -146,7 +153,7 @@ pub fn Input(props: InputProps) -> Element {
         input {
             class: "{full_class}",
             r#type: "{props.r#type}",
-            value: "{props.value}",
+            value: if props.uncontrolled { None } else { Some(props.value.clone()) },
             placeholder: "{props.placeholder}",
             min: props.min.clone(),
             max: props.max.clone(),
@@ -279,6 +286,13 @@ pub struct TextareaProps {
     /// Current value.
     #[props(default)]
     pub value: String,
+    /// When `true`, the `value` attribute is omitted so the field is
+    /// *uncontrolled*: the DOM keeps whatever value the user or an external
+    /// script writes, instead of Dioxus forcing it back to `value` on every
+    /// render. Use for a field another script streams into (e.g. a live
+    /// transcript box).
+    #[props(default)]
+    pub uncontrolled: bool,
     /// Number of visible rows.
     #[props(default = 3)]
     pub rows: u32,
@@ -333,7 +347,7 @@ pub fn Textarea(props: TextareaProps) -> Element {
             placeholder: "{props.placeholder}",
             disabled: props.disabled,
             readonly: props.readonly,
-            value: "{props.value}",
+            value: if props.uncontrolled { None } else { Some(props.value.clone()) },
             oninput: move |evt| {
                 if let Some(handler) = &props.oninput {
                     handler.call(evt);

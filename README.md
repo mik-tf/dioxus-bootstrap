@@ -1,13 +1,11 @@
 # dioxus-bootstrap-css
 
 [![Crates.io](https://img.shields.io/crates/v/dioxus-bootstrap-css.svg)](https://crates.io/crates/dioxus-bootstrap-css)
+[![docs.rs](https://img.shields.io/badge/docs.rs-reference-blue)](https://docs.rs/dioxus-bootstrap-css)
 [![License](https://img.shields.io/crates/l/dioxus-bootstrap-css.svg)](LICENSE)
-[![Forge CI](https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css/actions/workflows/ci.yml/badge.svg?branch=development)](https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css/actions?workflow=ci.yml)
-
-[![GitHub mirror CI](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml)
-
-[![GitHub Pages](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/pages.yml/badge.svg?branch=development)](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/pages.yml)
-[![docs.rs](https://img.shields.io/docsrs/dioxus-bootstrap-css)](https://docs.rs/dioxus-bootstrap-css)
+[![Forge](https://img.shields.io/badge/Forge-primary-1f6feb)](https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css)
+[![CI](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml)
+[![Pages](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/pages.yml/badge.svg?branch=development)](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/pages.yml)
 
 Bootstrap 5.3 components for Dioxus. The crate uses real Bootstrap CSS and
 Bootstrap Icons, bundles assets for offline-first apps, and replaces Bootstrap

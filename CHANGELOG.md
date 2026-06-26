@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.6] — Uncontrolled form fields + gate hardening
+
+### Added
+
+- `uncontrolled` prop on `Input` and `Textarea`. When set, the `value`
+  attribute is omitted so the element keeps whatever value the user or an
+  external script writes, instead of Dioxus forcing it back to `value` on every
+  render. Use it for a field another script streams into (e.g. a live transcript
+  box driven by a custom element).
+
+### Changed
+
+- `check-no-raw-bootstrap.mjs` now forbids the raw `form-control` and
+  `form-select` component classes (exact match), since `Input` / `Select` /
+  `Textarea` are their typed equivalents. Residual size/variant modifiers
+  (`form-control-sm`, `form-control-color`, `form-select-lg`) ride on the typed
+  component's own class and remain allowed.
+
+### Fixed
+
+- README badges that rendered broken on crates.io and GitHub: the dynamic Forge
+  Actions badge (served HTML, not an image) and the docs.rs badge (delegated to
+  a shields.io endpoint that times out) are replaced with static badges; the
+  badge row is consolidated. Live CI status stays on the GitHub-mirror badge.
+
 ## [0.5.5] — Tooltip, Popover, Scrollspy parity release
 
 ### Added

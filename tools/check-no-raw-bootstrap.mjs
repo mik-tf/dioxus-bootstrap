@@ -46,6 +46,10 @@ const FORBID_EXACT = new Set([
   'nav-tabs', 'nav-pills', 'navbar-nav', 'navbar-nav-scroll',
   'progress', 'progress-bar', 'pagination', 'page-item', 'page-link',
   'popover-header', 'popover-body',
+  // Form fields with typed equivalents (Input / Select / Textarea). Exact match
+  // only: residual size/variant modifiers (form-control-sm, form-control-color,
+  // form-select-lg) ride on the typed component's own class and stay allowed.
+  'form-control', 'form-select',
 ]);
 // Allowed even though a FORBID_PREFIX base would otherwise catch them (utilities / state, no component).
 const ALLOW_EXACT = new Set(['btn-close', 'collapsed', 'collapsing']);
