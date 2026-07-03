@@ -1,22 +1,20 @@
 use dioxus::prelude::*;
-use dioxus_bootstrap_css::prelude::{NavbarNav, NavItem, NavLink};
+use dioxus_bootstrap_css::prelude::{Nav, NavItem, NavLink};
 
 fn app() -> Element {
     rsx! {
-        NavbarNav {
+        Nav {
+            pills: true,
+            id: "adminTabs",
             NavItem {
                 NavLink {
                     active: true,
-                    href: "#", "Home"
+                    "data-tab": "overview", href: "#/overview", "Overview"
                 }
             }
-        }
-        NavbarNav {
-            scroll: true,
-            class: "ms-auto",
             NavItem {
                 NavLink {
-                    href: "#docs", "Docs"
+                    href: "#/api", "API"
                 }
             }
         }

@@ -38,6 +38,11 @@ assertEqual('navbar nav conversion changed flag', String(navbarNav.changed), 'tr
 assertEqual('navbar nav warnings', JSON.stringify(navbarNav.warnings), '[]');
 assertEqual('navbar nav conversion', navbarNav.source, read('navbar-nav.expected.rs'));
 
+const navPills = transformSource(read('nav-pills.input.rs'), 'nav-pills.input.rs');
+assertEqual('nav pills conversion changed flag', String(navPills.changed), 'true');
+assertEqual('nav pills warnings', JSON.stringify(navPills.warnings), '[]');
+assertEqual('nav pills conversion', navPills.source, read('nav-pills.expected.rs'));
+
 const overlays = transformSource(read('overlays.input.rs'), 'overlays.input.rs');
 assertEqual('overlay conversion changed flag', String(overlays.changed), 'true');
 assertEqual('overlay warnings', JSON.stringify(overlays.warnings), '[]');

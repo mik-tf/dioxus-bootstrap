@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 import { colorProp, sizeProp } from './bootstrap-parity.mjs';
 
-const RAW_TAGS = new Set(['button', 'a', 'span', 'div', 'input', 'select', 'textarea', 'table', 'ul']);
+const RAW_TAGS = new Set(['button', 'a', 'span', 'div', 'input', 'select', 'textarea', 'table', 'ul', 'li']);
 const SKIP_DIRS = new Set(['.git', 'target', 'node_modules', '.dx', 'dist', 'pkg']);
 const SLOT_CLASSES = new Map([
   ['card-header', 'header'],
@@ -50,6 +50,7 @@ const DYNAMIC_COMPONENT_PREFIXES = [
   'breadcrumb',
   'list-group',
   'carousel',
+  'nav-',
 ];
 
 function isWord(ch) {
@@ -642,6 +643,47 @@ function mapNavbarNav(tag, tokens) {
   return { component: 'NavbarNav', props, residual: residual(tokens, consumed) };
 }
 
+function mapNav(tag, tokens) {
+  // `ul.nav` (pills/tabs/underline). `ul.navbar-nav` is a different component
+  // (mapNavbarNav), so exclude it here.
+  if (tag !== 'ul' || !tokens.includes('nav') || tokens.includes('navbar-nav')) return null;
+  const consumed = new Set(['nav']);
+  const props = [];
+  const flag = (token, prop) => {
+    if (tokens.includes(token)) {
+      props.push(`${prop}: true`);
+      consumed.add(token);
+    }
+  };
+  flag('nav-pills', 'pills');
+  flag('nav-tabs', 'tabs');
+  flag('nav-underline', 'underline');
+  flag('nav-fill', 'fill');
+  flag('nav-justified', 'justified');
+  flag('flex-column', 'vertical');
+  return { component: 'Nav', props, residual: residual(tokens, consumed) };
+}
+
+function mapNavItem(tag, tokens) {
+  if (tag !== 'li' || !tokens.includes('nav-item')) return null;
+  return { component: 'NavItem', props: [], residual: residual(tokens, new Set(['nav-item'])) };
+}
+
+function mapNavLink(tag, tokens) {
+  if (tag !== 'a' || !tokens.includes('nav-link')) return null;
+  const consumed = new Set(['nav-link']);
+  const props = [];
+  if (tokens.includes('active')) {
+    props.push('active: true');
+    consumed.add('active');
+  }
+  if (tokens.includes('disabled')) {
+    props.push('disabled: true');
+    consumed.add('disabled');
+  }
+  return { component: 'NavLink', props, residual: residual(tokens, consumed) };
+}
+
 function mapCard(tag, tokens) {
   if (tag !== 'div' || !tokens.includes('card')) return null;
   const consumed = new Set(['card']);
@@ -829,6 +871,9 @@ function mapElement(tag, classValue) {
     mapForm(tag, tokens) ||
     mapTable(tag, tokens) ||
     mapNavbarNav(tag, tokens) ||
+    mapNav(tag, tokens) ||
+    mapNavItem(tag, tokens) ||
+    mapNavLink(tag, tokens) ||
     mapCard(tag, tokens)
   );
 }
