@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.8] — SPA-safe nav links: prevent_default + NavButton
+
 ### Added
 
 - `prevent_default` prop on `NavLink`. When set, a click calls
