@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.7] — Datalist autocomplete + focus handlers on Input
+
 ### Added
 
 - `list` prop on `Input`, rendered as the input's `list` attribute so a text
