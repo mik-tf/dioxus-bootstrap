@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- `list` prop on `Input`, rendered as the input's `list` attribute so a text
+  field can bind a `<datalist>` for autocomplete. `list` is not a
+  `GlobalAttributes` attribute, so it could not previously ride through
+  `..attributes` and forced the field to stay a raw `<input class="form-control">`.
+- `onfocus` / `onblur` event handlers (`EventHandler<FocusEvent>`) on `Input`
+  and `Textarea`, mirroring the existing `oninput` / `onchange` forwarding.
+
+All additions are purely additive: existing `Input` / `Textarea` call sites
+compile and render unchanged.
+
 ## [0.5.6] — Uncontrolled form fields + gate hardening
 
 ### Added

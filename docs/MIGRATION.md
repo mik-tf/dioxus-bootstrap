@@ -104,9 +104,10 @@ Supported static mappings include:
 - `span.badge` -> `Badge`
 - `div.alert` -> `Alert`
 - `div.spinner-*` / `span.spinner-*` -> `Spinner`
-- `input.form-control` -> `Input`
+- `input.form-control` -> `Input` (including `list` for `<datalist>`
+  autocomplete and `onfocus` / `onblur` focus handlers)
 - `select.form-select` -> `Select`
-- `textarea.form-control` -> `Textarea`
+- `textarea.form-control` -> `Textarea` (including `onfocus` / `onblur`)
 - `table.table` -> `Table`
 - static `data-bs-toggle="tooltip"` + `title`/`data-bs-title` -> `Tooltip`
 - static `data-bs-toggle="popover"` + `data-bs-content` -> `Popover`

@@ -68,6 +68,10 @@ pub fn FormGroup(props: FormGroupProps) -> Element {
 /// | `<input class="form-control" type="text">` | `Input { r#type: "text" }` |
 /// | `<input class="form-control form-control-sm" type="email">` | `Input { r#type: "email", size: Size::Sm }` |
 /// | `<input class="form-control" disabled>` | `Input { disabled: true }` |
+/// | `<input class="form-control" list="opts">` | `Input { list: "opts" }` |
+///
+/// Bind a `<datalist>` for autocomplete with `list`, and observe focus with
+/// `onfocus` / `onblur`:
 ///
 /// ```rust,no_run
 /// # use dioxus::prelude::*;
@@ -77,6 +81,15 @@ pub fn FormGroup(props: FormGroupProps) -> Element {
 ///     Input { r#type: "text", value: "hello", placeholder: "Enter text" }
 ///     Input { r#type: "email", size: Size::Sm, oninput: move |evt| { /* handle */ } }
 ///     Input { r#type: "password", disabled: true }
+///     Input {
+///         list: "icon-options",
+///         onfocus: move |_| { /* open suggestions */ },
+///         onblur: move |_| { /* close suggestions */ },
+///     }
+///     datalist { id: "icon-options",
+///         option { value: "star" }
+///         option { value: "heart" }
+///     }
 /// }
 /// # }
 /// ```
@@ -107,6 +120,11 @@ pub struct InputProps {
     /// Browser autocomplete hint.
     #[props(default)]
     pub autocomplete: Option<String>,
+    /// Datalist id to bind for autocomplete (rendered as the input `list`
+    /// attribute). `list` is not a `GlobalAttributes` attribute, so it needs
+    /// its own typed prop rather than riding through `..attributes`.
+    #[props(default)]
+    pub list: Option<String>,
     /// Input size.
     #[props(default)]
     pub size: Size,
@@ -122,6 +140,12 @@ pub struct InputProps {
     /// Change event handler.
     #[props(default)]
     pub onchange: Option<EventHandler<FormEvent>>,
+    /// Focus event handler.
+    #[props(default)]
+    pub onfocus: Option<EventHandler<FocusEvent>>,
+    /// Blur event handler.
+    #[props(default)]
+    pub onblur: Option<EventHandler<FocusEvent>>,
     /// Key down event handler.
     #[props(default)]
     pub onkeydown: Option<EventHandler<KeyboardEvent>>,
@@ -158,6 +182,7 @@ pub fn Input(props: InputProps) -> Element {
             min: props.min.clone(),
             max: props.max.clone(),
             autocomplete: props.autocomplete.clone(),
+            list: props.list.clone(),
             disabled: props.disabled,
             readonly: props.readonly,
             oninput: move |evt| {
@@ -167,6 +192,16 @@ pub fn Input(props: InputProps) -> Element {
             },
             onchange: move |evt| {
                 if let Some(handler) = &props.onchange {
+                    handler.call(evt);
+                }
+            },
+            onfocus: move |evt| {
+                if let Some(handler) = &props.onfocus {
+                    handler.call(evt);
+                }
+            },
+            onblur: move |evt| {
+                if let Some(handler) = &props.onblur {
                     handler.call(evt);
                 }
             },
@@ -314,6 +349,12 @@ pub struct TextareaProps {
     /// Change event handler.
     #[props(default)]
     pub onchange: Option<EventHandler<FormEvent>>,
+    /// Focus event handler.
+    #[props(default)]
+    pub onfocus: Option<EventHandler<FocusEvent>>,
+    /// Blur event handler.
+    #[props(default)]
+    pub onblur: Option<EventHandler<FocusEvent>>,
     /// Key down event handler.
     #[props(default)]
     pub onkeydown: Option<EventHandler<KeyboardEvent>>,
@@ -355,6 +396,16 @@ pub fn Textarea(props: TextareaProps) -> Element {
             },
             onchange: move |evt| {
                 if let Some(handler) = &props.onchange {
+                    handler.call(evt);
+                }
+            },
+            onfocus: move |evt| {
+                if let Some(handler) = &props.onfocus {
+                    handler.call(evt);
+                }
+            },
+            onblur: move |evt| {
+                if let Some(handler) = &props.onblur {
                     handler.call(evt);
                 }
             },
