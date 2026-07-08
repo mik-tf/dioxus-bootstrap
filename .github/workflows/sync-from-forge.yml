@@ -1,0 +1,149 @@
+name: Sync from Forge
+
+# Keeps this GitHub mirror in sync with the Forge primary repository
+# (https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css) with no stored
+# secrets and no cross-service credential: it reads Forge over public HTTPS and
+# pushes to this repo with the built-in GITHUB_TOKEN. Because a GITHUB_TOKEN
+# push does not re-trigger other `on: push` workflows, this workflow also
+# performs the two mirror outputs itself — GitHub Releases for new tags and the
+# GitHub Pages showcase rebuild — instead of relying on release.yml / pages.yml.
+#
+# Runs daily and on manual dispatch. It is a no-op when already in sync.
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily 06:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: sync-from-forge
+  cancel-in-progress: false
+
+env:
+  FORGE_REPO: https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css
+
+jobs:
+  sync:
+    if: ${{ github.server_url == 'https://github.com' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      branch_changed: ${{ steps.sync.outputs.branch_changed }}
+      new_tags: ${{ steps.sync.outputs.new_tags }}
+    steps:
+      - name: Checkout mirror (full history + tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fast-forward branch and mirror tags from Forge
+        id: sync
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Snapshot the tags this mirror already has, before pulling Forge's.
+          git tag -l 'v*' | sort -u > /tmp/tags_before
+
+          git remote add forge "$FORGE_REPO"
+          git fetch --tags forge development
+
+          # --- Branch: fast-forward development to Forge, never force ---
+          branch_changed=false
+          git checkout development
+          before="$(git rev-parse HEAD)"
+          if git merge --ff-only forge/development; then
+            after="$(git rev-parse HEAD)"
+            if [ "$before" != "$after" ]; then
+              git push origin development
+              branch_changed=true
+            fi
+          else
+            echo "::error::development cannot fast-forward to Forge (histories diverged) — manual reconciliation needed."
+            exit 1
+          fi
+          echo "branch_changed=$branch_changed" >> "$GITHUB_OUTPUT"
+
+          # --- Tags: push tags Forge has that the mirror lacks ---
+          git tag -l 'v*' | sort -u > /tmp/tags_after
+          new_tags="$(comm -13 /tmp/tags_before /tmp/tags_after | tr '\n' ' ' | sed 's/ *$//')"
+          if [ -n "$new_tags" ]; then
+            for t in $new_tags; do
+              git push origin "refs/tags/$t"
+            done
+          fi
+          echo "new_tags=$new_tags" >> "$GITHUB_OUTPUT"
+          echo "Branch changed: $branch_changed | New tags: ${new_tags:-<none>}"
+
+  release:
+    needs: sync
+    if: ${{ github.server_url == 'https://github.com' && needs.sync.outputs.new_tags != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create GitHub releases for new tags
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEW_TAGS: ${{ needs.sync.outputs.new_tags }}
+        run: |
+          set -euo pipefail
+          for t in $NEW_TAGS; do
+            if gh release view "$t" >/dev/null 2>&1; then
+              echo "Release $t already exists — skipping."
+            else
+              echo "Creating release $t"
+              gh release create "$t" --title "$t" --generate-notes --verify-tag
+            fi
+          done
+
+  pages:
+    needs: sync
+    if: ${{ github.server_url == 'https://github.com' && needs.sync.outputs.branch_changed == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Cache cargo
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-pages-${{ hashFiles('**/Cargo.toml', 'tools/install-dioxus-cli.sh') }}
+          restore-keys: ${{ runner.os }}-cargo-pages-
+      - name: Install Dioxus CLI
+        run: tools/install-dioxus-cli.sh
+      - name: Build showcase
+        working-directory: examples/showcase
+        run: dx build --release --base-path dioxus-bootstrap-css
+      - name: Prepare pages artifact
+        run: |
+          cp -r target/dx/showcase/release/web/public _site
+          touch _site/.nojekyll
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
