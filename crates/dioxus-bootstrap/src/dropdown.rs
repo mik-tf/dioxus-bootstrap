@@ -51,7 +51,7 @@ use dioxus::prelude::*;
 /// - `split` — split button mode (separate action button + caret toggle)
 /// - `color` — button color in split mode
 /// - `direction` — `DropDirection::Down`, `Up`, `Start`, `End`
-/// - `align_end` — align menu to the right
+/// - `align_end` — align menu's right edge to the toggle (works JS-free)
 #[derive(Clone, PartialEq, Props)]
 pub struct DropdownProps {
     /// Signal controlling dropdown open state.
@@ -171,6 +171,10 @@ pub fn Dropdown(props: DropdownProps) -> Element {
                 }
             }
             ul { class: "{menu_class}",
+                // Bootstrap 5.3 gates .dropdown-menu-end right-alignment on
+                // [data-bs-popper], set only by Bootstrap's JS. This crate is
+                // JS-free, so apply Bootstrap's own end values directly.
+                style: if props.align_end { "right: 0; left: auto;" } else { "" },
                 // Close dropdown when clicking an item
                 onclick: move |_| open_signal.set(false),
                 {props.menu}
@@ -214,8 +218,15 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
         classes.push(props.class.clone());
     }
     let full_class = classes.join(" ");
+    // JS-free end-alignment: Bootstrap gates .dropdown-menu-end{right:0;left:auto}
+    // on [data-bs-popper] (set only by its JS), so apply the values directly.
+    let align_style = if props.align_end {
+        "right: 0; left: auto;"
+    } else {
+        ""
+    };
     rsx! {
-    ul { class: "{full_class}", ..props.attributes, {props.children} }
+    ul { class: "{full_class}", style: "{align_style}", ..props.attributes, {props.children} }
     }
 }
 

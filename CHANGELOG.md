@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `align_end` on `Dropdown` / `DropdownMenu` now right-aligns the menu without
+  JavaScript. Bootstrap 5.3 gates `.dropdown-menu-end`'s `right: 0; left: auto`
+  on `[data-bs-popper]`, an attribute only Bootstrap's JS sets — so in this
+  JS-free crate the class had no effect and the menu overflowed to the right.
+  The component now emits those values inline when `align_end` is set.
+
 ## [0.5.8] — SPA-safe nav links: prevent_default + NavButton
 
 ### Added

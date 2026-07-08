@@ -650,6 +650,7 @@ fn InteractiveSection() -> Element {
     let mut show_modal_fs = use_signal(|| false);
     let dropdown_open = use_signal(|| false);
     let split_dropdown_open = use_signal(|| false);
+    let end_dropdown_open = use_signal(|| false);
     let mut collapse_expanded = use_signal(|| false);
     let accordion_open = use_signal(|| Some(0usize));
     let mut toast_show = use_signal(|| false);
@@ -721,6 +722,17 @@ fn InteractiveSection() -> Element {
                         DropdownItem { "Action 2" }
                         DropdownDivider {}
                         DropdownItem { "Separated action" }
+                    },
+                }
+                // End-aligned dropdown (JS-free right alignment)
+                Dropdown {
+                    open: end_dropdown_open,
+                    align_end: true,
+                    color: Some(Color::Secondary),
+                    toggle: rsx! { "End-aligned" },
+                    menu: rsx! {
+                        DropdownItem { "Right-aligned 1" }
+                        DropdownItem { "Right-aligned 2" }
                     },
                 }
             }
