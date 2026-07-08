@@ -421,7 +421,12 @@ pub fn NavItem(props: NavItemProps) -> Element {
 /// | HTML | Dioxus |
 /// |---|---|
 /// | `<a class="nav-link active" href="/">Home</a>` | `NavLink { href: "/", active: true, "Home" }` |
-/// | `<a class="nav-link disabled">Disabled</a>` | `NavLink { disabled: true, "Disabled" }` |
+/// | `<a class="nav-link disabled" aria-disabled="true" tabindex="-1">Disabled</a>` | `NavLink { disabled: true, "Disabled" }` |
+///
+/// For single-page apps that switch content client-side, set `prevent_default: true`
+/// so a click on a `#`-href link runs only your `onclick` handler and does not
+/// follow the anchor (no hash change, no scroll-to-top). For a JS-toggled tab
+/// button (`<button class="nav-link">`) use [`NavButton`] instead of an anchor.
 ///
 /// ```rust,no_run
 /// # use dioxus::prelude::*;
@@ -429,6 +434,8 @@ pub fn NavItem(props: NavItemProps) -> Element {
 /// # fn _doctest() -> Element {
 /// rsx! {
 ///     NavLink { href: "/dashboard", active: true, "Dashboard" }
+///     // SPA tab link: handler runs, page does not navigate.
+///     NavLink { prevent_default: true, onclick: move |_| { /* switch section */ }, "Settings" }
 /// }
 /// # }
 /// ```
@@ -441,6 +448,94 @@ pub struct NavLinkProps {
     #[props(default)]
     pub active: bool,
     /// Disabled state.
+    #[props(default)]
+    pub disabled: bool,
+    /// Call `event.prevent_default()` on click so the anchor is not followed
+    /// (SPA-safe: the `onclick` handler runs, but the URL/hash is untouched and
+    /// the page does not scroll to top). Matches what Bootstrap's own JS does
+    /// for `#`-href toggle links.
+    #[props(default)]
+    pub prevent_default: bool,
+    /// Click event handler.
+    #[props(default)]
+    pub onclick: Option<EventHandler<MouseEvent>>,
+    /// Additional CSS classes.
+    #[props(default)]
+    pub class: String,
+    /// Any additional HTML attributes.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+    /// Child elements.
+    pub children: Element,
+}
+
+#[component]
+pub fn NavLink(props: NavLinkProps) -> Element {
+    let full_class = nav_link_class(props.active, props.disabled, &props.class);
+
+    rsx! {
+        a {
+            class: "{full_class}",
+            href: "{props.href}",
+            "aria-current": if props.active { "page" } else { "" },
+            "aria-disabled": if props.disabled { "true" } else { "" },
+            tabindex: if props.disabled { "-1" } else { "" },
+            onclick: move |evt| {
+                if props.prevent_default {
+                    evt.prevent_default();
+                }
+                if let Some(handler) = &props.onclick {
+                    handler.call(evt);
+                }
+            },
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// Bootstrap nav-link rendered as a `<button>` — the JS-toggled tab / SPA
+/// navigation variant of [`NavLink`].
+///
+/// Bootstrap supports `button.nav-link` for nav components driven by script
+/// rather than by following an href (an in-page tab strip, a settings sidebar
+/// that swaps sections). A button never navigates, so there is nothing to
+/// prevent — use this instead of a `NavLink` with `prevent_default` when the
+/// item is not a real link.
+///
+/// This renders a plain nav button (`active` → `aria-current="page"`). It does
+/// **not** add `role="tab"`/`aria-selected`: those belong only inside a
+/// `role="tablist"`, which [`TabList`](crate::tabs::TabList) already provides.
+/// For a full ARIA tablist with managed panes, use `TabList`; use `NavButton`
+/// for a plain button-driven nav.
+///
+/// # Bootstrap HTML → Dioxus
+///
+/// | HTML | Dioxus |
+/// |---|---|
+/// | `<button class="nav-link active">Home</button>` | `NavButton { active: true, "Home" }` |
+/// | `<button class="nav-link" disabled>Off</button>` | `NavButton { disabled: true, "Off" }` |
+///
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
+/// let mut section = use_signal(|| 0);
+/// rsx! {
+///     Nav {
+///         NavItem { NavButton { active: section() == 0, onclick: move |_| section.set(0), "General" } }
+///         NavItem { NavButton { active: section() == 1, onclick: move |_| section.set(1), "Account" } }
+///     }
+/// }
+/// # }
+/// ```
+#[derive(Clone, PartialEq, Props)]
+pub struct NavButtonProps {
+    /// Active state.
+    #[props(default)]
+    pub active: bool,
+    /// Disabled state. Rendered as the `<button>` `disabled` attribute (Bootstrap
+    /// parity), not the `.disabled` class used for anchors.
     #[props(default)]
     pub disabled: bool,
     /// Click event handler.
@@ -457,23 +552,15 @@ pub struct NavLinkProps {
 }
 
 #[component]
-pub fn NavLink(props: NavLinkProps) -> Element {
-    let mut classes = vec!["nav-link".to_string()];
-    if props.active {
-        classes.push("active".to_string());
-    }
-    if props.disabled {
-        classes.push("disabled".to_string());
-    }
-    if !props.class.is_empty() {
-        classes.push(props.class.clone());
-    }
-    let full_class = classes.join(" ");
+pub fn NavButton(props: NavButtonProps) -> Element {
+    // Button disabled uses the HTML attribute, so keep the class free of `disabled`.
+    let full_class = nav_link_class(props.active, false, &props.class);
 
     rsx! {
-        a {
+        button {
+            r#type: "button",
             class: "{full_class}",
-            href: "{props.href}",
+            disabled: props.disabled,
             "aria-current": if props.active { "page" } else { "" },
             onclick: move |evt| {
                 if let Some(handler) = &props.onclick {
@@ -484,6 +571,21 @@ pub fn NavLink(props: NavLinkProps) -> Element {
             {props.children}
         }
     }
+}
+
+/// Assemble the `nav-link` class list shared by [`NavLink`] and [`NavButton`].
+fn nav_link_class(active: bool, disabled: bool, extra: &str) -> String {
+    let mut classes = vec!["nav-link".to_string()];
+    if active {
+        classes.push("active".to_string());
+    }
+    if disabled {
+        classes.push("disabled".to_string());
+    }
+    if !extra.is_empty() {
+        classes.push(extra.to_string());
+    }
+    classes.join(" ")
 }
 
 #[cfg(test)]
@@ -501,5 +603,26 @@ mod tests {
             navbar_nav_class(true, "ms-auto"),
             "navbar-nav navbar-nav-scroll ms-auto"
         );
+    }
+
+    #[test]
+    fn nav_link_class_base() {
+        assert_eq!(nav_link_class(false, false, ""), "nav-link");
+    }
+
+    #[test]
+    fn nav_link_class_active_disabled_and_extra() {
+        assert_eq!(
+            nav_link_class(true, true, "px-3"),
+            "nav-link active disabled px-3"
+        );
+    }
+
+    #[test]
+    fn nav_button_omits_disabled_class() {
+        // NavButton passes disabled=false to the class builder because a
+        // `<button>` uses the HTML `disabled` attribute, not the `.disabled`
+        // class. Only `active` should reach the class list.
+        assert_eq!(nav_link_class(true, false, ""), "nav-link active");
     }
 }

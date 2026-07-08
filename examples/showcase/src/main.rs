@@ -131,7 +131,7 @@ fn app() -> Element {
                         ul {
                             li { "Navbar / NavbarToggler / NavbarCollapse / NavbarNav" }
                             li { "Nav (pills, tabs, underline, fill)" }
-                            li { "NavItem / NavLink" }
+                            li { "NavItem / NavLink / NavButton" }
                             li { "Breadcrumb / BreadcrumbItem" }
                         }
                     }
@@ -1012,6 +1012,7 @@ fn NavigationSection() -> Element {
     let body_scrollspy_active = use_signal(String::new);
     let custom_scrollspy_active = use_signal(String::new);
     let mut show_dynamic_scrollspy_section = use_signal(|| false);
+    let mut spa_section = use_signal(|| 0usize);
     let custom_refresh_key = if *show_dynamic_scrollspy_section.read() {
         1
     } else {
@@ -1027,6 +1028,17 @@ fn NavigationSection() -> Element {
                 NavItem { NavLink { "Link" } }
                 NavItem { NavLink { "Another Link" } }
                 NavItem { NavLink { disabled: true, "Disabled" } }
+            }
+
+            // Nav — SPA button switcher (button.nav-link, no navigation)
+            h3 { class: "mb-3", "Nav — SPA switcher (NavButton)" }
+            Nav { pills: true, class: "mb-2",
+                NavItem { NavButton { active: spa_section() == 0, onclick: move |_| spa_section.set(0), "General" } }
+                NavItem { NavButton { active: spa_section() == 1, onclick: move |_| spa_section.set(1), "Account" } }
+                NavItem { NavButton { disabled: true, "Disabled" } }
+            }
+            p { class: "text-muted mb-4",
+                if spa_section() == 0 { "General settings panel." } else { "Account settings panel." }
             }
 
             // Nav — Tabs

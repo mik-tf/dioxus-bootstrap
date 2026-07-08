@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- `prevent_default` prop on `NavLink`. When set, a click calls
+  `event.prevent_default()` so the anchor is not followed — the `onclick`
+  handler runs but the URL/hash is untouched and the page does not scroll to
+  top. This makes `NavLink` usable for single-page apps that switch tabs or
+  sections client-side, matching what Bootstrap's own JS does for `#`-href
+  toggle links.
+- `NavButton` component, rendering `<button class="nav-link">` — the JS-toggled
+  nav variant Bootstrap documents for nav components driven by script rather
+  than by following an href. `disabled` is rendered as the button `disabled`
+  attribute (Bootstrap parity). It deliberately does not add `role="tab"` /
+  `aria-selected`; use `TabList` for a full ARIA tablist with managed panes.
+
+### Fixed
+
+- `NavLink` with `disabled: true` now also renders `aria-disabled="true"` and
+  `tabindex="-1"`, matching Bootstrap's disabled-anchor markup (previously only
+  the `.disabled` class was applied).
+
+All changes are additive: existing `NavLink` call sites compile and render
+unchanged.
+
 ## [0.5.7] — Datalist autocomplete + focus handlers on Input
 
 ### Added

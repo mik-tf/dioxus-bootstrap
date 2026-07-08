@@ -171,6 +171,8 @@ Bootstrap JavaScript is not loaded. Replace JS attributes with Dioxus state.
 | `.collapse` | `Collapse { expanded, ... }` | `Signal<bool>` |
 | navbar collapse | `NavbarToggler` + `NavbarCollapse` + `NavbarNav` | `Signal<bool>` |
 | tabs | `TabList` / `Tabs` | `Signal<usize>` |
+| `<a class="nav-link">` used for SPA/JS nav (must not follow `#`) | `NavLink { prevent_default: true, onclick, .. }` | app signal |
+| `<button class="nav-link">` (JS-toggled nav item) | `NavButton { active, onclick, .. }` | app signal |
 | accordion | `Accordion` / `AccordionItem` | `Signal<Option<usize>>` |
 | offcanvas | `Offcanvas { show, ... }` | `Signal<bool>` |
 | toast | `Toast { show, ... }` | `Signal<bool>` |
