@@ -1,0 +1,5 @@
+[application]
+name = "popover_parity"
+
+[web.app]
+title = "dbcss popover edge-clamp parity"

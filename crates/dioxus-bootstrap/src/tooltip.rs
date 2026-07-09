@@ -176,9 +176,9 @@ pub struct TooltipDisabledTriggerProps {
 #[component]
 pub fn TooltipDisabledTrigger(props: TooltipDisabledTriggerProps) -> Element {
     let style = if props.style.is_empty() {
-        "display: inline-block;".to_string()
+        "display: inline-flex;".to_string()
     } else {
-        format!("display: inline-block; {}", props.style)
+        format!("display: inline-flex; {}", props.style)
     };
 
     rsx! {
@@ -273,6 +273,7 @@ pub fn Tooltip(props: TooltipProps) -> Element {
     let placement_value = effective_placement.data_value();
     let tooltip_class = classes("tooltip fade show", placement_class, &props.class);
     let tooltip_style = tooltip_style(*overlay_position.read());
+    let arrow_style = arrow_style(*overlay_position.read(), effective_placement);
     let describedby = if is_visible {
         tooltip_id.read().clone()
     } else {
@@ -335,7 +336,10 @@ pub fn Tooltip(props: TooltipProps) -> Element {
         span {
             id: "{trigger_id}",
             class: "tooltip-wrapper",
-            style: "display: inline-block;",
+            // `inline-flex` hugs the trigger; `inline-block` would add line-box
+            // leading and push the measured anchor box below the element, landing
+            // the tooltip low (see the same fix on `.popover-wrapper`).
+            style: "display: inline-flex;",
             "aria-describedby": "{describedby}",
             onmouseenter: move |_| {
                 if props.trigger.hover && props.open.is_none() {
@@ -421,7 +425,7 @@ pub fn Tooltip(props: TooltipProps) -> Element {
                     role: "tooltip",
                     "data-popper-placement": "{placement_value}",
                     style: "{tooltip_style}",
-                    div { class: "tooltip-arrow" }
+                    div { class: "tooltip-arrow", style: "{arrow_style}" }
                     div { class: "tooltip-inner", "{props.text}" }
                 }
             }
@@ -456,6 +460,28 @@ fn tooltip_style(position: Option<OverlayPosition>) -> String {
         None => {
             "position: fixed; left: 0; top: 0; z-index: 1080; pointer-events: none; white-space: nowrap; visibility: hidden;".to_string()
         }
+    }
+}
+
+/// Bootstrap's tooltip arrow is `0.8rem` wide (`--bs-tooltip-arrow-width`); half of
+/// that centres the arrow element on the computed cross-axis point.
+const TOOLTIP_ARROW_HALF: f64 = 6.4;
+
+/// Inline style that slides the `.tooltip-arrow` along the tooltip's cross axis so
+/// it keeps pointing at the trigger after the box is clamped to the viewport — the
+/// job Popper.js does for a real Bootstrap tooltip. `position: absolute` is
+/// required: Bootstrap positions the arrow along the main edge only once Popper has
+/// made the element absolutely positioned, so without it the offset is a no-op.
+fn arrow_style(position: Option<OverlayPosition>, placement: TooltipPlacement) -> String {
+    let Some(position) = position else {
+        return String::new();
+    };
+    let edge = position.arrow - TOOLTIP_ARROW_HALF;
+    match placement {
+        TooltipPlacement::Start | TooltipPlacement::End => {
+            format!("position: absolute; top: {edge:.3}px;")
+        }
+        _ => format!("position: absolute; left: {edge:.3}px;"),
     }
 }
 
@@ -635,5 +661,26 @@ mod tests {
         assert_eq!(TooltipPlacement::Bottom.class(), "bs-tooltip-bottom");
         assert_eq!(TooltipPlacement::Start.class(), "bs-tooltip-start");
         assert_eq!(TooltipPlacement::End.class(), "bs-tooltip-end");
+    }
+
+    #[test]
+    fn arrow_style_offsets_on_cross_axis() {
+        let pos = OverlayPosition {
+            x: 100.0,
+            y: 50.0,
+            placement: OverlayPlacement::Bottom,
+            fits: false,
+            arrow: 30.0,
+        };
+        // Top/Bottom placements slide the arrow in x; the arrow element is centred
+        // on `position.arrow`, so its leading edge is that minus the arrow half-width.
+        let bottom = arrow_style(Some(pos), TooltipPlacement::Bottom);
+        assert!(bottom.contains("position: absolute"));
+        assert!(bottom.contains("left: 23.600px"));
+        // Start/End placements slide it in y instead.
+        let end = arrow_style(Some(pos), TooltipPlacement::End);
+        assert!(end.contains("top: 23.600px"));
+        // No measured position yet -> no offset emitted.
+        assert_eq!(arrow_style(None, TooltipPlacement::Bottom), "");
     }
 }

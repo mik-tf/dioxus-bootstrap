@@ -136,6 +136,22 @@ pub fn Dropdown(props: DropdownProps) -> Element {
         "dropdown-menu"
     };
 
+    // Bootstrap offsets the menu from the toggle by `--bs-dropdown-spacer` (0.125rem);
+    // in stock Bootstrap that offset is applied by Popper. JS-free, we set it directly
+    // so the menu clears the toggle by the same 2px instead of sitting flush against it.
+    let spacer = match props.direction {
+        DropDirection::Down => "margin-top: var(--bs-dropdown-spacer, 0.125rem);",
+        DropDirection::Up => "margin-bottom: var(--bs-dropdown-spacer, 0.125rem);",
+        DropDirection::Start | DropDirection::End => "",
+    };
+    // JS-free end-alignment: Bootstrap gates .dropdown-menu-end{right:0;left:auto} on
+    // [data-bs-popper] (set only by its JS), so apply the end values directly.
+    let menu_style = if props.align_end {
+        format!("{spacer} right: 0; left: auto;")
+    } else {
+        spacer.to_string()
+    };
+
     rsx! {
         // Invisible overlay to close on outside click (only when open)
         if is_open {
@@ -171,10 +187,7 @@ pub fn Dropdown(props: DropdownProps) -> Element {
                 }
             }
             ul { class: "{menu_class}",
-                // Bootstrap 5.3 gates .dropdown-menu-end right-alignment on
-                // [data-bs-popper], set only by Bootstrap's JS. This crate is
-                // JS-free, so apply Bootstrap's own end values directly.
-                style: if props.align_end { "right: 0; left: auto;" } else { "" },
+                style: "{menu_style}",
                 // Close dropdown when clicking an item
                 onclick: move |_| open_signal.set(false),
                 {props.menu}

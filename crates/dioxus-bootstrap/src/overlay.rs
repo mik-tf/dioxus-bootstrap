@@ -88,6 +88,12 @@ impl OverlayOffset {
     };
 }
 
+/// Bootstrap arrow width (`--bs-popover-arrow-width` / tooltip equivalent, `1rem`).
+const ARROW_SIZE: f64 = 16.0;
+/// Keep the arrow this far from the overlay's rounded corner so it never straddles
+/// the border radius.
+const ARROW_EDGE_INSET: f64 = 8.0;
+
 /// Calculated overlay position.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct OverlayPosition {
@@ -96,12 +102,32 @@ pub struct OverlayPosition {
     pub placement: OverlayPlacement,
     /// True when the overlay fits inside the boundary without clamping.
     pub fits: bool,
+    /// Arrow centre in overlay-local coordinates along the cross axis (x for
+    /// top/bottom placements, y for start/end). Lets the caller keep the arrow
+    /// pointing at the trigger even after the overlay box is clamped to the
+    /// viewport — the job Popper.js does for Bootstrap's own overlays.
+    pub arrow: f64,
 }
 
 impl OverlayPosition {
     pub fn rect(self, overlay_size: OverlayRect) -> OverlayRect {
         OverlayRect::new(self.x, self.y, overlay_size.width, overlay_size.height)
     }
+}
+
+/// Arrow centre (cross-axis, overlay-local) that keeps the arrow over the trigger
+/// centre, clamped so it stays clear of the overlay's rounded corners.
+fn arrow_offset(trigger: OverlayRect, rect: OverlayRect, placement: OverlayPlacement) -> f64 {
+    let (target, cross_size) = match placement {
+        OverlayPlacement::Start | OverlayPlacement::End => {
+            (trigger.center_y() - rect.y, rect.height)
+        }
+        // Top / Bottom / Auto place on the vertical axis, so the arrow slides in x.
+        _ => (trigger.center_x() - rect.x, rect.width),
+    };
+    let lo = ARROW_EDGE_INSET + ARROW_SIZE / 2.0;
+    let hi = (cross_size - ARROW_EDGE_INSET - ARROW_SIZE / 2.0).max(lo);
+    target.clamp(lo, hi)
 }
 
 /// Calculate a viewport-aware overlay position.
@@ -129,6 +155,7 @@ pub fn calculate_overlay_position(
                 y: rect.y,
                 placement,
                 fits: true,
+                arrow: arrow_offset(trigger, rect, placement),
             };
         }
 
@@ -156,6 +183,7 @@ pub fn calculate_overlay_position(
         y: clamped.y,
         placement,
         fits: false,
+        arrow: arrow_offset(trigger, clamped, placement),
     }
 }
 
@@ -391,6 +419,46 @@ mod tests {
         assert!(!position.fits);
         assert_eq!(position.x, 8.0);
         assert_eq!(position.y, 90.0);
+    }
+
+    #[test]
+    fn arrow_is_centred_when_overlay_fits() {
+        // Centred trigger, overlay fits: the arrow sits at the overlay's centre.
+        let position = calculate_overlay_position(
+            OverlayRect::new(130.0, 20.0, 40.0, 20.0), // center_x = 150
+            OverlayRect::new(0.0, 0.0, 80.0, 30.0),
+            boundary(),
+            OverlayPlacement::Bottom,
+            &[],
+            OverlayOffset::ZERO,
+            0.0,
+        );
+        assert!(position.fits);
+        assert_eq!(position.x, 110.0);
+        // 150 - 110 = 40 = overlay width / 2 (centred).
+        assert_eq!(position.arrow, 40.0);
+    }
+
+    #[test]
+    fn arrow_tracks_trigger_after_horizontal_clamp() {
+        // A trigger near the right edge: the bottom overlay is centred on it,
+        // overflows the boundary, and is clamped left. The arrow must keep pointing
+        // at the trigger centre, not drift to the (now shifted) overlay centre.
+        let position = calculate_overlay_position(
+            OverlayRect::new(280.0, 20.0, 20.0, 20.0), // center_x = 290
+            OverlayRect::new(0.0, 0.0, 120.0, 60.0),
+            boundary(), // 300 wide
+            OverlayPlacement::Bottom,
+            &[],
+            OverlayOffset::ZERO,
+            0.0,
+        );
+        assert_eq!(position.placement, OverlayPlacement::Bottom);
+        assert!(!position.fits);
+        assert_eq!(position.x, 180.0); // clamped so right edge hits 300
+        // trigger.center_x - x = 290 - 180 = 110, clamped to [16, 104] -> 104:
+        // the arrow hugs the trigger side, not the overlay centre (60).
+        assert_eq!(position.arrow, 104.0);
     }
 
     #[test]

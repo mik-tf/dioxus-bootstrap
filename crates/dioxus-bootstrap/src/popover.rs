@@ -174,9 +174,9 @@ pub struct PopoverDisabledTriggerProps {
 #[component]
 pub fn PopoverDisabledTrigger(props: PopoverDisabledTriggerProps) -> Element {
     let style = if props.style.is_empty() {
-        "display: inline-block;".to_string()
+        "display: inline-flex;".to_string()
     } else {
-        format!("display: inline-block; {}", props.style)
+        format!("display: inline-flex; {}", props.style)
     };
 
     rsx! {
@@ -281,6 +281,7 @@ pub fn Popover(props: PopoverProps) -> Element {
     let placement_value = effective_placement.data_value();
     let popover_class = classes("popover fade show", placement_class, &props.class);
     let popover_style = popover_style(*overlay_position.read());
+    let arrow_style = arrow_style(*overlay_position.read(), effective_placement);
     let describedby = if is_visible {
         popover_id.read().clone()
     } else {
@@ -365,7 +366,12 @@ pub fn Popover(props: PopoverProps) -> Element {
         span {
             id: "{trigger_id}",
             class: "popover-wrapper",
-            style: if is_visible { "position: relative; display: inline-block; z-index: 1070;" } else { "position: relative; display: inline-block;" },
+            // `inline-flex`, not `inline-block`: an inline-block wrapper carries
+            // line-box leading (descent below the baseline), so its measured box
+            // extends past the trigger and the popover anchors a dozen-odd pixels
+            // low. A flex wrapper has no line box, so it hugs the trigger and the
+            // popover lands where Popper would put it against the element itself.
+            style: if is_visible { "position: relative; display: inline-flex; z-index: 1070;" } else { "position: relative; display: inline-flex;" },
             "aria-describedby": "{describedby}",
             onmouseenter: move |_| {
                 if props.trigger.hover && props.open.is_none() {
@@ -453,7 +459,7 @@ pub fn Popover(props: PopoverProps) -> Element {
                     "data-popper-placement": "{placement_value}",
                     style: "{popover_style}",
                     onclick: move |evt| evt.stop_propagation(),
-                    div { class: "popover-arrow" }
+                    div { class: "popover-arrow", style: "{arrow_style}" }
                     if !props.title.is_empty() {
                         h3 { class: "popover-header", "{props.title}" }
                     }
@@ -491,6 +497,30 @@ fn popover_style(position: Option<OverlayPosition>) -> String {
             position.x, position.y
         ),
         None => "position: fixed; left: 0; top: 0; z-index: 1070; visibility: hidden;".to_string(),
+    }
+}
+
+/// Inline style that slides the `.popover-arrow` along the popover's cross axis so
+/// it stays pointing at the trigger even after the popover box is clamped to the
+/// viewport. Without this the arrow sits at its static position and misses the
+/// trigger whenever the box is shifted — the gap left by not running Popper.js.
+fn arrow_style(position: Option<OverlayPosition>, placement: PopoverPlacement) -> String {
+    let Some(position) = position else {
+        return String::new();
+    };
+    // `position.arrow` is the arrow centre in popover-local coordinates; the arrow
+    // box is 1rem (16px), so its leading edge is the centre minus half that.
+    //
+    // `position: absolute` is required: Bootstrap positions the arrow along the main
+    // edge (its `.bs-popover-*>.popover-arrow{top/bottom/left/right}` rules) but only
+    // Popper.js makes the element absolutely positioned. Without it those rules and
+    // this cross-axis offset are both ignored, so we set it here.
+    let edge = position.arrow - 8.0;
+    match placement {
+        PopoverPlacement::Start | PopoverPlacement::End => {
+            format!("position: absolute; top: {edge:.3}px;")
+        }
+        _ => format!("position: absolute; left: {edge:.3}px;"),
     }
 }
 

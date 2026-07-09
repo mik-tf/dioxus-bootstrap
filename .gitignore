@@ -24,3 +24,6 @@ Thumbs.db
 node_modules/
 test-results/
 playwright-report/
+
+# git worktrees (lane isolation) — never committed
+.wt/

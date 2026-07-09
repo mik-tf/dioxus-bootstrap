@@ -1,0 +1,9 @@
+[package]
+name = "dropdown_parity"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+dioxus = { version = "0.7", features = ["web"] }
+dioxus-bootstrap-css = { path = "../../crates/dioxus-bootstrap" }

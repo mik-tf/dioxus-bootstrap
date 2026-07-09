@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.11] — Overlay parity (arrow, anchor, dropdown spacer) + objective parity gate
+
+### Fixed
+
+- **Overlay arrow tracking.** When a `Popover` or `Tooltip` box is clamped against a
+  viewport edge, its arrow now offsets along the box to keep pointing at the trigger,
+  matching Popper's behaviour. `calculate_overlay_position` returns the arrow's
+  cross-axis centre; `Popover`/`Tooltip` apply it as an inline `position: absolute`
+  offset on `.popover-arrow` / `.tooltip-arrow` (Bootstrap only makes the arrow
+  absolutely positioned via Popper, so without this the offset was a no-op).
+- **Overlay trigger anchoring.** The `Popover`/`Tooltip` trigger wrappers are now
+  `inline-flex` instead of `inline-block`, so the wrapper hugs the trigger. An
+  `inline-block` wrapper carried line-box leading and its measured box sat below the
+  trigger, landing the overlay a dozen-odd pixels low.
+
+### Added
+
+- Objective parity tooling for migrations: `tools/structural-parity.mjs` (the primary
+  gate — an element-by-element diff of computed style, geometry, and text between the
+  original control and the converted one) and `tools/visual-parity.mjs` (a coarse
+  pixel/AE backstop), plus the `examples/popover_parity` / `examples/dropdown_parity`
+  capture harnesses. The read → transfer → measure → fix-the-crate method, and the
+  dump → reproduce → structural-diff recipe for imperative-JS controls, are documented
+  in `docs/MIGRATION.md` and `CLAUDE.md`.
+
 ## [0.5.10] — DropdownItem as an anchor (href/target)
 
 ### Added

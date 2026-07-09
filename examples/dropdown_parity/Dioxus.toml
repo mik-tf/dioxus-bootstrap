@@ -1,0 +1,5 @@
+[application]
+name = "dropdown_parity"
+
+[web.app]
+title = "dbcss dropdown edge-align parity"
