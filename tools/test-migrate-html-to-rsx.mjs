@@ -24,7 +24,7 @@ function assertEqual(name, actual, expected) {
 }
 
 // Deterministic conversions: output matches the golden .rs and nothing is flagged.
-for (const name of ['card', 'table-for', 'if-block', 'interp', 'form', 'inline-ws']) {
+for (const name of ['card', 'card-link', 'table-for', 'if-block', 'interp', 'form', 'inline-ws']) {
   const result = transformHtml(read(`${name}.input.html`), `${name}.input.html`);
   assertEqual(`${name} conversion`, result.source, read(`${name}.expected.rs`));
   assertEqual(`${name} warnings`, JSON.stringify(result.warnings), '[]');
@@ -65,6 +65,21 @@ if (!piped.source.includes('Card {') || !piped.source.includes('Button {')) {
 // allowed content classes like `card-title` / `card-text` legitimately stay.
 if (/class:\s*"(?:[^"]*\s)?(?:card|btn)(?:\s[^"]*)?"/.test(piped.source)) {
   console.error('FAIL piped card must not leave a bare card/btn component class');
+  process.exit(1);
+}
+
+// A clickable whole-card link (<a class="card" href>) must become a typed Card
+// in anchor mode: Card { href } with the residual classes preserved and no bare
+// `card` class left behind (dbcss 0.5.12 Card gained the href/target props).
+const pipedLink = transformHtmlToTyped(read('card-link.input.html'), 'card-link.input.html');
+assertEqual('piped card-link warnings', JSON.stringify(pipedLink.warnings), '[]');
+if (!pipedLink.source.includes('Card {') || !/href:\s*"\/docs\/hero_router"/.test(pipedLink.source)) {
+  console.error('FAIL piped card-link must emit a typed Card in href anchor mode');
+  console.error(pipedLink.source);
+  process.exit(1);
+}
+if (/class:\s*"(?:[^"]*\s)?card(?:\s[^"]*)?"/.test(pipedLink.source)) {
+  console.error('FAIL piped card-link must not leave a bare card component class');
   process.exit(1);
 }
 

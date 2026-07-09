@@ -685,7 +685,10 @@ function mapNavLink(tag, tokens) {
 }
 
 function mapCard(tag, tokens) {
-  if (tag !== 'div' || !tokens.includes('card')) return null;
+  // `card` sits on a <div> normally, or on an <a> for the whole-card-as-link
+  // pattern (mirrors mapButton's button/a). For the <a> form the element's
+  // href/target survive as kept attributes and land on Card's href/target props.
+  if ((tag !== 'div' && tag !== 'a') || !tokens.includes('card')) return null;
   const consumed = new Set(['card']);
   return { component: 'Card', props: [], residual: residual(tokens, consumed), card: true };
 }

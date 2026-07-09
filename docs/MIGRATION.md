@@ -121,7 +121,9 @@ node tools/migrate-bootstrap-rsx.mjs --write path/to/app/src
 Supported static mappings include:
 
 - `button.btn` / `a.btn` -> `Button`
-- `div.card` with `card-header` / `card-body` / `card-footer` slots -> `Card`
+- `div.card` / `a.card` with `card-header` / `card-body` / `card-footer` slots -> `Card`
+  (the `<a>` form is a whole-card link; its `href` / `target` map to `Card`'s props,
+  exactly as `a.btn` maps to `Button { href }`)
 - `span.badge` -> `Badge`
 - `div.alert` -> `Alert`
 - `div.spinner-*` / `span.spinner-*` -> `Spinner`
@@ -214,6 +216,7 @@ WASM app.
 | `btn btn-outline-danger btn-sm` | `Button { color: Color::Danger, outline: true, size: Size::Sm }` |
 | bare `btn` | `Button { plain: true }` |
 | `card` + header/body/footer | `Card { header, body, footer }` |
+| `<a class="card" href=...>` (whole card is a link) | `Card { href, target?, header, body, footer }` |
 | `alert alert-warning` | `Alert { color: Color::Warning }` |
 | `badge text-bg-success` | `Badge { color: Color::Success }` |
 | `spinner-border text-primary` | `Spinner { color: Some(Color::Primary) }` |
