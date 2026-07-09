@@ -708,6 +708,14 @@ fn InteractiveSection() -> Element {
                         DropdownItem { Icon { name: "pencil", class: "me-2" } "Edit" }
                         DropdownItem { Icon { name: "files", class: "me-2" } "Duplicate" }
                         DropdownDivider {}
+                        // Anchor items: real links so middle-click / ctrl-click
+                        // open in a background tab and copy-link works.
+                        DropdownItem { href: "/settings", Icon { name: "gear", class: "me-2" } "Settings" }
+                        DropdownItem { href: "https://getbootstrap.com", target: "_blank",
+                            Icon { name: "box-arrow-up-right", class: "me-2" } "Docs (new tab)"
+                        }
+                        DropdownItem { href: "/disabled", disabled: true, "Disabled link" }
+                        DropdownDivider {}
                         DropdownItem { Icon { name: "trash", class: "me-2" } "Delete" }
                     },
                 }

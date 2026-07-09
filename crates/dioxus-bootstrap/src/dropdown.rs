@@ -231,6 +231,26 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 }
 
 /// A single item in a Dropdown menu.
+///
+/// Renders a `<button class="dropdown-item">` by default. Set `href` to render a
+/// real `<a class="dropdown-item" href=...>` instead — use this for menu entries
+/// that navigate to a URL so the browser's link behaviours work (middle-click /
+/// ctrl-click to open in a background tab, copy-link and open-in-new-window
+/// context actions, and a visible target URL on hover). Add `target` (e.g.
+/// `"_blank"`) to open in a new tab. The same `active`, `disabled`, `class`, and
+/// `onclick` props apply to both forms.
+///
+/// ```rust,no_run
+/// # use dioxus::prelude::*;
+/// # use dioxus_bootstrap_css::prelude::*;
+/// # fn _doctest() -> Element {
+/// rsx! {
+///     DropdownItem { "Action" }                                  // <button>
+///     DropdownItem { href: "/settings", "Settings" }             // <a href="/settings">
+///     DropdownItem { href: "https://example.com", target: "_blank", "Docs" }
+/// }
+/// # }
+/// ```
 #[derive(Clone, PartialEq, Props)]
 pub struct DropdownItemProps {
     /// Active state.
@@ -239,6 +259,16 @@ pub struct DropdownItemProps {
     /// Disabled state.
     #[props(default)]
     pub disabled: bool,
+    /// When set, render an `<a class="dropdown-item" href=...>` anchor instead of
+    /// a `<button>` so the item behaves as a real hyperlink. Anchors cannot be
+    /// HTML-`disabled`, so a disabled anchor item carries the `.disabled` class,
+    /// `aria-disabled="true"`, and `tabindex="-1"` (matching `NavLink`).
+    #[props(default)]
+    pub href: Option<String>,
+    /// Anchor `target` (e.g. `"_blank"` to open in a new tab). Only applies when
+    /// `href` is set.
+    #[props(default)]
+    pub target: Option<String>,
     /// Click event handler.
     #[props(default)]
     pub onclick: Option<EventHandler<MouseEvent>>,
@@ -252,19 +282,51 @@ pub struct DropdownItemProps {
     pub children: Element,
 }
 
-#[component]
-pub fn DropdownItem(props: DropdownItemProps) -> Element {
+/// Build the class string for a dropdown item (`dropdown-item` + optional
+/// `active`/`disabled` + caller classes). Shared by the `<button>` and `<a>`
+/// render paths so both carry identical classes.
+fn dropdown_item_class(active: bool, disabled: bool, class: &str) -> String {
     let mut classes = vec!["dropdown-item".to_string()];
-    if props.active {
+    if active {
         classes.push("active".to_string());
     }
-    if props.disabled {
+    if disabled {
         classes.push("disabled".to_string());
     }
-    if !props.class.is_empty() {
-        classes.push(props.class.clone());
+    if !class.is_empty() {
+        classes.push(class.to_string());
     }
-    let full_class = classes.join(" ");
+    classes.join(" ")
+}
+
+#[component]
+pub fn DropdownItem(props: DropdownItemProps) -> Element {
+    let full_class = dropdown_item_class(props.active, props.disabled, &props.class);
+
+    // Anchor form: a real hyperlink so browser link behaviours work. Anchors
+    // can't be HTML-`disabled`, so disabled state is conveyed by the `.disabled`
+    // class plus `aria-disabled`/`tabindex="-1"` (matching NavLink).
+    if let Some(href) = props.href.clone() {
+        let target = props.target.clone();
+        return rsx! {
+            li {
+                a {
+                    class: "{full_class}",
+                    href: "{href}",
+                    target: target,
+                    "aria-disabled": if props.disabled { "true" } else { "" },
+                    tabindex: if props.disabled { "-1" } else { "" },
+                    onclick: move |evt| {
+                        if let Some(handler) = &props.onclick {
+                            handler.call(evt);
+                        }
+                    },
+                    ..props.attributes,
+                    {props.children}
+                }
+            }
+        };
+    }
 
     rsx! {
         li {
@@ -305,5 +367,29 @@ pub struct DropdownHeaderProps {
 pub fn DropdownHeader(props: DropdownHeaderProps) -> Element {
     rsx! {
         li { h6 { class: "dropdown-header", ..props.attributes, {props.children} } }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dropdown_item_class_base() {
+        assert_eq!(dropdown_item_class(false, false, ""), "dropdown-item");
+    }
+
+    #[test]
+    fn dropdown_item_class_active_disabled_and_extra() {
+        // Identical class output for the `<button>` and `<a>` render paths.
+        assert_eq!(
+            dropdown_item_class(true, true, "text-danger"),
+            "dropdown-item active disabled text-danger"
+        );
+    }
+
+    #[test]
+    fn dropdown_item_class_active_only() {
+        assert_eq!(dropdown_item_class(true, false, ""), "dropdown-item active");
     }
 }

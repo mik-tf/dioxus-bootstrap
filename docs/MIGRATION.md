@@ -168,6 +168,8 @@ Bootstrap JavaScript is not loaded. Replace JS attributes with Dioxus state.
 | --- | --- | --- |
 | `data-bs-toggle="modal"` | `Modal { show, ... }` | `Signal<bool>` |
 | dropdown + `data-bs-toggle` | `Dropdown { open, ... }` | `Signal<bool>` |
+| `<button class="dropdown-item">` | `DropdownItem { .. }` | — |
+| `<a class="dropdown-item" href=... target=...>` (link menu item) | `DropdownItem { href, target?, .. }` | — |
 | `.collapse` | `Collapse { expanded, ... }` | `Signal<bool>` |
 | navbar collapse | `NavbarToggler` + `NavbarCollapse` + `NavbarNav` | `Signal<bool>` |
 | tabs | `TabList` / `Tabs` | `Signal<usize>` |

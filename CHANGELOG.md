@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- `href` (and optional `target`) props on `DropdownItem`. When `href` is set,
+  the item renders `<a class="dropdown-item" href=... target=...>` instead of a
+  `<button>`, so link menu entries get real anchor behaviours — middle-click /
+  ctrl-cmd click to open in a background tab, copy-link and open-in-new-window
+  context actions, and a visible target URL on hover. The same `active`,
+  `disabled`, `class`, and `onclick` props apply to both forms; a disabled
+  anchor carries `.disabled` + `aria-disabled="true"` + `tabindex="-1"` (anchors
+  cannot be HTML-`disabled`). The default `<button>` rendering is unchanged.
+
 ## [0.5.9] — JS-free dropdown end-alignment
 
 ### Fixed
