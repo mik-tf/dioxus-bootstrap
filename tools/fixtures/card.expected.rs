@@ -6,7 +6,7 @@ rsx! {
             i {
                 class: "bi bi-info-circle",
             }
-            "Details"
+            " Details"
         }
         div {
             class: "card-body",

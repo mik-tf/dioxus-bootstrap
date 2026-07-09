@@ -24,7 +24,7 @@ function assertEqual(name, actual, expected) {
 }
 
 // Deterministic conversions: output matches the golden .rs and nothing is flagged.
-for (const name of ['card', 'table-for', 'if-block', 'interp', 'form']) {
+for (const name of ['card', 'table-for', 'if-block', 'interp', 'form', 'inline-ws']) {
   const result = transformHtml(read(`${name}.input.html`), `${name}.input.html`);
   assertEqual(`${name} conversion`, result.source, read(`${name}.expected.rs`));
   assertEqual(`${name} warnings`, JSON.stringify(result.warnings), '[]');

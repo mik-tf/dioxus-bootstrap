@@ -3,11 +3,11 @@ rsx! {
         class: "summary",
         p {
             class: "mb-0",
-            "Version"
+            "Version "
             code {
                 {version}
             }
-            "on host {hostname}."
+            " on host {hostname}."
         }
         a {
             class: "link",

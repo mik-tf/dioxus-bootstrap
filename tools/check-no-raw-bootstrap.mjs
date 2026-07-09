@@ -58,7 +58,13 @@ const SKIP_DIRS = new Set(['target', 'node_modules', '.git', 'dist', 'app_dist',
 const SCAN_EXT = new Set(['.rs', '.html', '.htm', '.js', '.mjs']);
 
 const CDN_RE = /(https?:)?\/\/[^"'`\s)]*\b(cdn\.jsdelivr\.net|bootstrapcdn\.com|unpkg\.com|stackpath\.[^/"'`\s]+|cdnjs\.cloudflare\.com)\/[^"'`\s)]*bootstrap/i;
-const JS_DATA_RE = /\bdata-bs-[a-z-]+/g;
+// `data-bs-*` attributes drive Bootstrap's JavaScript (toggle, target, dismiss,
+// ride, spy, ...) — forbidden, since that JS is not loaded in WASM. The sole
+// exception is `data-bs-theme`: it is the CSS-only color-mode hook (Bootstrap's
+// stylesheet reads it, no JS involved), and this crate's own ThemeProvider emits
+// it via `documentElement.setAttribute('data-bs-theme', …)`. Exempt it so
+// consumers can set the color mode the same idiomatic way.
+const JS_DATA_RE = /\bdata-bs-(?!theme\b)[a-z-]+/g;
 const JS_API_RE = /\b(bootstrap\.bundle(?:\.min)?\.js|bootstrap(?:\.min)?\.js|new\s+bootstrap\.[A-Z]\w*|bootstrap\.(Modal|Dropdown|Collapse|Offcanvas|Tab|Toast|Tooltip|Popover|Carousel|ScrollSpy)\b)/g;
 // class string literals: RSX `class: "..."` and HTML `class="..."`
 const CLASS_RE = /\bclass\s*[:=]\s*"([^"]*)"/g;

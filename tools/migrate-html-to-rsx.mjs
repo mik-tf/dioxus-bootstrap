@@ -456,6 +456,29 @@ function renderAttrLines(el, indent, warnings) {
   return lines;
 }
 
+// Text-phrasing (inline-level) HTML elements whose whitespace boundary with
+// adjacent text is *significant* — it renders as a space — so it must be preserved
+// across the run boundary, unlike whitespace around block elements (which
+// collapses to nothing). This keeps prose like `lives under <code>~/hero/</code>.
+// To back …` from rendering as one run-on word.
+//
+// Deliberately excludes form controls (input/select/textarea/button/label) and
+// replaced elements (img): they are inline-level in HTML's content model but are
+// almost always block-styled by CSS (`.form-control` is `display:block`), so
+// preserving whitespace around them would inject spaces the rendered form never
+// shows. Narrow to the text-level elements where a space is the reliable intent.
+const INLINE_TAGS = new Set([
+  'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i',
+  'kbd', 'mark', 'q', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup',
+  'time', 'u', 'var', 'wbr',
+]);
+
+// Is `node` an inline-level *element* whose whitespace boundary with adjacent
+// text is significant? (Text/expr are handled by isInline; this is for elements.)
+function isInlineEl(node) {
+  return node.type === 'el' && INLINE_TAGS.has(node.tag.toLowerCase());
+}
+
 // Split children into runs of inline nodes (text/expr) and standalone nodes, so adjacent text and
 // interpolations collapse into a single Dioxus string / dyn-node.
 function isInline(node) {
@@ -465,29 +488,46 @@ function isInline(node) {
 function renderChildren(children, indent, warnings) {
   const lines = [];
   let run = [];
-  const flush = () => {
+  // Whether the sibling immediately before the pending run is an inline element,
+  // so a whitespace boundary between them renders as a space and must be kept.
+  let prevInlineEl = false;
+  const flush = (nextInlineEl) => {
     if (!run.length) return;
-    const rendered = renderInlineRun(run, indent, warnings);
+    const rendered = renderInlineRun(run, indent, warnings, prevInlineEl, nextInlineEl);
     for (const l of rendered) lines.push(l);
     run = [];
   };
   for (const child of children) {
     if (isInline(child)) { run.push(child); continue; }
-    flush();
+    // Hit an element: flush the pending text run, telling it whether the element
+    // it butts up against is inline (keep the boundary space) or block (drop it).
+    const childInline = isInlineEl(child);
+    flush(childInline);
     for (const l of renderNode(child, indent, warnings)) lines.push(l);
+    prevInlineEl = childInline;
   }
-  flush();
+  flush(false); // parent's trailing edge -> trim trailing whitespace
   return lines;
 }
 
-function renderInlineRun(run, indent, warnings) {
-  // Collapse whitespace; drop a run that is only whitespace text.
+// `keepLeading`/`keepTrailing`: the run abuts an inline element on that side, so a
+// whitespace boundary there is significant (renders as a space) and is preserved
+// as a single space rather than trimmed. At a parent edge or a block-element
+// boundary both are false and the edge whitespace collapses away, as in HTML.
+function renderInlineRun(run, indent, warnings, keepLeading = false, keepTrailing = false) {
+  // Collapse whitespace; a run that is only whitespace text normally drops — but
+  // whitespace sandwiched between two inline elements (`<code>a</code> <code>b</code>`)
+  // is a significant space and must survive as a bare `" "` literal.
   const exprs = run.filter((r) => r.type === 'expr');
   const hasText = run.some((r) => r.type === 'text' && decodeEntities(r.value).trim() !== '');
-  if (!exprs.length && !hasText) return [];
+  if (!exprs.length && !hasText) {
+    const hasWs = run.some((r) => r.type === 'text' && /\s/.test(r.value));
+    return keepLeading && keepTrailing && hasWs ? [`${indent}" "`] : [];
+  }
 
-  // A single interpolation with no surrounding text -> a bare dyn node `{expr}` (accepts any expr).
-  if (exprs.length === 1 && !hasText) {
+  // A single interpolation with no surrounding text or kept boundary space -> a bare
+  // dyn node `{expr}` (accepts any expr).
+  if (exprs.length === 1 && !hasText && !keepLeading && !keepTrailing) {
     return [`${indent}{${cleanExpr(exprs[0].raw, exprs[0].off, warnings, 'node')}}`];
   }
 
@@ -501,10 +541,16 @@ function renderInlineRun(run, indent, warnings) {
       pieces.push({ expr: node.raw, off: node.off });
     }
   }
-  // Trim leading/trailing whitespace on the joined text edges.
-  if (pieces.length && pieces[0].text !== undefined) pieces[0].text = pieces[0].text.replace(/^\s+/, '');
+  // Trim the joined text edges — but keep a single space where the run abuts an
+  // inline element (significant whitespace), collapsing to that one space.
+  const firstP = pieces[0];
+  if (firstP && firstP.text !== undefined) {
+    firstP.text = keepLeading ? firstP.text.replace(/^\s+/, ' ') : firstP.text.replace(/^\s+/, '');
+  }
   const lastP = pieces[pieces.length - 1];
-  if (lastP && lastP.text !== undefined) lastP.text = lastP.text.replace(/\s+$/, '');
+  if (lastP && lastP.text !== undefined) {
+    lastP.text = keepTrailing ? lastP.text.replace(/\s+$/, ' ') : lastP.text.replace(/\s+$/, '');
+  }
   const cleaned = pieces.filter((p) => p.expr !== undefined || p.text !== '');
   if (!cleaned.length) return [];
   return [`${indent}${renderFormatString(cleaned, run[0].off, warnings)}`];
