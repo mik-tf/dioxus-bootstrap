@@ -1,0 +1,14 @@
+<form action="/save" method="post">
+    <div class="mb-2">
+        <label class="form-label" for="name">Name</label>
+        <input class="form-control" type="text" id="name" name="name" required>
+    </div>
+    <div class="mb-2">
+        <label class="form-label" for="role">Role</label>
+        <select class="form-select" id="role" name="role">
+            <option value="admin">Admin</option>
+            <option value="user" selected>User</option>
+        </select>
+    </div>
+    <button class="btn btn-primary" type="submit">Save</button>
+</form>

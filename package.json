@@ -3,6 +3,8 @@
   "scripts": {
     "lint:bootstrap": "node tools/check-no-raw-bootstrap.mjs examples",
     "test:migrate": "node tools/test-migrate-bootstrap-rsx.mjs",
+    "test:migrate:html": "node tools/test-migrate-html-to-rsx.mjs",
+    "test:tools": "node tools/test-migrate-bootstrap-rsx.mjs && node tools/test-migrate-html-to-rsx.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed"
   },

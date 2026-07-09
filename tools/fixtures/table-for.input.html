@@ -1,0 +1,13 @@
+<table class="table table-striped">
+    <thead>
+        <tr><th>Name</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+        {% for svc in services %}
+        <tr>
+            <td>{{ svc.name }}</td>
+            <td>{{ svc.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
