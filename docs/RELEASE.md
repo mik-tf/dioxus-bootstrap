@@ -3,6 +3,14 @@
 `dioxus-bootstrap-css` releases are cut from the Forge primary repository and
 mirrored to GitHub.
 
+> **Publishing is automated by the tag push.** Step 7 (pushing the `vX.Y.Z` tag)
+> triggers the Forge `Release` workflow (`.forgejo/workflows/release.yml`), which runs
+> the gates and `cargo publish`es to crates.io — guarded by an existing-version check,
+> so it safely skips if that version is already on crates.io. **Never run
+> `cargo publish` manually**; the tag does it (a manual publish is redundant at best and
+> races the workflow at worst). GitHub release + Pages are automated mirror outputs, so
+> the GitHub remote is never pushed by hand either.
+
 ## Repositories
 
 - Primary repository: https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css

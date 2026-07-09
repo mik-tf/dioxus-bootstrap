@@ -74,3 +74,24 @@ precise anchoring. `src/overlay.rs` reproduces Popper's placement/arrow math; th
 Popover and Tooltip apply it. Fix an overlay behaviour there once and every overlay
 inherits it. (The Dropdown is CSS-anchored — no arrow, no run-time measurement — so
 it is immune to that class by construction.)
+
+## Releasing — the tag publishes; never `cargo publish` by hand
+
+Publishing is automated and triggered by pushing a version **tag**. To cut a release:
+
+1. Move the `CHANGELOG.md` `[Unreleased]` notes under a new `## [X.Y.Z]` heading.
+2. Bump `version` in `crates/dioxus-bootstrap/Cargo.toml`.
+3. Commit on a branch, squash-merge to `development`, push `development`.
+4. Create and push the tag: `git tag -a vX.Y.Z -m "dioxus-bootstrap-css X.Y.Z"` then
+   push it to `origin` (Forge).
+
+Pushing the `vX.Y.Z` tag triggers the Forge **Release** workflow
+(`.forgejo/workflows/release.yml`): it checks the tag matches the crate version, runs
+the gates, and publishes to crates.io — **guarded by an existing-version check, so it
+safely skips if that version is already published.** GitHub release + Pages are
+automated mirror outputs of Forge (`sync-from-forge.yml`); Forge is the only publisher,
+so you never push the GitHub remote by hand either.
+
+**Do NOT run `cargo publish` manually.** The tag does it. A manual publish is at best
+redundant (CI then skips the publish step) and at worst races the workflow. Full
+step-by-step: `docs/RELEASE.md`.
