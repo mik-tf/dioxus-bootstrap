@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.12] — Clickable-card (`Card` anchor mode)
+
+### Added
+
+- **`Card` anchor mode.** `Card` gains `href` (and `target`) props: when `href` is
+  set it renders `<a class="card" href=...>` instead of `<div class="card">`, so the
+  whole card is a single link — the standard Bootstrap clickable-card pattern. This
+  closes a crate parity gap (Bootstrap allows `.card` on an `<a>`; the typed component
+  was `<div>`-only, and `check-no-raw-bootstrap` forbids raw `card`, so a clickable
+  card had no typed expression). Mirrors the existing `Button` (`button.btn` /
+  `a.btn`) and `DropdownItem` element-switch. The `card_class` helper is shared by
+  both render paths so classes are identical; unit tests cover it.
+
 ## [0.5.11] — Overlay parity (arrow, anchor, dropdown spacer) + objective parity gate
 
 ### Fixed
