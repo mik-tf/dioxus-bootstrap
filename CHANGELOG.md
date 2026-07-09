@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.10] — DropdownItem as an anchor (href/target)
+
 ### Added
 
 - `href` (and optional `target`) props on `DropdownItem`. When `href` is set,

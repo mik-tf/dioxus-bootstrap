@@ -1,6 +1,6 @@
 [package]
 name = "dioxus-bootstrap-css"
-version = "0.5.9"
+version = "0.5.10"
 readme = "../../README.md"
 edition = "2024"
 rust-version = "1.85"
