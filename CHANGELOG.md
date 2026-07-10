@@ -6,7 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
-## [0.5.12] — Clickable-card (`Card` anchor mode)
+## [0.5.13] — Dismissible-overlay behaviour parity (Escape, autohide, dismiss callback)
+
+### Added
+
+- **Escape-to-close on `Modal` and `Offcanvas`.** Both now focus their panel on
+  open and close on the Escape key, matching Bootstrap's `keyboard: true` option
+  (previously only the close button and backdrop click dismissed them). A new
+  `keyboard_close` prop (default `true`) gates it. The shared decision lives in one
+  place (`is_escape_key`) so the two components stay in agreement; unit-tested.
+- **`Toast` autohide.** New `autohide` (default `false`) and `delay_ms` (default
+  `5000`) props auto-dismiss a toast after the delay, matching Bootstrap's
+  `autohide` + `delay`. Default `false` keeps existing toasts persistent, so the
+  addition is backward-compatible.
+- **`Offcanvas` dismiss callback.** New `on_dismiss` prop fires on every close path
+  (button, backdrop, Escape) — the typed equivalent of Bootstrap's
+  `hidden.bs.offcanvas` event, so a consumer can tear down work tied to the panel
+  being open (e.g. stop a log stream). Mirrors `Toast`'s existing `on_dismiss`.
 
 ### Added
 

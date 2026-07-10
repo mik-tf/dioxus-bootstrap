@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 
+use crate::keyboard::is_escape_key;
 use crate::types::ModalSize;
 
 /// Modal fullscreen variants.
@@ -75,6 +76,7 @@ pub enum ModalFullscreen {
 /// - `centered` — vertically center the modal
 /// - `scrollable` — scrollable modal body
 /// - `backdrop_close` — close when clicking backdrop (default: true)
+/// - `keyboard_close` — close on the Escape key (default: true)
 #[derive(Clone, PartialEq, Props)]
 pub struct ModalProps {
     /// Signal controlling modal visibility.
@@ -94,6 +96,9 @@ pub struct ModalProps {
     /// Close when clicking the backdrop.
     #[props(default = true)]
     pub backdrop_close: bool,
+    /// Close when the Escape key is pressed (Bootstrap's `keyboard` option).
+    #[props(default = true)]
+    pub keyboard_close: bool,
     /// Show the close button in the header.
     #[props(default = true)]
     pub show_close: bool,
@@ -165,6 +170,7 @@ pub fn Modal(props: ModalProps) -> Element {
     };
 
     let backdrop_close = props.backdrop_close;
+    let keyboard_close = props.keyboard_close;
 
     rsx! {
         // Backdrop
@@ -183,6 +189,18 @@ pub fn Modal(props: ModalProps) -> Element {
             tabindex: "-1",
             role: "dialog",
             "aria-modal": "true",
+            // Focus the panel on open so it receives key events (Bootstrap
+            // moves focus to the modal on show); Escape then closes it.
+            onmounted: move |evt: MountedEvent| {
+                spawn(async move {
+                    let _ = evt.set_focus(true).await;
+                });
+            },
+            onkeydown: move |evt: KeyboardEvent| {
+                if keyboard_close && is_escape_key(&evt.key()) {
+                    show_signal.set(false);
+                }
+            },
             onclick: move |_| {
                 if backdrop_close {
                     show_signal.set(false);

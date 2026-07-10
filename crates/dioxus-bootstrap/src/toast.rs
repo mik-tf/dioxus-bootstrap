@@ -59,6 +59,8 @@ use crate::types::Color;
 /// - `subtitle` — small text in header (e.g., "just now")
 /// - `color` — background color variant
 /// - `show_close` — show close button (default: true)
+/// - `autohide` — auto-dismiss after `delay_ms` (default: false)
+/// - `delay_ms` — auto-dismiss delay in milliseconds (default: 5000)
 /// - `on_dismiss` — callback when the toast is dismissed
 #[derive(Clone, PartialEq, Props)]
 pub struct ToastProps {
@@ -73,6 +75,12 @@ pub struct ToastProps {
     /// Show close button.
     #[props(default = true)]
     pub show_close: bool,
+    /// Auto-dismiss the toast after `delay_ms` (Bootstrap's `autohide` option).
+    #[props(default)]
+    pub autohide: bool,
+    /// Auto-dismiss delay in milliseconds (Bootstrap's `delay` option).
+    #[props(default = 5000)]
+    pub delay_ms: u32,
     /// Toast color variant (applied as bg class).
     #[props(default)]
     pub color: Option<Color>,
@@ -88,10 +96,31 @@ pub struct ToastProps {
 
 #[component]
 pub fn Toast(props: ToastProps) -> Element {
-    let is_shown = *props.show.read();
     let mut show_signal = props.show;
     let on_dismiss = props.on_dismiss;
+    let autohide = props.autohide;
+    let delay_ms = props.delay_ms;
 
+    // Autohide — when the toast is shown and autohide is on, close it after
+    // `delay_ms`, matching Bootstrap's `autohide` + `delay`. Runs before the
+    // early return so the hook count is stable across shown/hidden renders.
+    use_effect(move || {
+        let shown = *show_signal.read();
+        if autohide && shown {
+            spawn(async move {
+                gloo_timers::future::TimeoutFuture::new(delay_ms).await;
+                // The toast may have been dismissed already while we waited.
+                if *show_signal.peek() {
+                    show_signal.set(false);
+                    if let Some(handler) = &on_dismiss {
+                        handler.call(());
+                    }
+                }
+            });
+        }
+    });
+
+    let is_shown = *show_signal.read();
     if !is_shown {
         return rsx! {};
     }

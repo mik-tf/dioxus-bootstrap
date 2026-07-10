@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::keyboard::is_escape_key;
+
 /// Bootstrap Offcanvas (slide-in sidebar) — signal-driven, no JavaScript.
 ///
 /// # Bootstrap HTML → Dioxus
@@ -38,6 +40,8 @@ use dioxus::prelude::*;
 /// - `placement` — `OffcanvasPlacement::Start`, `End`, `Top`, `Bottom`
 /// - `backdrop` — show backdrop overlay (default: true)
 /// - `backdrop_close` — close on backdrop click (default: true)
+/// - `keyboard_close` — close on the Escape key (default: true)
+/// - `on_dismiss` — callback fired whenever the offcanvas is dismissed
 /// - `responsive` — responsive variant breakpoint (e.g., "lg")
 #[derive(Clone, PartialEq, Props)]
 pub struct OffcanvasProps {
@@ -52,12 +56,20 @@ pub struct OffcanvasProps {
     /// Close when clicking the backdrop.
     #[props(default = true)]
     pub backdrop_close: bool,
+    /// Close when the Escape key is pressed (Bootstrap's `keyboard` option).
+    #[props(default = true)]
+    pub keyboard_close: bool,
     /// Show backdrop overlay.
     #[props(default = true)]
     pub backdrop: bool,
     /// Show close button.
     #[props(default = true)]
     pub show_close: bool,
+    /// Callback fired whenever the offcanvas is dismissed (close button,
+    /// backdrop click, or Escape) — the typed equivalent of Bootstrap's
+    /// `hidden.bs.offcanvas` event.
+    #[props(default)]
+    pub on_dismiss: Option<EventHandler<()>>,
     /// Responsive variant — offcanvas only below this breakpoint.
     /// E.g., "lg" makes it offcanvas below lg, regular content above.
     #[props(default)]
@@ -115,6 +127,17 @@ pub fn Offcanvas(props: OffcanvasProps) -> Element {
     };
 
     let backdrop_close = props.backdrop_close;
+    let keyboard_close = props.keyboard_close;
+    let on_dismiss = props.on_dismiss;
+
+    // Every close path (button, backdrop, Escape) funnels through here so the
+    // dismiss callback fires exactly once per dismissal, regardless of how.
+    let mut dismiss = move || {
+        show_signal.set(false);
+        if let Some(handler) = &on_dismiss {
+            handler.call(());
+        }
+    };
 
     rsx! {
         // Backdrop
@@ -123,7 +146,7 @@ pub fn Offcanvas(props: OffcanvasProps) -> Element {
                 class: "offcanvas-backdrop fade show",
                 onclick: move |_| {
                     if backdrop_close {
-                        show_signal.set(false);
+                        dismiss();
                     }
                 },
             }
@@ -135,6 +158,17 @@ pub fn Offcanvas(props: OffcanvasProps) -> Element {
             tabindex: "-1",
             "aria-modal": "true",
             role: "dialog",
+            // Focus the panel on open so it receives key events; Escape closes it.
+            onmounted: move |evt: MountedEvent| {
+                spawn(async move {
+                    let _ = evt.set_focus(true).await;
+                });
+            },
+            onkeydown: move |evt: KeyboardEvent| {
+                if keyboard_close && is_escape_key(&evt.key()) {
+                    dismiss();
+                }
+            },
             if !props.title.is_empty() || props.show_close {
                 div { class: "offcanvas-header",
                     if !props.title.is_empty() {
@@ -145,7 +179,7 @@ pub fn Offcanvas(props: OffcanvasProps) -> Element {
                             class: "btn-close",
                             r#type: "button",
                             "aria-label": "Close",
-                            onclick: move |_| show_signal.set(false),
+                            onclick: move |_| dismiss(),
                         }
                     }
                 }
