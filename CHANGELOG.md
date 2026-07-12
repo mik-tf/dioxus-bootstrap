@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.15] — `Range` reflects its controlled value
+
+### Fixed
+
+- **`Range` (slider) now positions its thumb at its `value` prop.** A range
+  input's thumb is controlled by its `.value` DOM property; the `value` content
+  attribute only seeds the default (a range with no value defaults to the
+  min–max midpoint). Dioxus's declarative `value` set the attribute only, so a
+  server- or state-driven value that differed from the midpoint left the thumb at
+  the default — the same property-vs-attribute gap fixed for `Select` in 0.5.14.
+  `Range` now holds its mounted element and sets `.value` imperatively on mount and
+  whenever `value` changes. (Checkbox, radio, and switch were audited in the same
+  pass and are correct: Dioxus special-cases the `checked` property, so their
+  declarative `checked` reflects reliably.)
+
 ## [0.5.14] — `Select` reflects its controlled value
 
 ### Fixed

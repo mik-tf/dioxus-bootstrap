@@ -1,6 +1,6 @@
 [package]
 name = "dioxus-bootstrap-css"
-version = "0.5.14"
+version = "0.5.15"
 readme = "../../README.md"
 edition = "2024"
 rust-version = "1.85"
@@ -20,4 +20,4 @@ gloo-timers = { version = "0.4", features = ["futures"] }
 # `value` content attribute, so Dioxus's declarative `value` never applies to a
 # select. Select reflects the controlled value onto the DOM element imperatively.
 wasm-bindgen = "0.2"
-web-sys = { version = "0.3", features = ["Element", "HtmlSelectElement"] }
+web-sys = { version = "0.3", features = ["Element", "HtmlSelectElement", "HtmlInputElement"] }

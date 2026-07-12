@@ -659,21 +659,46 @@ pub struct RangeProps {
 
 #[component]
 pub fn Range(props: RangeProps) -> Element {
+    use wasm_bindgen::JsCast;
+
     let full_class = if props.class.is_empty() {
         "form-range".to_string()
     } else {
         format!("form-range {}", props.class)
     };
 
+    // A range slider's thumb position is controlled by its `.value` DOM property,
+    // NOT by a `value` content attribute (the attribute only seeds the default).
+    // Dioxus's declarative `value` sets the attribute, so a server-reported value
+    // that differs from the default leaves the thumb at the default — the same
+    // property-vs-attribute gap the Select had. Hold the mounted element and set
+    // `.value` imperatively on mount and whenever `value` changes.
+    let mut range_el = use_signal(|| None as Option<web_sys::HtmlInputElement>);
+    let value = props.value.clone();
+    use_effect(use_reactive!(|value| {
+        if let Some(el) = range_el.peek().clone() {
+            el.set_value(&value);
+        }
+    }));
+
+    let mount_value = props.value.clone();
     rsx! {
         input {
             class: "{full_class}",
             r#type: "range",
-            value: "{props.value}",
             min: "{props.min}",
             max: "{props.max}",
             step: if props.step.is_empty() { None } else { Some(props.step.clone()) },
             disabled: props.disabled,
+            onmounted: move |evt: MountedEvent| {
+                if let Some(el) = evt
+                    .downcast::<web_sys::Element>()
+                    .and_then(|e| e.clone().dyn_into::<web_sys::HtmlInputElement>().ok())
+                {
+                    el.set_value(&mount_value);
+                    range_el.set(Some(el));
+                }
+            },
             oninput: move |evt| {
                 if let Some(handler) = &props.oninput {
                     handler.call(evt);

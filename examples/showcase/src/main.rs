@@ -349,7 +349,10 @@ fn FormsSection() -> Element {
     let mut accept = use_signal(|| false);
     let mut selected = use_signal(String::new);
     let mut switch_on = use_signal(|| true);
-    let mut range_val = use_signal(|| "50".to_string());
+    // Off the 0–100 midpoint on purpose: a range with no `value` attribute
+    // defaults to the midpoint, so an initial 20 witnesses controlled-value
+    // reflection — the thumb must sit at 20, not the default 50.
+    let mut range_val = use_signal(|| "20".to_string());
 
     rsx! {
         div { class: "mt-3",
