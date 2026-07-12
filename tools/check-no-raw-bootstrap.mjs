@@ -8,7 +8,7 @@
 //
 // Layout/utility classes (container, row, col-*, d-flex, m-*, p-*, text-*, form-label, ...) are allowed:
 // the guide says to use plain `div { class: "..." }` for static layout. Only component classes that have a
-// typed equivalent in this crate are forbidden, matching docs/content/04_migration.md.
+// typed equivalent in this crate are forbidden, matching docs/04_migration.md.
 //
 // Usage:
 //   node tools/check-no-raw-bootstrap.mjs [dir ...]     # default: examples
@@ -23,7 +23,7 @@ import path from 'path';
 const ROOTS = process.argv.slice(2);
 const TARGETS = ROOTS.length ? ROOTS : ['examples'];
 
-// Component classes with a typed equivalent in the crate (docs/content/04_migration.md).
+// Component classes with a typed equivalent in the crate (docs/04_migration.md).
 //
 // Two match modes, because some roots own a whole family (every `dropdown-*` is rendered by Dropdown)
 // while others have *content* sub-classes with no typed equivalent (`card-title`/`card-text` live inside a
@@ -102,7 +102,7 @@ function scanFile(file) {
       // strip RSX interpolation braces so `{foo}` inside a class string is ignored
       const tokens = m[1].replace(/\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean);
       const bad = tokens.filter(tokenForbidden);
-        if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" (use the typed component, see docs/content/04_migration.md)`);
+        if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" (use the typed component, see docs/04_migration.md)`);
     }
     // conditional class attrs: check every string literal in `class: if/match { … }`
     let c;
@@ -111,7 +111,7 @@ function scanFile(file) {
       for (const lit of c[0].match(/"[^"]*"/g) || []) {
         const tokens = lit.slice(1, -1).replace(/\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean);
         const bad = tokens.filter(tokenForbidden);
-      if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" in a conditional class (use the typed component, see docs/content/04_migration.md)`);
+      if (bad.length) at(`RAW: raw Bootstrap component class "${bad.join(' ')}" in a conditional class (use the typed component, see docs/04_migration.md)`);
       }
       if (c.index === COND_CLASS_RE.lastIndex) COND_CLASS_RE.lastIndex++; // guard zero-width
     }
@@ -146,5 +146,5 @@ for (const v of violations) {
   console.error(`      ${v.msg}`);
   console.error(`      > ${v.src}`);
 }
-console.error(`\nFix: replace with typed components (docs/content/04_migration.md), drop CDN links (use BootstrapHead), and drive interactive state with Dioxus signals.`);
+console.error(`\nFix: replace with typed components (docs/04_migration.md), drop CDN links (use BootstrapHead), and drive interactive state with Dioxus signals.`);
 process.exit(1);

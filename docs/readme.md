@@ -6,8 +6,8 @@ This directory contains the repository documentation for `dioxus-bootstrap-css`
 ## Files
 
 - `booklet.toml` — booklet configuration (title, author, template, output formats).
-- `content/` — numbered Markdown chapters that make up the document.
-- `readme.md` — this file.
+- `NN_*.md` — numbered Markdown chapters that make up the document, in order.
+- `readme.md` — this file (not included in the booklet).
 
 ## Build the docs
 
@@ -37,11 +37,11 @@ To see the processing order of the Markdown files:
 hero_doc_generator check .
 ```
 
-Only the Markdown source under `content/` is committed; built ebook/HTML/PDF
-output is not checked in, and there is no docs CI job.
+Only the numbered Markdown chapters are committed; built ebook/HTML/PDF output
+is not checked in, and there is no docs CI job.
 
 ## Adding chapters
 
-Add new numbered Markdown files to `content/`, for example `08_new_topic.md`.
-The generator processes files alphabetically, so keep the `NN_` prefix to
-maintain order.
+Add new numbered Markdown files next to the others in this directory, for
+example `08_new_topic.md`. The generator processes files alphabetically, so keep
+the `NN_` prefix to maintain order (`readme.md` is skipped automatically).

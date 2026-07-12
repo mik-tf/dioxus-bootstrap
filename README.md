@@ -151,7 +151,7 @@ Key principles:
 - Let the converter map Bootstrap intent to props, flag unsafe cases instead of
   guessing, then prove fidelity with Playwright screenshots.
 
-See [docs/content/04_migration.md](docs/content/04_migration.md) for the complete
+See [docs/04_migration.md](docs/04_migration.md) for the complete
 workflow.
 
 ## Tools
@@ -178,11 +178,11 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## Release
 
-See [docs/content/06_release.md](docs/content/06_release.md).
+See [docs/06_release.md](docs/06_release.md).
 
 ## Governance
 
-See [docs/content/05_governance.md](docs/content/05_governance.md).
+See [docs/05_governance.md](docs/05_governance.md).
 
 ## License
 

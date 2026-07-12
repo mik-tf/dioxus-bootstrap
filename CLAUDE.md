@@ -64,7 +64,7 @@ then let the structural checker confirm zero mismatch. No creativity, no eyeball
 - `examples/popover_parity`, `examples/dropdown_parity` — capture harnesses that pin a
   control at a fixed point and force it open, so a golden-vs-candidate diff isolates
   the control from the page around it. Copy the pattern for new controls.
-- `docs/content/04_migration.md` — the full method, the component map, and the overlay/Popper notes.
+- `docs/04_migration.md` — the full method, the component map, and the overlay/Popper notes.
 
 ## Overlays are one family
 
@@ -94,4 +94,4 @@ so you never push the GitHub remote by hand either.
 
 **Do NOT run `cargo publish` manually.** The tag does it. A manual publish is at best
 redundant (CI then skips the publish step) and at worst races the workflow. Full
-step-by-step: `docs/content/06_release.md`.
+step-by-step: `docs/06_release.md`.
