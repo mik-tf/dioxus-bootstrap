@@ -65,29 +65,31 @@ version = "X.Y.Z"
 git commit -m "chore: release dbcss X.Y.Z"
    ```
 
-6. Push `development` to Forge primary and GitHub mirror.
+6. Push `development` to the Forge primary. Do **not** push the GitHub remote by
+   hand — GitHub is a pull-based mirror (see the note below).
 
    ```bash
    git push origin development
-   git push github development
    ```
 
-7. Create and push the release tag to both remotes.
+7. Create and push the release tag to the Forge primary. The tag is what
+   triggers publishing.
 
    ```bash
 git tag -a vX.Y.Z -m "dioxus-bootstrap-css X.Y.Z"
 git push origin vX.Y.Z
-git push github vX.Y.Z
    ```
 
-8. Verify the automated release flow.
+8. Verify the automated release flow. crates.io publishes within minutes; the
+   GitHub mirror, release, and Pages follow on the scheduled sync (a manual
+   `Sync from Forge` dispatch on GitHub speeds it up).
 
    - Forge release workflow succeeds.
    - Forge branch CI succeeds.
    - crates.io shows the new version.
    - crates.io repository metadata points to the Forge primary repository.
-   - GitHub release workflow succeeds.
-   - GitHub Pages rebuild succeeds.
+   - GitHub sync mirrors `development` and the new tag, then the GitHub release
+     workflow and Pages rebuild succeed.
    - Live showcase loads from https://mik-tf.github.io/dioxus-bootstrap-css/
 
 ## Notes

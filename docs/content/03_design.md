@@ -46,6 +46,12 @@ Every component follows the same pattern:
 3. Interactive state is explicit Dioxus state.
 4. Output remains standard Bootstrap HTML.
 
+Bootstrap's JavaScript conveniences are reproduced as typed props on the same
+components: Modal and Offcanvas close on the Escape key and backdrop click
+(`keyboard_close`, `backdrop_close`), Offcanvas exposes an `on_dismiss`
+callback, and Toast supports `autohide` with a `delay_ms`. See the
+Troubleshooting chapter for the defaults.
+
 ## Component Surface
 
 Layout and head:
@@ -76,7 +82,7 @@ Interactive components:
 Navigation:
 
 - `Navbar`, `NavbarToggler`, `NavbarCollapse`, `NavbarNav`
-- `Nav`, `NavItem`, `NavLink`
+- `Nav`, `NavItem`, `NavLink`, `NavButton`
 - `Breadcrumb`, `BreadcrumbItem`
 
 ## Migration Quality Bar

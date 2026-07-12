@@ -140,6 +140,37 @@ Scrollspy is intentionally manual review in the converter: raw Bootstrap
 `Scrollspy { target, root, active }`. Add the signal and typed `Scrollspy`
 marker by hand, then remove `data-bs-spy`/`data-bs-target`.
 
+## Starting from HTML or Askama templates
+
+`migrate-bootstrap-rsx.mjs` converts *RSX*. If you are migrating a
+server-rendered Bootstrap app whose source is plain HTML or Askama templates,
+run the HTML front-end first — the conversion is a two-stage pipeline:
+
+1. **`migrate-html-to-rsx.mjs`** — turns an `.html` template into a Dioxus
+   `rsx!` block (tags, attributes, text, nesting, comments, and the common
+   Askama control flow). It has **no Bootstrap opinion**; it just gets you from
+   HTML into RSX. `class` strings are kept verbatim so the downstream converter
+   can type them. Inline `on*=` handlers, `<script>`/`<style>` blocks, and
+   Askama shapes with no RSX equivalent (`{% match %}`, `{% extends %}`,
+   `{% include %}`, `{% macro %}`, a conditional in an attribute value) are
+   **flagged** with a `// TODO(convert): …` comment plus a manual-review
+   warning — never guessed.
+2. **`migrate-bootstrap-rsx.mjs`** — takes that RSX (or hand-written RSX) and
+   rewrites Bootstrap component classes into typed components, exactly as above.
+
+```bash
+node tools/migrate-html-to-rsx.mjs page.html -o page.rs   # stage 1: HTML -> RSX
+node tools/migrate-bootstrap-rsx.mjs --write page.rs      # stage 2: RSX -> typed components
+node tools/check-no-raw-bootstrap.mjs page.rs             # stage 3: gate
+```
+
+The front-end mirrors the RSX converter's flags: `--check` (parse only, exit 2
+if anything is flagged), `--write` (write `<name>.rs` next to each `.html`), and
+`--json` (machine-readable summary). `--pipe page.html` runs both stages in one
+shot, emitting typed-dbcss RSX directly. As with the RSX converter, flagged
+cases are for you to resolve deliberately — the gate and visual regression below
+still apply to the result.
+
 Example:
 
 ```rust
@@ -263,18 +294,21 @@ When you hit a new overlay gap: reproduce it in a `*_parity` example, add the ma
 1. Dump or inspect the existing DOM — and identify each control's source form
    (static markup / declarative `data-bs-*` / imperative JS), per "Reading the
    original" above.
-2. Run the converter in dry-run mode.
-3. Review warnings. Fix crate parity gaps upstream; handle manual-review cases
+2. If the source is HTML or Askama templates rather than RSX, run
+   `migrate-html-to-rsx.mjs` first (see "Starting from HTML or Askama
+   templates") so the rest of this workflow has RSX to work on.
+3. Run the converter in dry-run mode.
+4. Review warnings. Fix crate parity gaps upstream; handle manual-review cases
    intentionally.
-4. Run the converter with `--write`.
-5. Run `cargo check` or the consumer app's normal build.
-6. Run the no-raw-Bootstrap gate:
+5. Run the converter with `--write`.
+6. Run `cargo check` or the consumer app's normal build.
+7. Run the no-raw-Bootstrap gate:
 
 ```bash
 node tools/check-no-raw-bootstrap.mjs path/to/app/src
 ```
 
-7. Run the objective parity gate (above): capture golden + candidate yourself,
+8. Run the objective parity gate (above): capture golden + candidate yourself,
    compare geometry and `tools/visual-parity.mjs` AE, and classify every delta.
 
 ## The objective parity gate
