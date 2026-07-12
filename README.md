@@ -178,11 +178,11 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## Release
 
-See [docs/06_release.md](docs/06_release.md).
+See [docs/08_release.md](docs/08_release.md).
 
 ## Governance
 
-See [docs/05_governance.md](docs/05_governance.md).
+See [docs/07_governance.md](docs/07_governance.md).
 
 ## License
 

@@ -40,7 +40,7 @@ Bootstrap workarounds.
 `development` is the release branch. Release tags use the crate version with a
 leading `v`, for example `vX.Y.Z`.
 
-Follow [the Release chapter](06_release.md) for the release checklist. Public release notes
+Follow [the Release chapter](08_release.md) for the release checklist. Public release notes
 should describe user-visible behavior, migration impact, documentation changes,
 and validation results.
 

@@ -38,6 +38,9 @@ documentation — never normalized as downstream raw Bootstrap workarounds.
 - **Getting Started** — install the crate and render your first typed component.
 - **Design** — the parity contract, rendering model, and component surface.
 - **Migration** — converting Bootstrap HTML and raw RSX to typed components.
+- **Visual parity and overlays** — proving the conversion looks right, and the
+  overlay positioning math behind tooltips, popovers, and dropdowns.
+- **Migrating with an AI agent** — handing the conversion to a coding agent.
 - **Governance** — where development happens and maintainer expectations.
 - **Release** — the release and mirror checklist.
 - **Troubleshooting** — common issues and how to resolve them.

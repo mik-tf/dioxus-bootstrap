@@ -94,4 +94,4 @@ so you never push the GitHub remote by hand either.
 
 **Do NOT run `cargo publish` manually.** The tag does it. A manual publish is at best
 redundant (CI then skips the publish step) and at worst races the workflow. Full
-step-by-step: `docs/06_release.md`.
+step-by-step: `docs/08_release.md`.
