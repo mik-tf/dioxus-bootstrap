@@ -1,6 +1,6 @@
 [package]
 name = "dioxus-bootstrap-css"
-version = "0.5.13"
+version = "0.5.14"
 readme = "../../README.md"
 edition = "2024"
 rust-version = "1.85"
@@ -16,3 +16,8 @@ all-features = true
 [dependencies]
 dioxus = { version = "0.7", default-features = false, features = ["macro", "html", "signals", "hooks", "document", "asset"] }
 gloo-timers = { version = "0.4", features = ["futures"] }
+# A <select>'s selection is its .value property / <option selected>, not a
+# `value` content attribute, so Dioxus's declarative `value` never applies to a
+# select. Select reflects the controlled value onto the DOM element imperatively.
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = ["Element", "HtmlSelectElement"] }

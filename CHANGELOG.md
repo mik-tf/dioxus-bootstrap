@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.5.14] — `Select` reflects its controlled value
+
+### Fixed
+
+- **`Select` now shows the option matching its `value` prop.** A `<select>`'s
+  selection is its `.value` property (or an `<option selected>`), never a `value`
+  content attribute — the browser ignores that on a select — so the declarative
+  `value` was silently dropped and every `Select` displayed its *first* option
+  regardless of the value it was given. `Select` now holds its mounted element and
+  sets `.value` imperatively on mount and whenever `value` changes, so a controlled
+  select reflects server/state-driven values correctly. (Consumers pass options as
+  opaque children, so the crate cannot mark `<option selected>` for them; setting
+  the element value is the reliable fix.)
+
 ## [0.5.13] — Dismissible-overlay behaviour parity (Escape, autohide, dismiss callback)
 
 ### Added

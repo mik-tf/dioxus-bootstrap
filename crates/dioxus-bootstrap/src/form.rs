@@ -270,6 +270,8 @@ pub struct SelectProps {
 
 #[component]
 pub fn Select(props: SelectProps) -> Element {
+    use wasm_bindgen::JsCast;
+
     let size_class = match props.size {
         Size::Md => String::new(),
         s => format!(" form-select-{s}"),
@@ -281,11 +283,34 @@ pub fn Select(props: SelectProps) -> Element {
         format!("form-select{size_class} {}", props.class)
     };
 
+    // A `<select>`'s selection is controlled by its `.value` property (or an
+    // `<option selected>`), NOT by a `value` content attribute — browsers ignore
+    // the latter on a select, so Dioxus's declarative `value` silently does
+    // nothing and the element shows its first option. Hold the mounted element
+    // and set `.value` imperatively on mount and whenever `value` changes, so the
+    // control reflects the value it is given.
+    let mut select_el = use_signal(|| None as Option<web_sys::HtmlSelectElement>);
+    let value = props.value.clone();
+    use_effect(use_reactive!(|value| {
+        if let Some(el) = select_el.peek().clone() {
+            el.set_value(&value);
+        }
+    }));
+
+    let mount_value = props.value.clone();
     rsx! {
         select {
             class: "{full_class}",
-            value: "{props.value}",
             disabled: props.disabled,
+            onmounted: move |evt: MountedEvent| {
+                if let Some(el) = evt
+                    .downcast::<web_sys::Element>()
+                    .and_then(|e| e.clone().dyn_into::<web_sys::HtmlSelectElement>().ok())
+                {
+                    el.set_value(&mount_value);
+                    select_el.set(Some(el));
+                }
+            },
             onchange: move |evt| {
                 if let Some(handler) = &props.onchange {
                     handler.call(evt);
