@@ -1,0 +1,33 @@
+title = "dioxus-bootstrap-css"
+subtitle = "Typed Bootstrap 5.3 components for Dioxus"
+author = "Hero Engineering"
+date = "2026"
+template = "clean-eu"
+formats = ["ebook", "html", "pdf"]
+
+[input]
+sort = "alphabetical"
+recursive = true
+
+[images]
+default_width = "80%"
+default_align = "center"
+caption = true
+caption_source = "alt"
+
+[mermaid]
+enabled = true
+caption = true
+
+[pagination]
+h1_page_break_before = true
+keep_headings_with_next = true
+
+[headings]
+auto_number = true
+number_depth = 4
+
+[toc]
+enabled = true
+depth = 3
+title = "Table of Contents"

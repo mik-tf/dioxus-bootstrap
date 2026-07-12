@@ -156,5 +156,5 @@ The migration gate's forbidden list is calibrated against the crate's component
 set in `tools/check-no-raw-bootstrap.mjs` (`FORBID_PREFIX`, `FORBID_EXACT`,
 `ALLOW_EXACT`). When a new component replaces a class people would otherwise
 write by hand, update the forbidden list so the gate enforces the new typed
-surface. See `docs/MIGRATION.md` for the full migration workflow definition of
+surface. See `docs/content/04_migration.md` for the full migration workflow definition of
 done.
