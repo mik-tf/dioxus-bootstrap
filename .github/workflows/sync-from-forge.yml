@@ -33,7 +33,7 @@ jobs:
       new_tags: ${{ steps.sync.outputs.new_tags }}
     steps:
       - name: Checkout mirror (full history + tags)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -84,7 +84,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Create GitHub releases for new tags
@@ -117,13 +117,13 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
       - name: Cache cargo
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
