@@ -5,14 +5,12 @@ lets applications express Bootstrap UI as type-safe Rust components instead of
 raw class strings, while emitting ordinary Bootstrap HTML and using real
 Bootstrap CSS for the styling.
 
-The crate is published to crates.io, maintained from the Forge primary
-repository, and mirrored to GitHub for visibility and the live showcase.
+The crate is developed on GitHub and published to crates.io.
 
 - **Crate:** https://crates.io/crates/dioxus-bootstrap-css
 - **API docs:** https://docs.rs/dioxus-bootstrap-css
 - **Live showcase:** https://mik-tf.github.io/dioxus-bootstrap-css/
-- **Primary repository:** https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css
-- **GitHub mirror:** https://github.com/mik-tf/dioxus-bootstrap-css
+- **Repository:** https://github.com/mik-tf/dioxus-bootstrap-css
 
 ## Why dbcss
 
@@ -42,7 +40,8 @@ documentation — never normalized as downstream raw Bootstrap workarounds.
   overlay positioning math behind tooltips, popovers, and dropdowns.
 - **Migrating with an AI agent** — handing the conversion to a coding agent.
 - **Governance** — where development happens and maintainer expectations.
-- **Release** — the release and mirror checklist.
+- **Release** — the release checklist.
+- **Adoption** — what has been assessed from downstream forks, adopted or declined.
 - **Troubleshooting** — common issues and how to resolve them.
 
 Throughout, the short name `dbcss` stands for `dioxus-bootstrap-css`; the full

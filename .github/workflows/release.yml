@@ -1,4 +1,18 @@
-name: Mirror Release
+name: Release
+
+# This repository is the origin, and this workflow is the only publisher.
+#
+# Pushing a `vX.Y.Z` tag cuts the release: the tag must match the crate version,
+# the gates must pass, and only then does the crate go to crates.io and the
+# GitHub Release get created.
+#
+# The publish step is guarded by an existing-version check against the registry,
+# so re-running the workflow — or pushing a tag for a version already published —
+# skips the publish instead of failing. A crates.io publish is irreversible
+# (yank is the only undo), so the guard fails closed: if the registry cannot be
+# read, the job stops rather than assuming the version is new.
+#
+# Requires the CARGO_REGISTRY_TOKEN repository secret.
 
 on:
   push:
@@ -8,13 +22,80 @@ on:
 permissions:
   contents: write
 
+env:
+  CARGO_TERM_COLOR: always
+  CRATE: dioxus-bootstrap-css
+  MANIFEST: crates/dioxus-bootstrap/Cargo.toml
+
 jobs:
-  github-release:
-    name: Create GitHub mirror release
+  release:
+    name: Verify, publish, release
     if: ${{ github.server_url == 'https://github.com' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Create GitHub Release
+      - uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+
+      - name: Tag must match the crate version
+        id: version
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME#v}"
+          crate="$(cargo metadata --no-deps --format-version 1 --manifest-path "$MANIFEST" \
+                   | jq -r --arg n "$CRATE" '.packages[] | select(.name == $n) | .version')"
+          if [ -z "$crate" ] || [ "$crate" = "null" ]; then
+            echo "::error::could not read the version of $CRATE from $MANIFEST"
+            exit 1
+          fi
+          if [ "$tag" != "$crate" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match crate version $crate"
+            exit 1
+          fi
+          echo "version=$crate" >> "$GITHUB_OUTPUT"
+          echo "Releasing $CRATE $crate"
+
+      - name: Gates
+        run: |
+          set -euo pipefail
+          cargo fmt --all -- --check
+          cargo clippy --target wasm32-unknown-unknown -p "$CRATE" -- -D warnings
+          cargo test -p "$CRATE"
+          cargo package -p "$CRATE"
+
+      - name: Is this version already on crates.io?
+        id: published
+        run: |
+          set -euo pipefail
+          v="${{ steps.version.outputs.version }}"
+          # Fail closed: a registry we cannot read is not a registry that lacks
+          # this version. Only 200 (published) or 404 (absent) is an answer.
+          code="$(curl -sS -o /dev/null -w '%{http_code}' --retry 3 --max-time 30 \
+                  -A "dioxus-bootstrap-css-release" \
+                  "https://crates.io/api/v1/crates/$CRATE/$v")"
+          case "$code" in
+            200) echo "skip=true"  >> "$GITHUB_OUTPUT"; echo "$CRATE $v is already published — skipping publish." ;;
+            404) echo "skip=false" >> "$GITHUB_OUTPUT"; echo "$CRATE $v is not on crates.io — will publish." ;;
+            *)   echo "::error::crates.io returned HTTP $code — cannot determine whether $v is published"; exit 1 ;;
+          esac
+
+      - name: Publish to crates.io
+        if: ${{ steps.published.outputs.skip == 'false' }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CARGO_REGISTRY_TOKEN:-}" ]; then
+            echo "::error::CARGO_REGISTRY_TOKEN is not set — add it as a repository secret"
+            exit 1
+          fi
+          cargo publish -p "$CRATE"
+
+      - name: Create the GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true

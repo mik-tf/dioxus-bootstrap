@@ -1,24 +1,33 @@
 # Release
 
-`dioxus-bootstrap-css` releases are cut from the Forge primary repository and
-mirrored to GitHub.
+`dioxus-bootstrap-css` is released from this repository. There is no upstream
+and no mirror: the tag you push here is the release.
 
 > **Publishing is automated by the tag push.** Step 7 (pushing the `vX.Y.Z` tag)
-> triggers the Forge `Release` workflow (`.forgejo/workflows/release.yml`), which runs
-> the gates and `cargo publish`es to crates.io — guarded by an existing-version check,
-> so it safely skips if that version is already on crates.io. **Never run
-> `cargo publish` manually**; the tag does it (a manual publish is redundant at best and
-> races the workflow at worst). GitHub release + Pages are automated mirror outputs, so
-> the GitHub remote is never pushed by hand either.
+> triggers the `Release` workflow (`.github/workflows/release.yml`), which checks
+> that the tag matches the crate version, runs the gates, publishes to crates.io,
+> and creates the GitHub Release. The publish step is guarded by an existing-version
+> check, so it safely skips if that version is already on crates.io. **Never run
+> `cargo publish` manually** — the tag does it, and a manual publish is redundant at
+> best and races the workflow at worst.
 
 ## Repositories
 
-- Primary repository: https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css
-- GitHub mirror and Pages host: https://github.com/mik-tf/dioxus-bootstrap-css
+- Repository, release publisher, and Pages host: https://github.com/mik-tf/dioxus-bootstrap-css
 - Crate: https://crates.io/crates/dioxus-bootstrap-css
 
 `development` is the release branch. Tags use the crate version with a leading
 `v`, for example `vX.Y.Z`.
+
+## Prerequisites
+
+The `Release` workflow needs a `CARGO_REGISTRY_TOKEN` repository secret — a
+crates.io API token with publish rights for this crate. Without it the workflow
+fails at the publish step with an explicit error rather than silently skipping.
+
+crates.io ownership should not rest on a single account. Add a co-owner with
+`cargo owner --add <user> dioxus-bootstrap-css`; a sole owner is the one failure
+mode that no amount of repository hosting protects against.
 
 ## Checklist
 
@@ -27,7 +36,6 @@ mirrored to GitHub.
    ```bash
    git status --short --branch
    git fetch origin
-   git fetch github
    ```
 
 2. Move the current changelog notes from `Unreleased` to the new version.
@@ -65,36 +73,34 @@ version = "X.Y.Z"
 git commit -m "chore: release dbcss X.Y.Z"
    ```
 
-6. Push `development` to the Forge primary. Do **not** push the GitHub remote by
-   hand — GitHub is a pull-based mirror (see the note below).
+6. Push `development`.
 
    ```bash
    git push origin development
    ```
 
-7. Create and push the release tag to the Forge primary. The tag is what
-   triggers publishing.
+7. Create and push the release tag. The tag is what triggers publishing.
 
    ```bash
 git tag -a vX.Y.Z -m "dioxus-bootstrap-css X.Y.Z"
 git push origin vX.Y.Z
    ```
 
-8. Verify the automated release flow. crates.io publishes within minutes; the
-   GitHub mirror, release, and Pages follow on the scheduled sync (a manual
-   `Sync from Forge` dispatch on GitHub speeds it up).
+8. Verify the automated release flow.
 
-   - Forge release workflow succeeds.
-   - Forge branch CI succeeds.
+   - The `Release` workflow succeeds.
+   - Branch CI succeeds.
    - crates.io shows the new version.
-   - crates.io repository metadata points to the Forge primary repository.
-   - GitHub sync mirrors `development` and the new tag, then the GitHub release
-     workflow and Pages rebuild succeed.
-   - Live showcase loads from https://mik-tf.github.io/dioxus-bootstrap-css/
+   - crates.io repository metadata points to this GitHub repository.
+   - The GitHub Release exists for the tag.
+   - Pages rebuilds and the live showcase loads from
+     https://mik-tf.github.io/dioxus-bootstrap-css/
 
 ## Notes
 
-- Forge is the only release publisher.
-- GitHub release and Pages are mirror outputs.
+- This repository is the only release publisher.
+- A crates.io publish is irreversible — yank is the only undo. The workflow's
+  existing-version guard fails closed: if the registry cannot be read, the job
+  stops rather than assuming the version is new.
 - Do not include credentials, private machine details, or operational secrets in
   release commits, issues, tags, logs, or documentation.

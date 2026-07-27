@@ -27,7 +27,7 @@ fn app() -> Element {
                 toggle: rsx! { "mik-tf" },
                 menu: rsx! {
                     DropdownItem { href: "#", "Settings" }
-                    DropdownItem { href: "#", "Forge account" }
+                    DropdownItem { href: "#", "Account" }
                     DropdownItem { href: "#", class: "text-danger", "Log out" }
                 },
             }

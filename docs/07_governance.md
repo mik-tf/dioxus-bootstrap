@@ -1,19 +1,40 @@
 # Governance
 
-`dioxus-bootstrap-css` (`dbcss`) is maintained from the Forge primary
-repository:
-
-https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css
-
-The GitHub repository is kept as a mirror and GitHub Pages host:
+`dioxus-bootstrap-css` (`dbcss`) is developed in this repository:
 
 https://github.com/mik-tf/dioxus-bootstrap-css
 
+It is the origin, the release publisher, and the GitHub Pages host. There is no
+upstream and no mirror.
+
 ## Development Home
 
-Use the Forge repository for issues, pull requests, release coordination, and
-maintenance discussion. GitHub remains useful for visibility, mirroring, and the
-live showcase, but Forge is the source of truth for development work.
+Use this repository for issues, pull requests, release coordination, and
+maintenance discussion. It is the single source of truth for development work,
+and crates.io is the only distribution channel.
+
+The crate is project-agnostic by design: it is a typed layer over Bootstrap 5.3
+and nothing else. It carries no assumptions about the application consuming it,
+which is what makes it usable by any Dioxus project.
+
+### Adopting work from downstream forks
+
+The crate is Apache-2.0, so anyone may fork it, rename it, and grow it. Where a
+fork has built something worth having, adopt the *idea* by implementing it here:
+read the source, write our own, and record what was adopted and from which
+upstream state.
+
+Two rules keep that honest:
+
+- **Content, never an address.** Record what came in by content hash in the
+  [Adoption Log](10_adoption.md). Do not add a fork as a git remote, submodule,
+  or path dependency, and do not point crate metadata or documentation at one. A
+  dependency on somebody else's hosting is a dependency we do not have today
+  and should not acquire.
+- **The parity contract still decides.** A fork's additions are adopted only if
+  they pass the Design chapter's test — Bootstrap defines it, so we express it.
+  Application-level arrangements do not become crate API because a fork put
+  them in its own copy.
 
 ## Design Rule
 
@@ -27,13 +48,12 @@ Bootstrap workarounds.
 ## Maintainer Expectations
 
 - Keep `development` green and release-ready.
-- Keep the GitHub mirror current after Forge changes.
 - Keep the live showcase and examples dogfooding dbcss components.
 - Keep the converter and raw-Bootstrap migration gate aligned with the component
   surface.
 - Update `CHANGELOG.md`, `README.md`, and `docs/` when behavior, release policy,
   migration rules, or repository locations change.
-- Track Bootstrap parity gaps as Forge issues with clear acceptance criteria.
+- Track Bootstrap parity gaps as GitHub issues with clear acceptance criteria.
 
 ## Release Policy
 

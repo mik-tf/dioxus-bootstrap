@@ -58,6 +58,5 @@ just as Bootstrap's observer model requires.
 ## A Bootstrap feature has no typed component
 
 Per the design rule, that is a parity gap to fix in the crate, not to work
-around downstream. Open a focused Forge issue with acceptance criteria on the
-primary repository so the crate API, converter, tests, and docs can be updated
-together.
+around downstream. Open a focused GitHub issue with acceptance criteria so the
+crate API, converter, tests, and docs can be updated together.

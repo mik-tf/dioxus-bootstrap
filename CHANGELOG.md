@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- **This repository is now the origin, not a mirror.** Development, issues,
+  releases and Pages all happen here; crates.io is the only distribution
+  channel. `repository` metadata, the README, and the Governance, Release,
+  Introduction, Design and Troubleshooting chapters all pointed at an upstream
+  that this project no longer has.
+- **The release workflow publishes.** `.github/workflows/release.yml` was a
+  mirror-release stub that only created a GitHub Release from a tag pushed
+  elsewhere; the actual publisher lived upstream. It now verifies that the tag
+  matches the crate version, runs the gates, publishes to crates.io, and creates
+  the Release. The existing-version guard fails closed — a registry it cannot
+  read stops the job rather than being read as "not yet published". Requires a
+  `CARGO_REGISTRY_TOKEN` repository secret.
+
+### Removed
+
+- **`.github/workflows/sync-from-forge.yml`.** It fast-forwarded `development`
+  and mirrored tags from an upstream repository on a daily schedule. Its two
+  other outputs are already covered natively: `pages.yml` builds on push to
+  `development`, and `release.yml` fires on tag push.
+
+### Added
+
+- **An Adoption Log chapter** (`docs/10_adoption.md`) recording what has been
+  assessed from downstream forks, adopted or declined, by content hash — so
+  "we took the good parts" is checkable rather than untracked divergence. First
+  entry assesses `ui_components` 0.6.0: the element layer is at parity and the
+  widget layer is declined in full, against the Design chapter's parity contract.
+
 ## [0.5.15] — `Range` reflects its controlled value
 
 ### Fixed

@@ -3,7 +3,6 @@
 [![Crates.io](https://img.shields.io/crates/v/dioxus-bootstrap-css.svg)](https://crates.io/crates/dioxus-bootstrap-css)
 [![docs.rs](https://img.shields.io/badge/docs.rs-reference-blue)](https://docs.rs/dioxus-bootstrap-css)
 [![License](https://img.shields.io/crates/l/dioxus-bootstrap-css.svg)](LICENSE)
-[![Forge](https://img.shields.io/badge/Forge-primary-1f6feb)](https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css)
 [![CI](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/ci.yml)
 [![Pages](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/pages.yml/badge.svg?branch=development)](https://github.com/mik-tf/dioxus-bootstrap-css/actions/workflows/pages.yml)
 
@@ -15,9 +14,7 @@ JavaScript behavior with Dioxus signals.
 
 **API docs:** https://docs.rs/dioxus-bootstrap-css
 
-**Primary repository:** https://forge.ourworld.tf/lhumina_code/dioxus-bootstrap-css
-
-**GitHub mirror:** https://github.com/mik-tf/dioxus-bootstrap-css
+**Repository:** https://github.com/mik-tf/dioxus-bootstrap-css
 
 Short name: `dbcss` means `dioxus-bootstrap-css`. The full crate name is long,
 so issues and notes may use the abbreviation.

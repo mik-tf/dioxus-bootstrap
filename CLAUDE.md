@@ -83,14 +83,17 @@ Publishing is automated and triggered by pushing a version **tag**. To cut a rel
 2. Bump `version` in `crates/dioxus-bootstrap/Cargo.toml`.
 3. Commit on a branch, squash-merge to `development`, push `development`.
 4. Create and push the tag: `git tag -a vX.Y.Z -m "dioxus-bootstrap-css X.Y.Z"` then
-   push it to `origin` (Forge).
+   push it to `origin`.
 
-Pushing the `vX.Y.Z` tag triggers the Forge **Release** workflow
-(`.forgejo/workflows/release.yml`): it checks the tag matches the crate version, runs
-the gates, and publishes to crates.io — **guarded by an existing-version check, so it
-safely skips if that version is already published.** GitHub release + Pages are
-automated mirror outputs of Forge (`sync-from-forge.yml`); Forge is the only publisher,
-so you never push the GitHub remote by hand either.
+Pushing the `vX.Y.Z` tag triggers the **Release** workflow
+(`.github/workflows/release.yml`): it checks the tag matches the crate version, runs
+the gates, publishes to crates.io, and creates the GitHub Release — **guarded by an
+existing-version check, so it safely skips if that version is already published.**
+The guard fails closed: a registry it cannot read stops the job rather than being
+read as "not yet published." Pages rebuilds from the `development` push.
+
+This repository is the origin and the only publisher. There is no upstream to pull
+from and no mirror to push to.
 
 **Do NOT run `cargo publish` manually.** The tag does it. A manual publish is at best
 redundant (CI then skips the publish step) and at worst races the workflow. Full

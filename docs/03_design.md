@@ -112,7 +112,7 @@ not hidden as downstream Bootstrap workarounds.
 - Use screenshot tests for visual confidence whenever component output or
   migration behavior changes.
 
-- Track new Bootstrap parity gaps as focused Forge issues with acceptance
+- Track new Bootstrap parity gaps as focused GitHub issues with acceptance
   criteria, then update crate API, converter, tests, and docs together.
 
 ## Quality Gates
